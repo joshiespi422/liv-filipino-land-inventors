@@ -7,6 +7,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use App\Http\Middleware\CheckUserType;
+use App\Http\Middleware\CheckServiceAccess;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'role' => CheckUserType::class,
+            'service_access' => CheckServiceAccess::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
