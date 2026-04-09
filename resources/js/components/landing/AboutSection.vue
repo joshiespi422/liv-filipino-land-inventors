@@ -21,13 +21,12 @@ const props = defineProps<{
     aboutMissions?: Mission[];
 }>();
 
-// --- STATE ---
 const isModalOpen = ref(false);
 
-// --- DATA PROCESSING ---
 
 const missionData = computed(() => {
     if (!props.aboutMissions) return null;
+    
     return props.aboutMissions.find((m) => m.column_position === 2) || null;
 });
 
@@ -41,7 +40,7 @@ const missionList = computed(() => {
 
     try {
         list = JSON.parse(rawList);
-        // Fallback if JSON parse returns something unexpected
+        
         if (!Array.isArray(list)) list = rawList.split('\n');
     } catch { 
         list = rawList.split('\n');
@@ -59,7 +58,7 @@ const previewMissions = computed(() => missionList.value.slice(0, 4));
 // --- ASSET HELPERS ---
 const getImageUrl = (path?: string, fallback: string = '') => {
     if (!path) return fallback;
-    // Assuming 'storage/' is your public disk path
+    
     return path.startsWith('http') ? path : `/storage/${path}`;
 };
 

@@ -1,12 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import type { HeroProps } from '@/types/landing/home-section';
 
-const props = defineProps({
-    sectionData: {
-        type: Object,
-        default: () => null
-    }
-});
+const props = defineProps<HeroProps>();
 
 const bgImage = computed(() => {
     return props.sectionData?.image_path 
