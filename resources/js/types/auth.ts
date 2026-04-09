@@ -1,20 +1,28 @@
+export interface Service {
+  id: number;
+  name: string;
+  slug: string;
+  icon: string | null;
+}
+
 export type User = {
-    id: number;
-    name: string;
-    email: string;
-    avatar?: string;
-    email_verified_at: string | null;
-    created_at: string;
-    updated_at: string;
-    [key: string]: unknown;
+  id: number;
+  name: string;
+  email: string;
+  avatar?: string;
+  email_verified_at: string | null;
+  created_at: string;
+  updated_at: string;
+  [key: string]: unknown;
 };
 
 export type Auth = {
-    user: User;
+  user: User;
+  managed_services: Service[];
 };
 
 export type TwoFactorConfigContent = {
-    title: string;
-    description: string;
-    buttonText: string;
+  title: string;
+  description: string;
+  buttonText: string;
 };

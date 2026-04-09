@@ -4,6 +4,8 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use App\Models\Service;
+use App\Models\UserType;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -35,13 +37,33 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
+                'managed_services' => $user ? $this->getManagedServices($user) : [],
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
+    }
+
+    // sidebar purposes
+    protected function getManagedServices($user)
+    {
+        // Super Admin sees all active services
+        if ($user->user_type_id === UserType::SUPER_ADMIN) {
+            return Service::where('is_active', true)->get(['id', 'name', 'slug', 'icon']);
+        }
+
+        // Admin sees only assigned active services
+        if ($user->user_type_id === UserType::ADMIN) {
+            return $user->services()
+                ->where('services.is_active', true)
+                ->get(['services.id', 'services.name', 'slug', 'icon']);
+        }
+
+        return [];
     }
 }
