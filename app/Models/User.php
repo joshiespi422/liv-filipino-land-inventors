@@ -50,7 +50,7 @@ class User extends Authenticatable
     public function managesService($serviceId): bool
     {
         // Super Admins bypass 
-        if ($this->user_type_id === UserType::ADMIN && $this->is_active) {
+        if ($this->user_type_id === UserType::SUPER_ADMIN && $this->is_active) {
             return true;
         }
 
@@ -60,7 +60,7 @@ class User extends Authenticatable
         }
 
         // Must be assigned to the service AND the service must be active
-        return $this->managedServices()
+        return $this->services()
             ->where('services.id', $serviceId)
             ->where('services.is_active', true)
             ->exists();
