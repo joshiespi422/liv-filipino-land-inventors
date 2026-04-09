@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\UserType;
 use Inertia\Inertia;
+use App\Models\BusinessTrainingType;
+use App\Models\BusinessTrainingCategory;
+
 
 class BusinessTrainingController extends Controller
 {
@@ -18,11 +21,33 @@ class BusinessTrainingController extends Controller
 
     public function index()
     {
-
-
         return Inertia::render('business-training/Index', [
-            // 'trainings' => BusinessTraining::latest()->get(),
+            'types' => BusinessTrainingType::all(),
             'can_mutate' => $this->canMutate(), 
+        ]);
+    }
+
+    public function showType($slug)
+    {
+        $type = BusinessTrainingType::where('slug', $slug)
+            ->with('categories')
+            ->firstOrFail();
+
+        return Inertia::render('business-training/ShowType', [
+            'type' => $type,
+            'can_mutate' => $this->canMutate(),
+        ]);
+    }
+
+    public function getCategoryModules($slug)
+    {
+        $category = BusinessTrainingCategory::where('slug', $slug)
+            ->with('trainings') // Eager load the modules/content
+            ->firstOrFail();
+
+        return response()->json([
+            'category' => $category,
+            'modules' => $category->trainings
         ]);
     }
 
