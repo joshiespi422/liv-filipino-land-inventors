@@ -2,7 +2,6 @@
 import { computed } from 'vue';
 import BaseCarousel from '@/components/BaseCarousel.vue';
 
-// --- INTERFACES ---
 interface Program {
     title: string;
     subtitle: string;
@@ -20,7 +19,6 @@ const props = defineProps<{
     sectionData?: SectionData;
 }>();
 
-// --- SAMPLE DATA ---
 const samplePrograms: Program[] = [
     {
         title: "Invention Development & Commercialization",
@@ -86,32 +84,32 @@ const getImageUrl = (path?: string) => {
 
         <div class="relative transition-colors duration-500 bg-[linear-gradient(to_bottom,#FFFFFF_0_35%,#033E94_35%_100%)] dark:bg-[#033e94]">
             
-            <div class="relative z-30 pt-6 pb-12 max-w-7xl mx-auto px-2 md:px-8">
+            <div class="relative z-30 pt-6 pb-12 flex items-center justify-center max-w-[1440px] mx-auto px-2 md:px-8 gap-2 md:gap-4 lg:gap-8">
                 
-                <BaseCarousel :items="displayPrograms" :autoplayDelay="5000">
+                <BaseCarousel :items="displayPrograms" :autoplayDelay="5000" class="w-full min-w-0">
                     
                     <template #prev-arrow>
-                        <div class="rounded-full bg-white p-2 md:p-3 shadow-xl transition-all hover:bg-gray-100 active:scale-95 cursor-pointer">
+                        <div class="rounded-full border border-gray-300 bg-white md:p-3 transition-all hover:border-gray-400 active:scale-95 cursor-pointer flex items-center justify-center">
                             <img
                                 src="/assets/leftarrow.png"
-                                class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 hover:bg-blue-600 rounded-full transition-colors"
+                                class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 rounded-full transition-colors"
                                 alt="Prev"
                             />
                         </div>
                     </template>
 
                     <template #next-arrow>
-                        <div class="rounded-full bg-white p-2 md:p-3 shadow-xl transition-all hover:bg-gray-100 active:scale-95 cursor-pointer">
+                        <div class="rounded-full border border-gray-300 bg-white md:p-3 transition-all hover:border-gray-400 active:scale-95 cursor-pointer flex items-center justify-center">
                             <img
                                 src="/assets/rightarrow.png"
-                                class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 hover:bg-blue-600 rounded-full transition-colors"
+                                class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 rounded-full transition-colors"
                                 alt="Next"
                             />
                         </div>
                     </template>
 
                     <template #slide="{ slide: program }">
-                        <div class="flex h-100 sm:h-112.5 md:h-120 cursor-pointer flex-col overflow-hidden rounded-3xl md:rounded-4xl border border-gray-100 bg-white transition-all duration-500 ease-out transform scale-95 opacity-90 shadow-md hover:scale-100 md:hover:scale-105 hover:opacity-100 hover:z-20 hover:ring-4 hover:ring-[#033E94]/30 hover:shadow-2xl mx-1 my-4">
+                        <div class="flex h-[400px] sm:h-[450px] md:h-[480px] cursor-pointer flex-col overflow-hidden rounded-3xl md:rounded-4xl border border-gray-100 bg-white transition-all duration-500 ease-out transform scale-95 shadow-md hover:scale-100 md:hover:scale-105 hover:z-20 hover:ring-4 hover:ring-[#033E94]/30 hover:shadow-2xl mx-1 my-4">
                             
                             <div class="h-48 sm:h-52 md:h-56 w-full overflow-hidden shrink-0">
                                 <img
