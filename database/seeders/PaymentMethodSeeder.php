@@ -13,7 +13,7 @@ class PaymentMethodSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('payment_options')->insert([
+        DB::table('payment_methods')->insert([
             ['id' => 1, 'name' => 'Cash'], 
             ['id' => 2, 'name' => 'Credit Card'], 
             ['id' => 3, 'name' => 'QR Code'], 

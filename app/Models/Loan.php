@@ -15,6 +15,7 @@ class Loan extends Model
         'interest_rate',
         'term_months',
         'start_date',
+        'end_date',
         'monthly_principal',
     ];
 
