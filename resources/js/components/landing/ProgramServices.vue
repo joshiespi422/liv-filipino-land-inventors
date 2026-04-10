@@ -67,9 +67,9 @@ const getImageUrl = (path?: string) => {
             <img
                 src="/assets/productsandservices.jpg"
                 alt="Programs and Services"
-                class="h-56 w-full object-cover md:h-64 lg:h-80"
+                class="h-40 w-full object-cover md:h-64 lg:h-80"
             />
-            <div class="absolute inset-0 flex flex-col items-center justify-center px-4 bg-black/30 text-center">
+            <div class="absolute inset-0 flex flex-col items-center justify-center px-4 dark:bg-black/30 text-center">
                 <h1 class="text-2xl font-bold tracking-wider text-white uppercase drop-shadow-xl sm:text-3xl md:text-5xl">
                     {{ sectionData?.title ?? 'PROGRAMS & SERVICES' }}
                 </h1>
