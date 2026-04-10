@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PaymentMethod extends Model
 {
@@ -13,4 +14,10 @@ class PaymentMethod extends Model
     public const QR_CODE = 3;
     
     // protected $fillable = [];
+
+    // one to many, payment method has many loan payments
+    public function loanPayments(): HasMany
+    {
+        return $this->hasMany(LoanPayment::class);
+    }
 }

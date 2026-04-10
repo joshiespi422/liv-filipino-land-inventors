@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Status extends Model
 {
@@ -20,4 +21,15 @@ class Status extends Model
     
     // protected $fillable = [];
 
+    // one to many, status has many loans
+    public function loans(): HasMany
+    {
+        return $this->hasMany(Loan::class);
+    }
+
+    // one to many, status has many loan schedules
+    public function loanSchedules(): HasMany
+    {
+        return $this->hasMany(LoanSchedule::class);
+    }
 }
