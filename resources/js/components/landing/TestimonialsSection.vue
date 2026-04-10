@@ -66,10 +66,15 @@ const getImageUrl = (path?: string) => {
             </div>
         </div>
   
-        <div class="relative -mt-12 md:-mt-20 lg:-mt-24 w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-8 z-10">
+        <div class="relative -mt-12 md:-mt-20 lg:-mt-24 w-full max-w-[1440px] mx-auto px-4 md:px-16 lg:px-24 z-10">
             
-            <div v-if="displayTestimonials.length > 0" class="py-4">
-                <BaseCarousel :items="displayTestimonials" :autoplayDelay="4000">
+            <div v-if="displayTestimonials.length > 0" class="w-full min-w-0 py-4">
+                
+                <BaseCarousel 
+                    :items="displayTestimonials" 
+                    :autoplayDelay="4000"
+                    slide-class="w-full md:w-[calc(50%-15px)] lg:w-[calc(50%-22.5px)] xl:w-[calc(33.333%-30px)]"
+                >
                     
                     <template #prev-arrow>
                         <div class="bg-white rounded-full shadow-lg hover:bg-gray-100 cursor-pointer transition-all active:scale-95 flex items-center justify-center p-1 sm:p-2">
@@ -92,7 +97,7 @@ const getImageUrl = (path?: string) => {
                     </template>
 
                     <template #slide="{ slide: item }">
-                        <div class="flex flex-col sm:flex-row bg-white p-6 lg:p-8 rounded-3xl shadow-lg w-full h-full transition duration-300 hover:-translate-y-1 hover:shadow-xl border border-gray-100 box-border text-center sm:text-left items-center sm:items-start mx-1 my-2">
+                        <div class="flex flex-col sm:flex-row bg-white p-6 lg:p-8 rounded-3xl shadow-lg w-full h-full transition duration-300 hover:-translate-y-1 hover:shadow-xl border border-gray-100 box-border text-center sm:text-left items-center sm:items-start mx-auto my-2">
                             
                             <div class="flex flex-col justify-start items-center sm:w-1/3 shrink-0 mb-4 sm:mb-0 sm:mr-6 relative">
                                 <img 
@@ -100,7 +105,7 @@ const getImageUrl = (path?: string) => {
                                     :src="getImageUrl(item.image_path)" 
                                     :alt="item.name"
                                 >
-                                <div class="text-[5rem] md:text-[6rem] lg:text-[7rem] font-black text-[#D70328] mt--2.5 sm:mt--6.25 rotate-180 leading-[0.7] opacity-90">
+                                <div class="text-[5rem] md:text-[6rem] lg:text-[7rem] font-black text-[#D70328] mt-[-10px] sm:mt-[-25px] rotate-180 leading-[0.7] opacity-90">
                                     "
                                 </div>
                             </div>
