@@ -12,6 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Laravel\Sanctum\HasApiTokens;
 
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
@@ -19,6 +20,8 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
+
+    use HasApiTokens;
 
     /**
      * Get the attributes that should be cast.
@@ -49,7 +52,7 @@ class User extends Authenticatable
     // checker for service management
     public function managesService($serviceId): bool
     {
-        // Super Admins bypass 
+        // Super Admins bypass
         if ($this->user_type_id === UserType::SUPER_ADMIN && $this->is_active) {
             return true;
         }
