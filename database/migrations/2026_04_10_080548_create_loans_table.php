@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('interest_rate', 5, 4);
             $table->integer('term_months');
             $table->date('start_date');
+            $table->date('end_date');
             $table->decimal('monthly_principal', 10, 2);
             $table->timestamps();
         });

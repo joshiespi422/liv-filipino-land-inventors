@@ -12,6 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\HasApiTokens;
 
 #[Fillable(['name', 'email', 'password'])]
@@ -49,6 +50,18 @@ class User extends Authenticatable
         return $this->belongsToMany(Service::class);
     }
 
+    // relationship to loans, one to many
+    public function loans(): HasMany
+    {
+        return $this->hasMany(Loan::class);
+    }
+
+    // relationship to loan settings, one to many
+    public function loanSettings(): HasMany
+    {
+        return $this->hasMany(LoanSetting::class);
+    }
+
     // checker for service management
     public function managesService($serviceId): bool
     {
@@ -67,5 +80,14 @@ class User extends Authenticatable
             ->where('services.id', $serviceId)
             ->where('services.is_active', true)
             ->exists();
+    }
+
+    // instance method to get active loan setting
+    public function getActiveLoanSetting()
+    {
+        return $this->loanSettings()
+            ->orWhereNull('user_id')
+            ->orderByRaw('user_id DESC')
+            ->first();
     }
 }

@@ -12,7 +12,7 @@ class LoanPayment extends Model
         'loan_schedule_id',
         'payment_method_id',
         'payment_date',
-        'amount_paid',
+        'amount',
     ];
 
     // one to many, payment has one loan

@@ -42,7 +42,7 @@ class BusinessTrainingController extends Controller
     public function getCategoryModules($slug)
     {
         $category = BusinessTrainingCategory::where('slug', $slug)
-            ->with('trainings') // Eager load the modules/content
+            ->with('trainings')
             ->firstOrFail();
 
         return response()->json([
