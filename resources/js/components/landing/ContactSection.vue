@@ -61,7 +61,7 @@ const submitForm = () => {
 
 <template>
     <div id="contact">
-        <h1 class="text-3xl md:text-4xl font-bold text-center my-8 md:my-10 text-[#033E94]">CONTACT US</h1>
+        <h1 class="text-3xl md:text-4xl font-bold text-center my-8 md:my-10 text-[#033E94] dark:text-white">CONTACT US</h1>
 
         <div class="max-w-6xl mx-auto my-6 md:my-10 rounded-2xl p-6 lg:p-0 lg:bg-linear-to-r lg:from-gray-50 lg:from-60% lg:to-transparent lg:to-60% shadow-sm border border-gray-100 lg:border-none lg:shadow-none">
             <div class="flex flex-col lg:flex-row gap-8 lg:p-6">

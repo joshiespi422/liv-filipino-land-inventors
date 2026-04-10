@@ -71,12 +71,14 @@ const highlightPhoto = computed(() => {
 
 const gridPhotos = computed(() => {
     if (!highlightPhoto.value) return [];
+
     return allPhotos.value.filter(photo => photo.id !== highlightPhoto.value!.id).slice(0, 4);
 });
 
 // --- HELPER METHODS ---
 const getImageUrl = (path?: string) => {
     if (!path) return '/assets/placeholder.jpg';
+
     return (path.startsWith('http') || path.startsWith('/')) ? path : `/storage/${path}`;
 };
 
@@ -91,7 +93,9 @@ const isPhotoModalOpen = ref(false);
 
 const toggleModal = (type: 'video' | 'photo', show: boolean) => {
     if (type === 'video') isVideoModalOpen.value = show;
+
     if (type === 'photo') isPhotoModalOpen.value = show;
+
     document.body.style.overflow = show ? 'hidden' : '';
 };
 
@@ -105,7 +109,7 @@ onUnmounted(() => {
         
         <div class="relative min-h-64 md:min-h-80 lg:min-h-96">
             <img src="/assets/gallery.jpg" alt="Gallery background" class="absolute inset-0 w-full h-full object-cover">
-            <div class="absolute inset-0 flex flex-col items-center justify-center px-6 text-center bg-black/20">
+            <div class="absolute inset-0 flex flex-col items-center justify-center px-6 text-center dark:bg-black/20">
                 <h1 class="text-white text-3xl md:text-5xl font-bold drop-shadow-lg mb-4">Gallery</h1>
                 <p class="text-white text-sm md:text-lg max-w-4xl drop-shadow-md leading-relaxed">
                     Our photo and video gallery showcase the vibrant life of our cooperative. Browse through pictures from past National Inventors Weeks, training workshops, and product launch events.
@@ -140,7 +144,7 @@ onUnmounted(() => {
                     </button>
                 </div>
                 <div class="flex-1 max-w-48">
-                    <select id="sort" class="w-full rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm shadow-md outline-none">
+                    <select id="sort" class="w-full rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm shadow-md outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         <option value="date">Sort by Date</option>
                         <option value="name">Sort by Name</option>
                     </select>
@@ -149,7 +153,7 @@ onUnmounted(() => {
         </div>
 
         <div class="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 mt-12">
-            <h1 class="relative text-3xl md:text-5xl font-bold mb-8 text-[#033E94] lg:pl-10">Video</h1>
+            <h1 class="relative text-3xl md:text-5xl font-bold mb-8 text-[#033E94] dark:text-white lg:pl-10">Video</h1>
 
             <div class="relative w-full">
                 
@@ -206,14 +210,14 @@ onUnmounted(() => {
             </div>
 
             <div class="flex justify-center mt-6">
-                <button @click="toggleModal('video', true)" class="text-white bg-[#033E94] hover:bg-blue-800 shadow-md rounded-full font-semibold text-lg md:text-xl px-8 py-3 transition active:scale-95">
+                <button @click="toggleModal('video', true)" class="text-white bg-[#033E94] hover:bg-blue-800 dark:bg-white dark:text-[#033E94] shadow-md rounded-xl font-semibold text-lg md:text-xl px-8 py-3 transition active:scale-95">
                     View all Videos
                 </button>
             </div>
         </div>
 
         <div class="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 mt-16 mb-16">
-            <h1 class="text-3xl md:text-5xl font-bold mb-8 text-[#033E94]">Photo</h1>
+            <h1 class="text-3xl md:text-5xl font-bold mb-8 text-[#033E94] dark:text-white">Photo</h1>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div v-if="highlightPhoto" class="relative w-full aspect-4/3 md:aspect-video lg:aspect-auto lg:h-full group overflow-hidden rounded-2xl shadow-lg cursor-pointer" @click="toggleModal('photo', true)">
@@ -230,7 +234,7 @@ onUnmounted(() => {
                 </div>
 
                 <div class="col-span-1 lg:col-span-2 flex justify-center mt-6">
-                    <button @click="toggleModal('photo', true)" class="text-white bg-[#033E94] hover:bg-blue-800 shadow-md font-semibold rounded-full text-lg md:text-xl px-8 py-3 transition active:scale-95">
+                    <button @click="toggleModal('photo', true)" class="text-white bg-[#033E94] hover:bg-blue-800 dark:bg-white dark:text-[#033E94] shadow-md font-semibold rounded-xl text-lg md:text-xl px-8 py-3 transition active:scale-95">
                         View all Photos
                     </button>
                 </div>
@@ -269,7 +273,7 @@ onUnmounted(() => {
                             </div>
                             
                             <div class="bg-white border-t border-gray-100 px-6 py-4 flex justify-end shrink-0">
-                                <button @click="toggleModal('video', false)" class="bg-[#033E94] text-white px-8 py-2.5 rounded-full hover:bg-blue-800 font-semibold transition shadow-sm">Close</button>
+                                <button @click="toggleModal('video', false)" class="bg-[#033E94] text-white px-8 py-2.5 rounded-xl hover:bg-blue-800 font-semibold transition shadow-sm">Close</button>
                             </div>
                         </div>
                     </div>
@@ -295,7 +299,7 @@ onUnmounted(() => {
                             </div>
                             
                             <div class="bg-white border-t border-gray-100 px-6 py-4 flex justify-end shrink-0">
-                                <button @click="toggleModal('photo', false)" class="bg-[#033E94] text-white px-8 py-2.5 rounded-full hover:bg-blue-800 font-semibold transition shadow-sm">Close</button>
+                                <button @click="toggleModal('photo', false)" class="bg-[#033E94] text-white px-8 py-2.5 rounded-xl hover:bg-blue-800 font-semibold transition shadow-sm">Close</button>
                             </div>
                         </div>
                     </div>

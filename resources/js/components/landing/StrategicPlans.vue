@@ -149,9 +149,9 @@ onUnmounted(() => {
 
 <template>
     <div id="strategic-plans">
-        <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-center my-8 text-[#033E94] px-4">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-center my-8 text-[#033E94] dark:text-white px-4">
             {{ sectionData?.title ?? 'STRATEGIC PLANS' }} 
-            <span class="text-[#D70328]">{{ sectionData?.short_title ?? '2026-2028' }}</span>
+            <span class="text-[#D70328] dark:text-white">{{ sectionData?.short_title ?? '2026-2028' }}</span>
         </h1>
         
         <p class="text-primary text-sm sm:text-base md:text-lg max-w-md sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl mx-auto text-center leading-relaxed drop-shadow mb-6 px-6">

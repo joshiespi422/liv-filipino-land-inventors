@@ -80,7 +80,7 @@ onUnmounted(() => {
 
 <template>
     <div id="about">
-        <h1 class="my-8 md:my-10 text-center text-3xl font-bold text-[#033e94] md:text-4xl lg:text-5xl">
+        <h1 class="my-8 md:my-10 text-center text-3xl font-bold text-[#033e94] dark:text-white md:text-4xl lg:text-5xl">
             {{ aboutIntro?.title ?? 'ABOUT US' }}
         </h1>
 
@@ -192,7 +192,7 @@ onUnmounted(() => {
                         <button
                             type="button"
                             @click="openMissionModal"
-                            class="cursor-pointer rounded-full bg-white px-8 py-3 text-sm sm:text-base font-bold text-[#785402] shadow-lg transition-transform hover:scale-105 hover:bg-[#FFCC00] focus:ring-4 focus:ring-[#DE9F1B] focus:outline-none"
+                            class="cursor-pointer rounded-xl bg-white px-8 py-3 text-sm sm:text-base font-bold text-[#785402] shadow-lg transition-transform hover:scale-105 hover:bg-[#FFCC00] focus:ring-4 focus:ring-[#DE9F1B] focus:outline-none"
                         >
                             View All Missions
                         </button>
@@ -274,7 +274,7 @@ onUnmounted(() => {
                                     <button
                                         type="button"
                                         @click="closeMissionModal"
-                                        class="inline-flex w-full justify-center rounded-full bg-white px-8 py-2 text-sm sm:text-base font-bold text-[#785402] shadow-sm transition hover:bg-yellow-100 sm:ml-3 sm:w-auto"
+                                        class="inline-flex w-full justify-center rounded-xl bg-white px-8 py-2 text-sm sm:text-base font-bold text-[#785402] shadow-sm transition hover:bg-yellow-100 sm:ml-3 sm:w-auto"
                                     >
                                         Close
                                     </button>
