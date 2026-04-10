@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted } from 'vue';
-import BaseCarousel from '@/components/BaseCarousel.vue'; // Adjust path if necessary
+import BaseCarousel from '@/components/BaseCarousel.vue'; 
 
-// --- INTERFACES ---
 interface Plan {
     title: string;
     acronym: string;
@@ -24,7 +23,6 @@ const props = defineProps<{
     sectionData?: SectionData;
 }>();
 
-// --- SAMPLE DATA (7 Items) ---
 const samplePlans: Plan[] = [
     {
         title: "Philippine Inventors Enterprise Accelerator",
@@ -170,21 +168,30 @@ onUnmounted(() => {
 
         <div 
             style="background-image: url('/assets/news.jpg')" 
-            class="h-auto px-4 sm:px-8 md:px-[8%] xl:px-[14%] bg-cover bg-center relative shadow-lg py-10"
+            class="h-auto px-4 sm:px-8 md:px-[8%] xl:px-[14%] bg-cover bg-center relative shadow-lg"
         >
-            <div class="relative w-full h-auto">
+            <div class="relative w-full h-auto py-10">
                 
-                <BaseCarousel :items="displayPlans" :autoplayDelay="10000">
+                <BaseCarousel 
+                    :items="displayPlans" 
+                    :autoplayDelay="10000" 
+                    class="w-full"
+                    slide-class="w-full"
+                >
                     
                     <template #prev-arrow>
-                        <div class="bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors">
-                            <img src="/assets/leftarrow.png" class="w-12 h-12 lg:w-16 lg:h-16 p-2 lg:p-1" alt="Previous" />
+                        <div class="hidden md:flex absolute inset-y-0 left-0 items-center px-4 xl:px-8 z-20 pointer-events-none">
+                            <button class="bg-white rounded-full shadow-md pointer-events-auto hover:bg-gray-100 transition-colors">
+                                <img src="/assets/leftarrow.png" class="w-12 h-12 lg:w-16 lg:h-16 p-2 lg:p-1" alt="Previous" />
+                            </button>
                         </div>
                     </template>
 
                     <template #next-arrow>
-                        <div class="bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors">
-                            <img src="/assets/rightarrow.png" class="w-12 h-12 lg:w-16 lg:h-16 p-2 lg:p-1" alt="Next" />
+                        <div class="hidden md:flex absolute inset-y-0 right-0 items-center px-4 xl:px-8 z-20 pointer-events-none">
+                            <button class="bg-white rounded-full shadow-md pointer-events-auto hover:bg-gray-100 transition-colors">
+                                <img src="/assets/rightarrow.png" class="w-12 h-12 lg:w-16 lg:h-16 p-2 lg:p-1" alt="Next" />
+                            </button>
                         </div>
                     </template>
 
