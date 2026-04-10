@@ -18,7 +18,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserTypeSeeder::class,
             ServiceSeeder::class,
-            BusinessTrainingSeeder::class
+            BusinessTrainingSeeder::class,
+            StatusSeeder::class,
+            PaymentMethodSeeder::class
         ]);
 
         User::factory()->create([

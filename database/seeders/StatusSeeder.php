@@ -1,0 +1,29 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class StatusSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        DB::table('statuses')->insert([
+            ['id' => 1, 'name' => 'pending'],
+            ['id' => 2, 'name' => 'approved'],
+            ['id' => 3, 'name' => 'rejected'],
+            ['id' => 4, 'name' => 'cancelled'],
+            ['id' => 5, 'name' => 'active'],
+            ['id' => 6, 'name' => 'finished'],
+            ['id' => 7, 'name' => 'paid'],
+            ['id' => 8, 'name' => 'unpaid'],
+            ['id' => 9, 'name' => 'overdue'],
+        ]);
+    
+    }
+}
