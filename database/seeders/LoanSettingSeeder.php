@@ -17,7 +17,7 @@ class LoanSettingSeeder extends Seeder
             ['user_id' => null],
             [
                 'label' => 'Global Default Settings',
-                'default_amount' => 1600.00,
+                'default_amount' => 16000.00,
                 'default_interest_rate' => 0.0300,
                 'default_term_months' => 12,
             ]

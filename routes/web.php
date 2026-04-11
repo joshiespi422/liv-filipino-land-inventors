@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use App\Models\UserType;
 use App\Http\Controllers\Web\BusinessTrainingController;
+use App\Http\Controllers\Web\LoanAssistanceController;
 
 Route::inertia('/', 'Home', [
     'canRegister' => Features::enabled(Features::registration()),
@@ -23,6 +24,9 @@ Route::middleware([
             ->name('business-training.type.show');
         Route::get('/business-training/categories/{slug}/modules', [BusinessTrainingController::class, 'getCategoryModules'])
             ->name('business-training.modules');
+
+        Route::get('/loan-assistance', [LoanAssistanceController::class, 'index'])
+            ->name('loan-assistance.index');
     });
 
 });
