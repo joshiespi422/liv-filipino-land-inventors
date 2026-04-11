@@ -4,6 +4,7 @@ namespace App\Http\Requests\Auth;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 class SetPasswordRequest extends FormRequest
 {
@@ -24,7 +25,7 @@ class SetPasswordRequest extends FormRequest
     {
         return [
             'phone' => ['required', 'string', 'exists:pending_registrations,phone'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', Password::default(), 'confirmed'],
             'verification_token' => ['required', 'string'],
         ];
     }
