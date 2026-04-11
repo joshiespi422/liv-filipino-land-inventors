@@ -8,6 +8,7 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
+import { ArrowLeft } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import businessTraining from '@/routes/business-training';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -93,10 +94,11 @@ const openCategoryModal = async (categorySlug: string) => {
           </p>
         </div>
         <Button
-          variant="outline"
+          variant="default"
           @click="router.visit(businessTraining.index())"
+          ]
         >
-          &larr; Back to Types
+          <ArrowLeft /> Back to Types
         </Button>
       </div>
 
