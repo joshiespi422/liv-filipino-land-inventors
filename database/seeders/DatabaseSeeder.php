@@ -35,5 +35,27 @@ class DatabaseSeeder extends Seeder
             'email' => 'juan@example.com',
             'user_type_id' => 2
         ]);
+
+        User::factory()->create([
+            'name' => 'Member One',
+            'email' => 'member1@example.com',
+            'user_type_id' => 3
+        ]);
+
+        User::factory()->create([
+            'name' => 'Member Two',
+            'email' => 'member2@example.com',
+            'user_type_id' => 3
+        ]);
+
+        User::factory()->create([
+            'name' => 'Member Three',
+            'email' => 'member3@example.com',
+            'user_type_id' => 3
+        ]);
+
+        $this->call([
+            DiminishingLoanSeeder::class
+        ]);
     }
 }
