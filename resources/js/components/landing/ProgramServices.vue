@@ -84,25 +84,25 @@ const getImageUrl = (path?: string) => {
 
         <div class="relative transition-colors duration-500 bg-[linear-gradient(to_bottom,#FFFFFF_0_35%,#033E94_35%_100%)] dark:bg-[#033e94]">
             
-            <div class="relative z-30 pt-6 pb-12 flex items-center justify-center max-w-[1440px] mx-auto px-2 md:px-8 gap-2 md:gap-4 lg:gap-8">
+            <div class="relative z-30 pt-6 pb-12 flex items-center justify-center max-w-7xl mx-auto px-2 md:px-8 gap-2 md:gap-4 lg:gap-8">
                 
                 <BaseCarousel :items="displayPrograms" :autoplayDelay="5000" class="w-full min-w-0">
                     
                     <template #prev-arrow>
-                        <div class="rounded-full border border-gray-300 bg-white md:p-3 transition-all hover:border-gray-400 active:scale-95 cursor-pointer flex items-center justify-center">
+                        <div class="rounded-full border border-gray-300 bg-white transition-all hover:border-gray-400 active:scale-95 cursor-pointer flex items-center justify-center">
                             <img
                                 src="/assets/leftarrow.png"
-                                class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 rounded-full transition-colors"
+                                class="h-12 w-12 sm:h-10 sm:w-10 md:h-12 md:w-12 rounded-full transition-colors"
                                 alt="Prev"
                             />
                         </div>
                     </template>
 
                     <template #next-arrow>
-                        <div class="rounded-full border border-gray-300 bg-white md:p-3 transition-all hover:border-gray-400 active:scale-95 cursor-pointer flex items-center justify-center">
+                        <div class="rounded-full border border-gray-300 bg-white transition-all hover:border-gray-400 active:scale-95 cursor-pointer flex items-center justify-center">
                             <img
                                 src="/assets/rightarrow.png"
-                                class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 rounded-full transition-colors"
+                                class="h-12 w-12 sm:h-10 sm:w-10 md:h-12 md:w-12 rounded-full transition-colors"
                                 alt="Next"
                             />
                         </div>

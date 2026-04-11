@@ -180,17 +180,17 @@ onUnmounted(() => {
                 >
                     
                     <template #prev-arrow>
-                        <div class="hidden md:flex absolute inset-y-0 left-0 items-center px-4 xl:px-8 z-20 pointer-events-none">
-                            <button class="bg-white rounded-full shadow-md pointer-events-auto hover:bg-gray-100 transition-colors">
-                                <img src="/assets/leftarrow.png" class="w-12 h-12 lg:w-16 lg:h-16 p-2 lg:p-1" alt="Previous" />
+                        <div class="hidden md:flex absolute inset-y-0 left-0 items-center z-20 pointer-events-none">
+                            <button class="bg-white w-12 rounded-full shadow-md pointer-events-auto hover:bg-gray-100 transition-colors">
+                                <img src="/assets/leftarrow.png" class="h-12 w-12 sm:h-10 sm:w-10 md:h-12 md:w-12" alt="Previous" />
                             </button>
                         </div>
                     </template>
 
                     <template #next-arrow>
-                        <div class="hidden md:flex absolute inset-y-0 right-0 items-center px-4 xl:px-8 z-20 pointer-events-none">
-                            <button class="bg-white rounded-full shadow-md pointer-events-auto hover:bg-gray-100 transition-colors">
-                                <img src="/assets/rightarrow.png" class="w-12 h-12 lg:w-16 lg:h-16 p-2 lg:p-1" alt="Next" />
+                        <div class="hidden md:flex absolute inset-y-0 right-0 items-center z-20 pointer-events-none">
+                            <button class="bg-white w-12 rounded-full shadow-md pointer-events-auto hover:bg-gray-100 transition-colors">
+                                <img src="/assets/rightarrow.png" class="h-12 w-12 sm:h-10 sm:w-10 md:h-12 md:w-12" alt="Next" />
                             </button>
                         </div>
                     </template>
@@ -272,14 +272,14 @@ onUnmounted(() => {
             >
                 <div v-if="isModalOpen" id="strategicModal" class="fixed inset-0 z-100 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                     
-                    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" @click="closeStrategicModal"></div>
+                    <div class="fixed inset-0 dark:bg-black/60 backdrop-blur-sm transition-opacity" @click="closeStrategicModal"></div>
 
                     <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-                        <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 w-full max-w-6xl flex flex-col max-h-[90vh]">
+                        <div class="relative transform overflow-hidden rounded-2xl bg-white  text-left shadow-2xl transition-all sm:my-8 w-full max-w-6xl flex flex-col max-h-[90vh]">
                             
                             <div class="bg-[#033E94] px-6 py-4 flex justify-between items-center shrink-0">
                                 <h3 class="text-xl sm:text-2xl font-bold text-white" id="modal-title">
-                                    All Strategic Plans <span class="text-[#FFCC00]">(2026-2028)</span>
+                                    All Strategic Plans <span class="text-[#FFCC00] dark:text-white">(2026-2028)</span>
                                 </h3>
                                 <button @click="closeStrategicModal" class="text-white hover:text-[#FFCC00] transition-colors focus:outline-none">
                                     <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -288,41 +288,41 @@ onUnmounted(() => {
                                 </button>
                             </div>
 
-                            <div class="p-6 sm:p-8 overflow-y-auto bg-gray-50 grow">
+                            <div class="p-6 sm:p-8 overflow-y-auto bg-gray-50 dark:bg-slate-900/85 grow">
                                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                    <div v-for="(plan, index) in displayPlans" :key="index" class="bg-white p-6 rounded-xl shadow-md border-t-4 border-[#FFCC00] hover:shadow-lg transition-shadow">
+                                    <div v-for="(plan, index) in displayPlans" :key="index" class="bg-white dark:bg-slate-700/85 p-6 rounded-xl shadow-md border-t-4 border-[#FFCC00] hover:shadow-lg transition-shadow">
                                         
                                         <div class="flex items-start mb-5">
-                                            <span class="bg-[#033E94] text-white px-3 py-1 rounded-lg text-sm font-bold mr-3 mt-1">{{ index + 1 }}</span>
-                                            <h4 class="text-xl font-bold text-[#033E94] leading-tight">{{ plan.title }} <span class="text-[#D70328]">({{ plan.acronym }})</span></h4>
+                                            <span class="bg-[#033E94] text-white  px-3 py-1 rounded-lg text-sm font-bold mr-3 mt-1">{{ index + 1 }}</span>
+                                            <h4 class="text-xl font-bold text-[#033E94] dark:text-white leading-tight">{{ plan.title }} <span class="text-[#D70328] dark:text-white">({{ plan.acronym }})</span></h4>
                                         </div>
                                         
                                         <div class="space-y-4">
                                             <div>
-                                                <strong class="text-xs sm:text-sm uppercase tracking-wider text-[#D70328] block mb-1">Goal</strong>
-                                                <p class="text-gray-800 text-sm md:text-base font-medium">{{ plan.goal }}</p>
+                                                <strong class="text-xs sm:text-sm uppercase tracking-wider text-[#D70328] dark:text-white block mb-1">Goal</strong>
+                                                <p class="text-gray-800 dark:text-white text-sm md:text-base font-medium">{{ plan.goal }}</p>
                                             </div>
                                             
                                             <div>
-                                                <strong class="text-xs sm:text-sm uppercase tracking-wider text-[#D70328] block mb-1">Description</strong>
-                                                <p class="text-gray-700 text-sm md:text-base">{{ plan.description }}</p>
+                                                <strong class="text-xs sm:text-sm uppercase tracking-wider text-[#D70328] dark:text-white block mb-1">Description</strong>
+                                                <p class="text-gray-700 dark:text-white text-sm md:text-base">{{ plan.description }}</p>
                                             </div>
 
                                             <div>
-                                                <strong class="text-xs sm:text-sm uppercase tracking-wider text-[#D70328] block mb-2">Key Activities</strong>
+                                                <strong class="text-xs sm:text-sm uppercase tracking-wider text-[#D70328] dark:text-white block mb-2">Key Activities</strong>
                                                 <ul class="space-y-2">
                                                     <li v-for="(action, aIndex) in plan.key_actions" :key="aIndex" class="flex items-start gap-2 text-sm md:text-base text-gray-700">
                                                         <svg class="h-5 w-5 shrink-0 text-green-600 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                                                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                                         </svg>
-                                                        <span>{{ action }}</span>
+                                                        <span class="dark:text-white">{{ action }}</span>
                                                     </li>
                                                 </ul>
                                             </div>
                                             
                                             <div class="pt-3 border-t border-gray-100">
-                                                <strong class="text-xs sm:text-sm uppercase tracking-wider text-[#D70328] block mb-1">Expected Outcome</strong>
-                                                <p class="text-gray-800 font-medium text-sm md:text-base italic">{{ plan.expected_outcome }}</p>
+                                                <strong class="text-xs sm:text-sm uppercase tracking-wider text-[#D70328] dark:text-white block mb-1">Expected Outcome</strong>
+                                                <p class="text-gray-800 dark:text-white font-medium text-sm md:text-base italic">{{ plan.expected_outcome }}</p>
                                             </div>
                                         </div>
 
@@ -330,7 +330,7 @@ onUnmounted(() => {
                                 </div>
                             </div>
 
-                            <div class="bg-gray-100 px-6 py-4 flex justify-end shrink-0 border-t border-gray-200">
+                            <div class="bg-gray-100 dark:bg-[#033E94] px-6 py-4 flex justify-end shrink-0 border-t border-gray-200">
                                 <button @click="closeStrategicModal" type="button" class="inline-flex w-full sm:w-auto justify-center rounded-lg bg-white px-8 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors">
                                     Close
                                 </button>

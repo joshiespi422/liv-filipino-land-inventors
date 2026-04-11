@@ -161,11 +161,11 @@ onUnmounted(() => {
                     <BaseCarousel :items="videos" :autoplayDelay="4000">
                         
                         <template #prev-arrow>
-                            <img src="/assets/leftarrow.png" class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-white hover:bg-gray-100 shadow-lg rounded-full p-2 cursor-pointer transition-transform active:scale-95" alt="Prev" />
+                            <img src="/assets/leftarrow.png" class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-white hover:bg-gray-100 shadow-lg rounded-full cursor-pointer transition-transform active:scale-95" alt="Prev" />
                         </template>
 
                         <template #next-arrow>
-                            <img src="/assets/rightarrow.png" class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-white hover:bg-gray-100 shadow-lg rounded-full p-2 cursor-pointer transition-transform active:scale-95" alt="Next" />
+                            <img src="/assets/rightarrow.png" class="h-12 w-12 sm:h-10 sm:w-10 md:h-12 md:w-12 bg-white hover:bg-gray-100 shadow-lg rounded-full cursor-pointer transition-transform active:scale-95" alt="Next" />
                         </template>
 
                         <template #slide="{ slide: video }">

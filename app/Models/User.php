@@ -15,8 +15,29 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
+#[Fillable([
+    'name',
+    'email',
+    'password',
+    'user_type_id',
+    'is_active',
+    'phone',
+    'phone_verified_at',
+    'gender',
+    'region',
+    'province',
+    'city',
+    'barangay',
+    'street',
+    'postal_code',
+])]
+
+#[Hidden([
+    'password',
+    'two_factor_secret',
+    'two_factor_recovery_codes',
+    'remember_token',
+])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -33,8 +54,10 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'phone_verified_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
+            'is_active' => 'boolean',
+            'password' => 'hashed',
         ];
     }
 

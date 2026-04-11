@@ -66,7 +66,7 @@ const getImageUrl = (path?: string) => {
             </div>
         </div>
   
-        <div class="relative -mt-12 md:-mt-20 lg:-mt-24 w-full max-w-[1440px] mx-auto px-4 md:px-16 lg:px-24 z-10">
+        <div class="relative -mt-12 md:-mt-20 lg:-mt-24 w-full max-w-7xl mx-auto px-4 md:px-16 lg:px-24 z-10">
             
             <div v-if="displayTestimonials.length > 0" class="w-full min-w-0 py-4">
                 
@@ -77,21 +77,21 @@ const getImageUrl = (path?: string) => {
                 >
                     
                     <template #prev-arrow>
-                        <div class="bg-white rounded-full shadow-lg hover:bg-gray-100 cursor-pointer transition-all active:scale-95 flex items-center justify-center p-1 sm:p-2">
+                        <div class="bg-white rounded-full shadow-lg hover:bg-gray-100 cursor-pointer transition-all active:scale-95 flex items-center justify-center">
                             <img 
                                 src="/assets/leftarrow.png" 
                                 alt="Previous" 
-                                class="w-6 h-6 sm:w-8 sm:h-8 lg:w-12 lg:h-12 hover:bg-blue-600 rounded-full transition-colors" 
+                                class="h-12 w-12 sm:h-10 sm:w-10 md:h-12 md:w-12 hover:bg-blue-600 rounded-full transition-colors" 
                             />
                         </div>
                     </template>
 
                     <template #next-arrow>
-                        <div class="bg-white rounded-full shadow-lg hover:bg-gray-100 cursor-pointer transition-all active:scale-95 flex items-center justify-center p-1 sm:p-2">
+                        <div class="bg-white rounded-full shadow-lg hover:bg-gray-100 cursor-pointer transition-all active:scale-95 flex items-center justify-center">
                             <img 
                                 src="/assets/rightarrow.png" 
                                 alt="Next" 
-                                class="w-6 h-6 sm:w-8 sm:h-8 lg:w-12 lg:h-12 hover:bg-blue-600 rounded-full transition-colors" 
+                                class="h-12 w-12 sm:h-10 sm:w-10 md:h-12 md:w-12 hover:bg-blue-600 rounded-full transition-colors" 
                             />
                         </div>
                     </template>

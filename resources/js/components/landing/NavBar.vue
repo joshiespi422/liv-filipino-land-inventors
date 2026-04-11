@@ -139,12 +139,12 @@ onUnmounted(() => {
                     </template>
 
                     <template v-else>
-                        <Link 
+                        <!-- <Link 
                             :href="register()"
                             class="rounded-xl px-4 py-2 text-sm font-medium text-[#033e94] dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all"
                         >
                             Register
-                        </Link>
+                        </Link> -->
                         <Link 
                             :href="login()"
                             class="rounded-xl px-4 py-2 text-sm font-medium text-[#033e94] dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all"
