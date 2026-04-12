@@ -1,9 +1,36 @@
 import { h } from 'vue';
 import type { ColumnDef } from '@tanstack/vue-table';
-import type { LoanAssistance } from '@/types';
+import type { LoanAssistance, LoanSchedule } from '@/types';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { MoreHorizontal } from 'lucide-vue-next';
 
-export const columns: ColumnDef<LoanAssistance>[] = [
+const STATUS_STYLES: Record<string, string> = {
+  active: 'bg-blue-500 hover:bg-blue-600',
+  finished: 'bg-green-500 hover:bg-green-600',
+  pending: 'bg-amber-500 hover:bg-amber-600',
+  cancelled: 'bg-rose-500 hover:bg-rose-600',
+  overdue: 'bg-rose-500 hover:bg-rose-600',
+  rejected: 'bg-rose-500 hover:bg-rose-600',
+  paid: 'bg-green-500 hover:bg-green-600',
+  unpaid: 'bg-rose-500 hover:bg-rose-600',
+};
+
+export const getAssistanceColumns = ({
+  navigateToSchedule,
+  approveLoan,
+}: {
+  navigateToSchedule: (id: number) => void;
+  approveLoan: (id: number) => void;
+}): ColumnDef<LoanAssistance>[] => [
   {
     accessorKey: 'user_name',
     header: 'Member',
@@ -38,15 +65,8 @@ export const columns: ColumnDef<LoanAssistance>[] = [
     header: () => h('div', { class: 'text-center' }, 'Status'),
     cell: ({ row }) => {
       const status = row.getValue('status_name') as string;
-      const badgeClass = {
-        'bg-blue-500 hover:bg-blue-600': status === 'active',
-        'bg-green-500 hover:bg-green-600': status === 'finished',
-        'bg-amber-500 hover:bg-amber-600': status === 'pending',
-        'bg-rose-500 hover:bg-rose-600':
-          status === 'cancelled' ||
-          status === 'overdue' ||
-          status === 'rejected',
-      };
+      const badgeClass =
+        STATUS_STYLES[status] ?? 'bg-gray-400 hover:bg-gray-500';
       return h('div', { class: 'text-center' }, [
         h(
           Badge,
@@ -63,5 +83,86 @@ export const columns: ColumnDef<LoanAssistance>[] = [
   {
     accessorKey: 'end_date_display',
     header: 'End Date',
+  },
+  {
+    id: 'actions',
+    header: () => h('div', { class: 'text-center' }, 'Actions'),
+    cell: ({ row }) => {
+      const loan = row.original;
+
+      return h('div', { class: 'relative text-center' }, [
+        h(DropdownMenu, null, () => [
+          h(
+            DropdownMenuTrigger,
+            { asChild: true, class: 'cursor-pointer' },
+            () =>
+              h(Button, { variant: 'ghost', class: 'h-8 w-8 p-0' }, () => [
+                h('span', { class: 'sr-only' }, 'Open menu'),
+                h(MoreHorizontal, { class: 'h-4 w-4' }),
+              ]),
+          ),
+          h(DropdownMenuContent, { align: 'end', class: 'border-2' }, () => [
+            h(DropdownMenuLabel, { class: 'text-gray-500' }, () => 'Actions'),
+            h(
+              DropdownMenuItem,
+              {
+                class: 'cursor-pointer',
+                onClick: () => navigateToSchedule(loan.id),
+              },
+              () => 'View Loan Details',
+            ),
+            loan.status_name === 'pending'
+              ? [
+                  h(DropdownMenuSeparator),
+                  h(
+                    DropdownMenuItem,
+                    {
+                      class: 'cursor-pointer text-blue-500 focus:text-blue-600',
+                      onClick: () => approveLoan(loan.id),
+                    },
+                    () => 'Approve Loan',
+                  ),
+                ]
+              : null,
+          ]),
+        ]),
+      ]);
+    },
+  },
+];
+
+export const scheduleColumns: ColumnDef<LoanSchedule>[] = [
+  {
+    accessorKey: 'total_payment',
+    header: 'Total Payment',
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue('total_payment'));
+      const formatted = new Intl.NumberFormat('en-PH', {
+        style: 'currency',
+        currency: 'PHP',
+      }).format(amount);
+
+      return h('div', { class: 'font-medium' }, formatted);
+    },
+  },
+  {
+    accessorKey: 'due_date_display',
+    header: 'Due Date',
+  },
+  {
+    accessorKey: 'status_name',
+    header: () => h('div', { class: 'text-center' }, 'Status'),
+    cell: ({ row }) => {
+      const status = row.getValue('status_name') as string;
+      const badgeClass =
+        STATUS_STYLES[status] ?? 'bg-gray-500 hover:bg-gray-600';
+      return h('div', { class: 'text-center' }, [
+        h(
+          Badge,
+          { class: [badgeClass, 'text-white pb-1'] },
+          () => status || '-',
+        ),
+      ]);
+    },
   },
 ];

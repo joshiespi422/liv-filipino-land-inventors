@@ -9,12 +9,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import loanAssistance from '@/routes/loan-assistance';
+import loanSchedule from '@/routes/loan-assistance/schedule';
 import { CreditCard, Calendar, Percent } from 'lucide-vue-next';
 import DataTable from '@/components/DataTable.vue';
 import { computed, ref, watch } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
+import { getAssistanceColumns } from '@/features/loan-assistance/columns';
 import type { GlobalSetting, LoanAssistance, LoanStatus } from '@/types';
-import { columns } from '@/features/loan-assistance/columns';
 
 defineOptions({
   layout: {
@@ -82,6 +83,17 @@ const updateFilters = () => {
 // Watch for select filter changes (debounced)
 const debouncedUpdate = useDebounceFn(updateFilters, 300);
 watch([selectedStatus], debouncedUpdate);
+
+const navigateToSchedule = (loanId: number) => {
+  router.visit(loanSchedule.index(loanId));
+};
+
+const columns = getAssistanceColumns({
+  navigateToSchedule,
+  approveLoan: (id: number) => {
+    console.log('Approve loan', id);
+  },
+});
 </script>
 
 <template>

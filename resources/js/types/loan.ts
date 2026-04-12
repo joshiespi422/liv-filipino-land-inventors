@@ -7,7 +7,7 @@ export interface GlobalSetting {
 
 export interface LoanAssistance {
   id: number;
-  status_name: string;
+  status_name: LoanStatus;
   user_name: string;
   amount: number;
   interest_rate: number;
@@ -21,6 +21,16 @@ export interface LoanAssistance {
   end_date_display: string;
 }
 
+export interface LoanSchedule {
+  id: number;
+  status_name: ScheduleStatus;
+  total_payment: number;
+  due_date: string;
+
+  // Display-ready fields from the resource
+  due_date_display: string;
+}
+
 // filter usage
 export type LoanStatus =
   | 'pending'
@@ -28,3 +38,5 @@ export type LoanStatus =
   | 'rejected'
   | 'cancelled'
   | 'finished';
+
+export type ScheduleStatus = 'paid' | 'unpaid' | 'overdue';

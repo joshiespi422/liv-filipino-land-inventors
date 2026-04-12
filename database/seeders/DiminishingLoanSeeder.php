@@ -79,7 +79,7 @@ class DiminishingLoanSeeder extends Seeder
 
                     LoanSchedule::create([
                         'loan_id'           => $loan->id,
-                        'status_id'         => Status::PENDING,
+                        'status_id'         => Status::UNPAID,
                         'month_no'          => $month,
                         'beginning_balance' => $beginningBalance,
                         'interest_amount'   => $interestAmount,

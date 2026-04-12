@@ -5,6 +5,7 @@ use Laravel\Fortify\Features;
 use App\Models\UserType;
 use App\Http\Controllers\Web\BusinessTrainingController;
 use App\Http\Controllers\Web\LoanAssistanceController;
+use App\Http\Controllers\Web\LoanScheduleController;
 
 Route::inertia('/', 'Home', [
     'canRegister' => Features::enabled(Features::registration()),
@@ -27,6 +28,9 @@ Route::middleware([
 
         Route::get('/loan-assistance', [LoanAssistanceController::class, 'index'])
             ->name('loan-assistance.index');
+
+        Route::get('/loan-assistance/{loan}/schedule', [LoanScheduleController::class, 'index'])
+            ->name('loan-assistance.schedule.index');
     });
 
 });
