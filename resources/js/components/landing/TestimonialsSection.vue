@@ -55,20 +55,20 @@ const getImageUrl = (path?: string) => {
 </script>
 
 <template>
-    <div id="testimonials" class="overflow-x-hidden pb-8 md:pb-12">
+    <div id="testimonials" class="overflow-x-hidden pb-6 md:pb-10">
         
         <div class="relative">
-            <img src="/assets/gallery.jpg" alt="Gallery background" class="w-full h-48 md:h-64 lg:h-72 object-cover">
-            <div class="absolute inset-0 flex items-start justify-center text-center pt-10 md:pt-16 bg-black/20">
-                <h1 class="text-2xl md:text-4xl lg:text-5xl font-bold drop-shadow-md text-white tracking-widest">
+            <img src="/assets/gallery.jpg" alt="Gallery background" class="w-full h-32 sm:h-48 md:h-56 object-cover">
+            <div class="absolute inset-0 flex items-center justify-center text-center bg-black/30">
+                <h1 class="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold drop-shadow-md text-white tracking-widest mt-[-20px] sm:mt-[-30px]">
                     TESTIMONIALS
                 </h1>
             </div>
         </div>
   
-        <div class="relative -mt-12 md:-mt-20 lg:-mt-24 w-full max-w-7xl mx-auto px-4 md:px-16 lg:px-24 z-10">
+        <div class="relative -mt-10 sm:-mt-16 md:-mt-20 w-full max-w-7xl mx-auto px-4 md:px-12 lg:px-16 z-10">
             
-            <div v-if="displayTestimonials.length > 0" class="w-full min-w-0 py-4">
+            <div v-if="displayTestimonials.length > 0" class="w-full min-w-0 py-2 sm:py-4">
                 
                 <BaseCarousel 
                     :items="displayTestimonials" 
@@ -81,7 +81,7 @@ const getImageUrl = (path?: string) => {
                             <img 
                                 src="/assets/leftarrow.png" 
                                 alt="Previous" 
-                                class="h-12 w-12 sm:h-10 sm:w-10 md:h-12 md:w-12 hover:bg-blue-600 rounded-full transition-colors" 
+                                class="h-10 w-10 md:h-12 md:w-12 hover:bg-blue-600 rounded-full transition-colors" 
                             />
                         </div>
                     </template>
@@ -91,33 +91,33 @@ const getImageUrl = (path?: string) => {
                             <img 
                                 src="/assets/rightarrow.png" 
                                 alt="Next" 
-                                class="h-12 w-12 sm:h-10 sm:w-10 md:h-12 md:w-12 hover:bg-blue-600 rounded-full transition-colors" 
+                                class="h-10 w-10 md:h-12 md:w-12 hover:bg-blue-600 rounded-full transition-colors" 
                             />
                         </div>
                     </template>
 
                     <template #slide="{ slide: item }">
-                        <div class="flex flex-col sm:flex-row bg-white p-6 lg:p-8 rounded-3xl shadow-lg w-full h-full transition duration-300 hover:-translate-y-1 hover:shadow-xl border border-gray-100 box-border text-center sm:text-left items-center sm:items-start mx-auto my-2">
+                        <div class="flex flex-col sm:flex-row bg-white p-5 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl shadow-lg w-full h-full transition duration-300 hover:-translate-y-1 hover:shadow-xl border border-gray-100 box-border text-center sm:text-left items-center sm:items-start mx-auto my-2">
                             
-                            <div class="flex flex-col justify-start items-center sm:w-1/3 shrink-0 mb-4 sm:mb-0 sm:mr-6 relative">
+                            <div class="flex flex-col justify-start items-center sm:w-1/3 shrink-0 mb-3 sm:mb-0 sm:mr-5 relative">
                                 <img 
-                                    class="object-cover w-20 h-20 md:w-24 md:h-24 aspect-square rounded-full shadow-md border-4 border-white z-10"
+                                    class="object-cover w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 aspect-square rounded-full shadow-md border-[3px] border-white z-10"
                                     :src="getImageUrl(item.image_path)" 
                                     :alt="item.name"
                                 >
-                                <div class="text-[5rem] md:text-[6rem] lg:text-[7rem] font-black text-[#D70328] mt-[-10px] sm:mt-[-25px] rotate-180 leading-[0.7] opacity-90">
+                                <div class="text-[4rem] sm:text-[5rem] md:text-[6rem] font-black text-[#D70328] mt-[-5px] sm:mt-[-15px] rotate-180 leading-[0.7] opacity-90">
                                     "
                                 </div>
                             </div>
 
                             <div class="flex flex-col sm:w-2/3 leading-relaxed justify-center h-full">
-                                <h5 class="text-lg md:text-xl lg:text-2xl font-bold text-[#033E94]">
+                                <h5 class="text-base sm:text-lg md:text-xl font-bold text-[#033E94]">
                                     {{ item.name }}
                                 </h5>
-                                <i class="text-sm md:text-base text-blue-800 mt-1 font-semibold">
+                                <i class="text-xs sm:text-sm md:text-base text-blue-800 mt-0.5 font-semibold">
                                     {{ item.role }}
                                 </i>
-                                <p class="mt-3 md:mt-4 text-sm md:text-base text-gray-700 italic">
+                                <p class="mt-2 md:mt-3 text-xs sm:text-sm md:text-base text-gray-700 italic">
                                     "{{ item.body }}"
                                 </p>
                             </div>
@@ -128,7 +128,7 @@ const getImageUrl = (path?: string) => {
                 </BaseCarousel>
             </div>
 
-            <div v-else class="bg-white p-6 rounded-2xl shadow-md mt-12 mb-8 w-full text-center border border-gray-100">
+            <div v-else class="bg-white p-6 rounded-2xl shadow-md mt-8 mb-6 w-full text-center border border-gray-100">
                 <p class="text-gray-600 font-medium">No testimonials found.</p>
             </div>
 

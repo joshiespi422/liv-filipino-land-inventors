@@ -134,12 +134,12 @@ const isModalOpen = ref(false);
 
 const openStrategicModal = () => {
     isModalOpen.value = true;
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    document.body.style.overflow = 'hidden'; 
 };
 
 const closeStrategicModal = () => {
     isModalOpen.value = false;
-    document.body.style.overflow = ''; // Restore background scrolling
+    document.body.style.overflow = ''; 
 };
 
 onUnmounted(() => {
@@ -149,12 +149,12 @@ onUnmounted(() => {
 
 <template>
     <div id="strategic-plans">
-        <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-center my-8 text-[#033E94] dark:text-white px-4">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-center my-6 sm:my-8 text-[#033E94] dark:text-white px-4">
             {{ sectionData?.title ?? 'STRATEGIC PLANS' }} 
             <span class="text-[#D70328] dark:text-white">{{ sectionData?.short_title ?? '2026-2028' }}</span>
         </h1>
         
-        <p class="text-primary text-sm sm:text-base md:text-lg max-w-md sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl mx-auto text-center leading-relaxed drop-shadow mb-6 px-6">
+        <p class="text-primary text-sm sm:text-base md:text-lg max-w-md sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl mx-auto text-center leading-relaxed drop-shadow mb-6 px-4 sm:px-6">
             <template v-if="sectionData?.content">
                 {{ sectionData.content }}
             </template>
@@ -168,9 +168,9 @@ onUnmounted(() => {
 
         <div 
             style="background-image: url('/assets/news.jpg')" 
-            class="h-auto px-4 sm:px-8 md:px-[8%] xl:px-[14%] bg-cover bg-center relative shadow-lg"
+            class="h-auto px-2 sm:px-8 md:px-[8%] xl:px-[14%] bg-cover bg-center relative shadow-lg"
         >
-            <div class="relative w-full h-auto py-10">
+            <div class="relative max-w-7xl w-full h-auto py-6 sm:py-10 mx-auto">
                 
                 <BaseCarousel 
                     :items="displayPlans" 
@@ -196,50 +196,55 @@ onUnmounted(() => {
                     </template>
 
                     <template #slide="{ slide: plan, index }">
-                        <div class="px-2 sm:px-5">
-                            <div class="item relative w-full h-auto bg-white/85 dark:bg-slate-900/85 backdrop-blur-md rounded-2xl pt-24 pb-8 px-6 sm:px-10 flex flex-col gap-6 shadow-xl border border-white/30 min-h-125">
+                        <div class="px-2 sm:px-8 lg:px-12 py-2 sm:py-4 w-full flex justify-center">
+                            
+                            <div class="item relative w-full max-w-4xl h-auto bg-white/85 dark:bg-slate-900/85 backdrop-blur-md rounded-2xl pt-20 sm:pt-24 pb-6 sm:pb-8 px-5 sm:px-10 flex flex-col gap-4 sm:gap-6 shadow-xl border border-white/30 min-h-auto md:min-h-[500px]">
                                 
-                                <div class="absolute top-6 left-0 -ml-2 sm:-ml-4 z-10 w-[95%] sm:w-max">
-                                    <div class="absolute inset-y-0 left-0 -right-10 sm:-right-14 bg-gray-300 rounded-br-[40px]"></div>
-                                    <div class="absolute inset-y-0 left-0 -right-5 sm:-right-7 bg-[#829FCA] rounded-br-[40px]"></div>
-                                    <div class="relative bg-[#033E94] text-white px-4 sm:px-6 py-2 lg:py-2.5 rounded-br-[40px] text-lg sm:text-xl font-bold w-full sm:w-fit whitespace-normal sm:whitespace-nowrap flex items-start sm:items-center">
-                                        <span class="mr-2 mt-1 sm:mt-0">{{ index + 1 }}.</span>
-                                        <span>{{ plan.title }} <span class="text-[#FFCC00]">({{ plan.acronym }})</span></span>
+                                <div class="absolute top-5 sm:top-6 left-0 -ml-2 sm:-ml-4 z-10 w-[95%] sm:w-[90%] md:max-w-[85%]">
+                                    <div class="absolute inset-y-0 left-0 -right-6 sm:-right-8 bg-gray-300 rounded-br-[30px]"></div>
+                                    <div class="absolute inset-y-0 left-0 -right-3 sm:-right-4 bg-[#829FCA] rounded-br-[30px]"></div>
+                                    
+                                    <div class="relative bg-[#033E94] text-white px-3 sm:px-6 py-1.5 sm:py-2 rounded-br-[30px] text-sm sm:text-lg font-bold w-full whitespace-normal flex items-start">
+                                        <span class="mr-2 mt-0.5 shrink-0">{{ index + 1 }}.</span>
+                                        <span class="leading-tight pr-2">
+                                            {{ plan.title }} 
+                                            <span class="text-[#FFCC00] whitespace-nowrap">({{ plan.acronym }})</span>
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="mt-4">
-                                    <div class="relative -ml-10 sm:-ml-14 mb-3 bg-[#D70328] px-4 sm:px-6 py-2 rounded-br-[40px] text-white text-lg sm:text-xl font-bold w-max shadow-md">
+                                <div class="mt-2 sm:mt-4">
+                                    <div class="relative -ml-5 sm:-ml-14 mb-2 sm:mb-3 bg-[#D70328] px-3 sm:px-6 py-1 sm:py-2 rounded-br-[20px] sm:rounded-br-[40px] text-white text-base sm:text-xl font-bold w-max shadow-md">
                                         <h3>Goal:</h3>
                                     </div>
-                                    <p class="px-2 text-gray-800 dark:text-gray-200 font-medium text-sm sm:text-base">{{ plan.goal }}</p>
+                                    <p class="px-1 sm:px-2 text-gray-800 dark:text-gray-200 font-medium text-sm sm:text-base leading-snug sm:leading-normal">{{ plan.goal }}</p>
                                 </div>
 
                                 <div>
-                                    <div class="relative -ml-10 sm:-ml-14 mb-3 bg-[#D70328] px-4 sm:px-6 py-2 rounded-br-[40px] text-white text-lg sm:text-xl font-bold w-max shadow-md">
+                                    <div class="relative -ml-5 sm:-ml-14 mb-2 sm:mb-3 bg-[#D70328] px-3 sm:px-6 py-1 sm:py-2 rounded-br-[20px] sm:rounded-br-[40px] text-white text-base sm:text-xl font-bold w-max shadow-md">
                                         <h3>Description:</h3>
                                     </div>
-                                    <p class="px-2 text-gray-700 dark:text-gray-300 text-sm sm:text-lg">{{ plan.description }}</p>
+                                    <p class="px-1 sm:px-2 text-gray-700 dark:text-gray-300 text-sm sm:text-lg leading-snug sm:leading-normal">{{ plan.description }}</p>
                                 </div>
 
                                 <div>
-                                    <h4 class="px-2 mb-3 text-lg sm:text-xl font-semibold text-[#033E94] dark:text-blue-300">Key Activities:</h4>
-                                    <div class="space-y-3 px-2 sm:px-8">
-                                        <div v-for="(action, aIndex) in plan.key_actions" :key="aIndex" class="flex items-start gap-3">
-                                            <svg class="h-5 w-5 sm:h-6 sm:w-6 shrink-0 mt-1" viewBox="0 0 24 24" fill="none">
+                                    <h4 class="px-1 sm:px-2 mb-2 sm:mb-3 text-base sm:text-xl font-semibold text-[#033E94] dark:text-blue-300">Key Activities:</h4>
+                                    <div class="space-y-2 sm:space-y-3 px-1 sm:px-8">
+                                        <div v-for="(action, aIndex) in plan.key_actions" :key="aIndex" class="flex items-start gap-2 sm:gap-3">
+                                            <svg class="h-4 w-4 sm:h-6 sm:w-6 shrink-0 mt-0.5 sm:mt-1" viewBox="0 0 24 24" fill="none">
                                                 <circle cx="12" cy="12" r="10" fill="#16a34a" />
                                                 <path d="M8.5 12.5l2.5 2.5 4.5-5.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                             </svg>
-                                            <p class="text-sm sm:text-lg leading-relaxed text-gray-700 dark:text-gray-300">{{ action }}</p>
+                                            <p class="text-sm sm:text-lg leading-snug sm:leading-relaxed text-gray-700 dark:text-gray-300">{{ action }}</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="mt-auto pt-4">
-                                    <div class="relative -ml-10 sm:-ml-14 mb-3 bg-[#D70328] px-4 sm:px-6 py-2 rounded-br-[40px] text-white text-lg sm:text-xl font-bold w-max shadow-md">
+                                <div class="mt-auto pt-2 sm:pt-4">
+                                    <div class="relative -ml-5 sm:-ml-14 mb-2 sm:mb-3 bg-[#D70328] px-3 sm:px-6 py-1 sm:py-2 rounded-br-[20px] sm:rounded-br-[40px] text-white text-base sm:text-xl font-bold w-max shadow-md">
                                         <h3>Expected Outcome:</h3>
                                     </div>
-                                    <p class="px-2 text-gray-800 dark:text-gray-200 italic font-medium text-sm sm:text-base">{{ plan.expected_outcome }}</p>
+                                    <p class="px-1 sm:px-2 text-gray-800 dark:text-gray-200 italic font-medium text-sm sm:text-base leading-snug sm:leading-normal">{{ plan.expected_outcome }}</p>
                                 </div>
 
                             </div>
@@ -247,15 +252,15 @@ onUnmounted(() => {
                     </template>
                 </BaseCarousel>
 
-                <div class="flex justify-center pb-5 mt-8 relative z-20">
-                    <button @click="openStrategicModal" class="text-[#033E94] hover:text-white bg-white hover:bg-[#033E94] border-2 border-[#033E94] shadow-lg rounded-xl text-lg sm:text-xl font-medium px-8 py-3 cursor-pointer transition-colors">
+                <div class="flex justify-center pb-2 sm:pb-5 mt-4 sm:mt-8 relative z-20">
+                    <button @click="openStrategicModal" class="text-[#033E94] hover:text-white bg-white hover:bg-[#033E94] border-2 border-[#033E94] shadow-lg rounded-xl text-base sm:text-xl font-medium px-6 sm:px-8 py-2 sm:py-3 cursor-pointer transition-colors">
                         View all
                     </button>
                 </div>
             </div>
         </div>
 
-        <div class="bg-surface-alt shadow-md px-6 sm:px-10 p-6 sm:p-8">
+        <div class="bg-surface-alt shadow-md px-4 sm:px-10 p-4 sm:p-8">
             <p class="text-text-primary text-sm sm:text-base leading-relaxed text-center xl:text-xl w-full max-w-6xl mx-auto">
                 {{ sectionData?.image_path ?? 'Together, these strategic programs ensure that FISMPC continues to empower Filipino inventors and drive sustainable, inclusive innovation across the country.' }}
             </p>
@@ -274,54 +279,54 @@ onUnmounted(() => {
                     
                     <div class="fixed inset-0 dark:bg-black/60 backdrop-blur-sm transition-opacity" @click="closeStrategicModal"></div>
 
-                    <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-                        <div class="relative transform overflow-hidden rounded-2xl bg-white  text-left shadow-2xl transition-all sm:my-8 w-full max-w-6xl flex flex-col max-h-[90vh]">
+                    <div class="flex min-h-full items-center justify-center p-2 sm:p-4 text-center">
+                        <div class="relative transform overflow-hidden rounded-xl sm:rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 w-full max-w-6xl flex flex-col max-h-[95vh] sm:max-h-[90vh]">
                             
-                            <div class="bg-[#033E94] px-6 py-4 flex justify-between items-center shrink-0">
-                                <h3 class="text-xl sm:text-2xl font-bold text-white" id="modal-title">
+                            <div class="bg-[#033E94] px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center shrink-0">
+                                <h3 class="text-lg sm:text-2xl font-bold text-white" id="modal-title">
                                     All Strategic Plans <span class="text-[#FFCC00] dark:text-white">(2026-2028)</span>
                                 </h3>
                                 <button @click="closeStrategicModal" class="text-white hover:text-[#FFCC00] transition-colors focus:outline-none">
-                                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg class="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </button>
                             </div>
 
-                            <div class="p-6 sm:p-8 overflow-y-auto bg-gray-50 dark:bg-slate-900/85 grow">
-                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                    <div v-for="(plan, index) in displayPlans" :key="index" class="bg-white dark:bg-slate-700/85 p-6 rounded-xl shadow-md border-t-4 border-[#FFCC00] hover:shadow-lg transition-shadow">
+                            <div class="p-4 sm:p-8 overflow-y-auto bg-gray-50 dark:bg-slate-900/85 grow">
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                                    <div v-for="(plan, index) in displayPlans" :key="index" class="bg-white dark:bg-slate-700/85 p-4 sm:p-6 rounded-xl shadow-md border-t-4 border-[#FFCC00] hover:shadow-lg transition-shadow">
                                         
-                                        <div class="flex items-start mb-5">
-                                            <span class="bg-[#033E94] text-white  px-3 py-1 rounded-lg text-sm font-bold mr-3 mt-1">{{ index + 1 }}</span>
-                                            <h4 class="text-xl font-bold text-[#033E94] dark:text-white leading-tight">{{ plan.title }} <span class="text-[#D70328] dark:text-white">({{ plan.acronym }})</span></h4>
+                                        <div class="flex items-start mb-4 sm:mb-5">
+                                            <span class="bg-[#033E94] text-white px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-bold mr-2 sm:mr-3 mt-1">{{ index + 1 }}</span>
+                                            <h4 class="text-lg sm:text-xl font-bold text-[#033E94] dark:text-white leading-tight">{{ plan.title }} <span class="text-[#D70328] dark:text-white">({{ plan.acronym }})</span></h4>
                                         </div>
                                         
-                                        <div class="space-y-4">
+                                        <div class="space-y-3 sm:space-y-4">
                                             <div>
-                                                <strong class="text-xs sm:text-sm uppercase tracking-wider text-[#D70328] dark:text-white block mb-1">Goal</strong>
+                                                <strong class="text-xs sm:text-sm uppercase tracking-wider text-[#D70328] dark:text-white block mb-0.5 sm:mb-1">Goal</strong>
                                                 <p class="text-gray-800 dark:text-white text-sm md:text-base font-medium">{{ plan.goal }}</p>
                                             </div>
                                             
                                             <div>
-                                                <strong class="text-xs sm:text-sm uppercase tracking-wider text-[#D70328] dark:text-white block mb-1">Description</strong>
+                                                <strong class="text-xs sm:text-sm uppercase tracking-wider text-[#D70328] dark:text-white block mb-0.5 sm:mb-1">Description</strong>
                                                 <p class="text-gray-700 dark:text-white text-sm md:text-base">{{ plan.description }}</p>
                                             </div>
 
                                             <div>
-                                                <strong class="text-xs sm:text-sm uppercase tracking-wider text-[#D70328] dark:text-white block mb-2">Key Activities</strong>
-                                                <ul class="space-y-2">
+                                                <strong class="text-xs sm:text-sm uppercase tracking-wider text-[#D70328] dark:text-white block mb-1 sm:mb-2">Key Activities</strong>
+                                                <ul class="space-y-1.5 sm:space-y-2">
                                                     <li v-for="(action, aIndex) in plan.key_actions" :key="aIndex" class="flex items-start gap-2 text-sm md:text-base text-gray-700">
-                                                        <svg class="h-5 w-5 shrink-0 text-green-600 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <svg class="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-green-600 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                                                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                                         </svg>
-                                                        <span class="dark:text-white">{{ action }}</span>
+                                                        <span class="dark:text-white leading-snug sm:leading-normal">{{ action }}</span>
                                                     </li>
                                                 </ul>
                                             </div>
                                             
-                                            <div class="pt-3 border-t border-gray-100">
-                                                <strong class="text-xs sm:text-sm uppercase tracking-wider text-[#D70328] dark:text-white block mb-1">Expected Outcome</strong>
+                                            <div class="pt-2 sm:pt-3 border-t border-gray-100">
+                                                <strong class="text-xs sm:text-sm uppercase tracking-wider text-[#D70328] dark:text-white block mb-0.5 sm:mb-1">Expected Outcome</strong>
                                                 <p class="text-gray-800 dark:text-white font-medium text-sm md:text-base italic">{{ plan.expected_outcome }}</p>
                                             </div>
                                         </div>
@@ -330,8 +335,8 @@ onUnmounted(() => {
                                 </div>
                             </div>
 
-                            <div class="bg-gray-100 dark:bg-[#033E94] px-6 py-4 flex justify-end shrink-0 border-t border-gray-200">
-                                <button @click="closeStrategicModal" type="button" class="inline-flex w-full sm:w-auto justify-center rounded-lg bg-white px-8 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors">
+                            <div class="bg-gray-100 dark:bg-[#033E94] px-4 sm:px-6 py-3 sm:py-4 flex justify-end shrink-0 border-t border-gray-200">
+                                <button @click="closeStrategicModal" type="button" class="inline-flex w-full sm:w-auto justify-center rounded-lg bg-white px-8 py-2 sm:py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors">
                                     Close
                                 </button>
                             </div>
