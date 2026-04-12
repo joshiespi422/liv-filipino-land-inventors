@@ -4,10 +4,12 @@ import type { HeroProps } from '@/types/landing/home-section';
 
 const props = defineProps<HeroProps>();
 
+// FIXED: Added safety checks for the image path to prevent broken URLs
 const bgImage = computed(() => {
-    return props.sectionData?.image_path 
-        ? `/storage/${props.sectionData.image_path}` 
-        : '/assets/bg1.jpg';
+    const path = props.sectionData?.image_path;
+    if (!path) return '/assets/bg1.jpg';
+    
+    return (path.startsWith('http') || path.startsWith('/')) ? path : `/storage/${path}`;
 });
 
 // Store default fallback texts
@@ -30,16 +32,16 @@ Our members have developed technologies in fields like agriculture, renewable en
             <div class="absolute inset-0 bg-black/40 dark:bg-black/60"></div>
         </div>
 
-        <div class="relative z-10 flex flex-col items-center px-4 sm:px-8 md:px-12 text-center w-full max-w-7xl mx-auto">
+        <div class="relative z-10 flex flex-col items-center px-4 sm:px-8 md:px-12 text-center w-full max-w-6xl mx-auto">
             
-            <h1 class="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold drop-shadow-2xl mb-6 leading-tight max-w-5xl">
+            <h1 class="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold drop-shadow-2xl mb-4 sm:mb-6 leading-tight max-w-5xl">
                 {{ sectionData?.title || defaultTitle }}
-                <span class="text-[#FFCC00] block mt-2 sm:mt-4 text-2xl sm:text-3xl lg:text-4xl">
+                <span class="text-[#FFCC00] block mt-1 sm:mt-4 text-2xl sm:text-3xl lg:text-4xl">
                     ({{ sectionData?.short_title || defaultShortTitle }})
                 </span>
             </h1>
 
-            <p class="text-white text-sm sm:text-base md:text-lg lg:text-xl drop-shadow-lg font-medium opacity-95 leading-relaxed whitespace-pre-wrap max-w-5xl mx-auto">
+            <p class="text-white text-sm sm:text-base md:text-lg lg:text-xl drop-shadow-lg font-medium opacity-95 leading-relaxed whitespace-pre-wrap max-w-4xl mx-auto">
                 {{ sectionData?.content || defaultContent }}
             </p>
             
