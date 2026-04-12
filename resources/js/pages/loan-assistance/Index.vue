@@ -1,9 +1,20 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import loanAssistance from '@/routes/loan-assistance';
 import { CreditCard, Calendar, Percent } from 'lucide-vue-next';
-import { computed } from 'vue';
+import DataTable from '@/components/DataTable.vue';
+import { computed, ref, watch } from 'vue';
+import { useDebounceFn } from '@vueuse/core';
+import type { GlobalSetting, LoanAssistance, LoanStatus } from '@/types';
+import { columns } from '@/features/loan-assistance/columns';
 
 defineOptions({
   layout: {
@@ -16,17 +27,18 @@ defineOptions({
   },
 });
 
-interface globalSetting {
-  id: number;
-  default_amount: string;
-  default_interest_rate: string;
-  default_term_months: number;
-}
-
 const props = defineProps<{
-  global_settings: globalSetting | null;
+  global_settings: GlobalSetting | null;
+  loans: {
+    data: LoanAssistance[];
+  };
   can_mutate: boolean;
+  filters: {
+    status: LoanStatus;
+  };
 }>();
+
+const selectedStatus = ref(props.filters.status || 'pending');
 
 const displayStats = computed(() => {
   if (!props.global_settings) return [];
@@ -52,12 +64,30 @@ const displayStats = computed(() => {
     },
   ];
 });
+
+// --- Watchers to Update URL ---
+const updateFilters = () => {
+  router.get(
+    loanAssistance.index(),
+    {
+      status: selectedStatus.value,
+    },
+    {
+      preserveScroll: true,
+      replace: true,
+    },
+  );
+};
+
+// Watch for select filter changes (debounced)
+const debouncedUpdate = useDebounceFn(updateFilters, 300);
+watch([selectedStatus], debouncedUpdate);
 </script>
 
 <template>
   <Head title="Loan Assistance" />
 
-  <div class="flex h-full flex-1 flex-col gap-6 p-6">
+  <div class="flex h-full flex-1 flex-col gap-3 p-6">
     <div>
       <h1 class="text-2xl font-bold tracking-tight">Global Default Value</h1>
       <p class="text-muted-foreground">
@@ -92,5 +122,36 @@ const displayStats = computed(() => {
         No global settings found.
       </div>
     </div>
+
+    <div
+      class="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight">Loan Assistance</h1>
+        <p class="text-muted-foreground">
+          Manage and monitor loan applications.
+        </p>
+      </div>
+      <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-4">
+        <Select v-model="selectedStatus">
+          <SelectTrigger class="w-full cursor-pointer sm:w-38 sm:shrink-0">
+            <SelectValue placeholder="Filter by..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="cancelled">Cancelled</SelectItem>
+            <SelectItem value="rejected">Rejected</SelectItem>
+            <SelectItem value="finished">Finished</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+
+    <DataTable
+      :columns="columns"
+      :data="loans.data"
+      search-placeholder="Search borrowers or status..."
+    />
   </div>
 </template>

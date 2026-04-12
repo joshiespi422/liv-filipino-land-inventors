@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { valueUpdater } from '@/components/ui/table/utils';
 import {
   type ColumnDef,
   FlexRender,
@@ -39,15 +40,13 @@ const props = defineProps<{
 }>();
 
 // --- Table State ---
-
 const globalFilter = ref('');
 const pagination = ref({
-  pageIndex: 0, // 0-indexed
+  pageIndex: 0,
   pageSize: 10,
 });
 
 // --- Table Instance ---
-
 const table = useVueTable({
   data: computed(() => props.data),
   columns: props.columns,
@@ -59,43 +58,35 @@ const table = useVueTable({
       return pagination.value;
     },
   },
-  // --- State Updaters ---
-  onGlobalFilterChange: (updater) => {
-    globalFilter.value =
-      typeof updater === 'function' ? updater(globalFilter.value) : updater;
-  },
-  onPaginationChange: (updater) => {
-    pagination.value =
-      typeof updater === 'function' ? updater(pagination.value) : updater;
-  },
-  // --- Models ---
+  // --- Cleaned up Updaters using your utility ---
+  onGlobalFilterChange: (updater) => valueUpdater(updater, globalFilter),
+  onPaginationChange: (updater) => valueUpdater(updater, pagination),
+
   getCoreRowModel: getCoreRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
   getFilteredRowModel: getFilteredRowModel(),
   // --- Config ---
-  manualPagination: false, // We are using client-side pagination
-  manualFiltering: false, // We are using client-side filtering
+  manualPagination: false,
+  manualFiltering: false,
 });
 
 // --- Computed Values for Display ---
-
 const pageCount = computed(() => table.getPageCount());
-const currentPageSize = computed(() => table.getState().pagination.pageSize);
-const currentPageIndex = computed(() => table.getState().pagination.pageIndex);
-
 const totalResults = computed(() => table.getFilteredRowModel().rows.length);
+
 const fromResult = computed(() => {
   if (totalResults.value === 0) return 0;
-  return currentPageIndex.value * currentPageSize.value + 1;
+  return pagination.value.pageIndex * pagination.value.pageSize + 1;
 });
+
 const toResult = computed(() => {
-  const end = (currentPageIndex.value + 1) * currentPageSize.value;
+  const end = (pagination.value.pageIndex + 1) * pagination.value.pageSize;
   return end > totalResults.value ? totalResults.value : end;
 });
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
+  <div class="flex flex-col gap-4 rounded-2xl border-2 bg-card p-5 pb-8">
     <!-- Search Filter -->
     <div
       class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
@@ -107,19 +98,23 @@ const toResult = computed(() => {
         class="max-w-xl lg:max-w-sm"
       />
       <div class="flex items-center gap-2">
-        <slot name="custom-actions"></slot>
+        <slot name="custom-actions" />
       </div>
     </div>
 
     <!-- Data Table -->
     <div class="w-full overflow-x-auto rounded-md border">
-      <Table class="w-full">
-        <TableHeader>
+      <Table>
+        <TableHeader class="bg-accent">
           <TableRow
             v-for="headerGroup in table.getHeaderGroups()"
             :key="headerGroup.id"
           >
-            <TableHead v-for="header in headerGroup.headers" :key="header.id">
+            <TableHead
+              v-for="header in headerGroup.headers"
+              :key="header.id"
+              class="text-center"
+            >
               <FlexRender
                 v-if="!header.isPlaceholder"
                 :render="header.column.columnDef.header"
@@ -134,8 +129,13 @@ const toResult = computed(() => {
               v-for="row in table.getRowModel().rows"
               :key="row.id"
               :data-state="row.getIsSelected() && 'selected'"
+              class="text-center"
             >
-              <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+              <TableCell
+                v-for="cell in row.getVisibleCells()"
+                :key="cell.id"
+                class="py-4"
+              >
                 <FlexRender
                   :render="cell.column.columnDef.cell"
                   :props="cell.getContext()"
@@ -143,7 +143,6 @@ const toResult = computed(() => {
               </TableCell>
             </TableRow>
           </template>
-
           <TableRow v-else>
             <TableCell
               :colspan="columns.length"
@@ -161,24 +160,20 @@ const toResult = computed(() => {
       class="flex flex-col items-center justify-between gap-4 px-2 sm:flex-row"
     >
       <div class="text-sm text-muted-foreground">
-        Showing
-        <strong>{{ fromResult }}</strong>
-        to
-        <strong>{{ toResult }}</strong>
-        of
-        <strong>{{ totalResults }}</strong>
-        results
+        Showing <strong>{{ fromResult }}</strong> to
+        <strong>{{ toResult }}</strong> of
+        <strong>{{ totalResults }}</strong> results
       </div>
+
       <div class="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
         <div class="flex items-center space-x-2">
           <p class="text-sm font-medium">Rows per page</p>
           <Select
-            :model-value="`${currentPageSize}`"
-            @update:model-value="(value) => table.setPageSize(Number(value))"
+            :model-value="`${pagination.pageSize}`"
+            @update:model-value="(val) => table.setPageSize(Number(val))"
           >
             <SelectTrigger class="h-8 w-18">
-              <!-- Using a string for the placeholder -->
-              <SelectValue :placeholder="`${currentPageSize}`" />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent side="top">
               <SelectItem
@@ -191,12 +186,11 @@ const toResult = computed(() => {
             </SelectContent>
           </Select>
         </div>
+
         <div class="flex w-25 items-center justify-center text-sm font-medium">
-          Page
-          {{ currentPageIndex + 1 }}
-          of
-          {{ pageCount }}
+          Page {{ pagination.pageIndex + 1 }} of {{ pageCount }}
         </div>
+
         <div class="flex items-center space-x-2">
           <Button
             variant="outline"
@@ -204,7 +198,6 @@ const toResult = computed(() => {
             :disabled="!table.getCanPreviousPage()"
             @click="table.setPageIndex(0)"
           >
-            <span class="sr-only">Go to first page</span>
             <ChevronsLeftIcon class="h-4 w-4" />
           </Button>
           <Button
@@ -213,7 +206,6 @@ const toResult = computed(() => {
             :disabled="!table.getCanPreviousPage()"
             @click="table.previousPage()"
           >
-            <span class="sr-only">Go to previous page</span>
             <ChevronLeftIcon class="h-4 w-4" />
           </Button>
           <Button
@@ -222,7 +214,6 @@ const toResult = computed(() => {
             :disabled="!table.getCanNextPage()"
             @click="table.nextPage()"
           >
-            <span class="sr-only">Go to next page</span>
             <ChevronRightIcon class="h-4 w-4" />
           </Button>
           <Button
@@ -231,7 +222,6 @@ const toResult = computed(() => {
             :disabled="!table.getCanNextPage()"
             @click="table.setPageIndex(pageCount - 1)"
           >
-            <span class="sr-only">Go to last page</span>
             <ChevronsRightIcon class="h-4 w-4" />
           </Button>
         </div>
