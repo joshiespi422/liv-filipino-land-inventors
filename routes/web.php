@@ -25,7 +25,10 @@ Route::middleware([
             ->name('business-training.type.show');
         Route::get('/business-training/categories/{slug}/modules', [BusinessTrainingController::class, 'getCategoryModules'])
             ->name('business-training.modules');
+    });
 
+    // Loan Assistance Domain
+    Route::middleware(['service_access:loan-assistance'])->group(function () {
         Route::get('/loan-assistance', [LoanAssistanceController::class, 'index'])
             ->name('loan-assistance.index');
 
