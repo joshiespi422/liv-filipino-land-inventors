@@ -25,7 +25,7 @@ class CheckServiceAccess
         $service = Service::where('slug', $serviceSlug)->where('is_active', true)->firstOrFail();
 
         // 2. Check if the user has access using your Model logic
-        if (! $user || ! $user->managesService($service->id)) {
+        if (!$user || !$user->managesService($service->id)) {
             abort(403, 'You do not have permission to access the ' . $service->name . ' module.');
         }
 

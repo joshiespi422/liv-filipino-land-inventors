@@ -5,6 +5,7 @@ namespace App\Http\Middleware\Api;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Status;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckUserType
@@ -17,8 +18,9 @@ class CheckUserType
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
         $user = Auth::user();
+        $validStatuses = [Status::ACTIVE, Status::PENDING_FOR_MEMBER];
 
-        if ($user && $user->is_active && in_array((string) $user->user_type_id, $roles)) {
+        if ($user && in_array($user->status_id, $validStatuses) && in_array((string) $user->user_type_id, $roles)) {
             return $next($request);
         }
 

@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
+use App\Models\Status;
 use Illuminate\Validation\ValidationException;
 
 class CheckUserType
@@ -21,12 +22,7 @@ class CheckUserType
         $user = Auth::user();
 
         // Check if the user's type ID is in the allowed roles array
-        if ($user && in_array($user->user_type_id, $roles)) {
-            return $next($request);
-        }
-
-        // Check if is_active is true
-        if ($user && $user->is_active) {
+        if ($user && $user->status_id === Status::ACTIVE && in_array($user->user_type_id, $roles)) {
             return $next($request);
         }
 

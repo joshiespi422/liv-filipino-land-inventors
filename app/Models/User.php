@@ -89,12 +89,12 @@ class User extends Authenticatable
     public function managesService($serviceId): bool
     {
         // Super Admins bypass
-        if ($this->user_type_id === UserType::SUPER_ADMIN && $this->is_active) {
+        if ($this->user_type_id === UserType::SUPER_ADMIN && $this->status_id === Status::ACTIVE) {
             return true;
         }
 
         // Must be an Admin and currently Active
-        if ($this->user_type_id !== UserType::ADMIN || !$this->is_active) {
+        if ($this->user_type_id !== UserType::ADMIN || $this->status_id !== Status::ACTIVE) {
             return false;
         }
 
