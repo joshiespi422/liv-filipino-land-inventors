@@ -2,7 +2,11 @@
 
 use App\Http\Controllers\API\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\API\Auth\RegisteredUserController;
+use App\Http\Controllers\API\BusinessTraining\CategoryController;
+use App\Http\Controllers\API\BusinessTraining\TrainingController;
+use App\Http\Controllers\API\BusinessTraining\TypeController;
 use App\Http\Controllers\API\Verification\PhoneVerificationController;
+use App\Models\UserType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,4 +27,21 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
+
+    Route::prefix('business-training')
+        ->middleware('role.api:' . UserType::MEMBER)
+        ->group(function () {
+            // Types
+            Route::get('types', [TypeController::class, 'index']);
+            Route::get('types/{type}', [TypeController::class, 'show']);
+
+            // Categories under a Type
+            Route::get('types/{type}/categories', [CategoryController::class, 'index']);
+            Route::get('types/{type}/categories/{category}', [CategoryController::class, 'show']);
+
+            // Training Modules under a Category
+            Route::get('categories/{category}/trainings', [TrainingController::class, 'index']);
+            Route::get('categories/{category}/trainings/{module}', [TrainingController::class, 'show'])
+                ->whereNumber('module');
+        });
 });
