@@ -22,6 +22,11 @@ return new class extends Migration {
             $table->string('barangay')->nullable()->after('city');
             $table->string('street')->nullable()->after('barangay');
             $table->string('postal_code', 20)->nullable()->after('street');
+            $table->string('avatar')->nullable()->after('postal_code');
+            $table->enum('valid_id_type', ['National ID', 'Passport', 'Driver License'])->nullable()->after('avatar');
+            $table->string('valid_id_number', 20)->unique()->nullable()->after('valid_id_type');
+            $table->string('front_valid_id_picture')->nullable()->after('valid_id_number');
+            $table->string('back_valid_id_picture')->nullable()->after('front_valid_id_picture');
         });
     }
 
@@ -44,6 +49,11 @@ return new class extends Migration {
                 'barangay',
                 'street',
                 'postal_code',
+                'avatar',
+                'valid_id_type',
+                'valid_id_number',
+                'front_valid_id_picture',
+                'back_valid_id_picture',
             ]);
         });
     }

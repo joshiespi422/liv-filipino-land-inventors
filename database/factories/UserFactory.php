@@ -33,6 +33,23 @@ class UserFactory extends Factory
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
+
+            'user_type_id' => 4,
+            'status_id' => 1,
+            'phone' => fake()->unique()->phoneNumber(),
+            'phone_verified_at' => now(),
+            'gender' => fake()->randomElement(['Male', 'Female', 'Other', 'Prefer not to say']),
+            'region' => fake()->state(),
+            'province' => fake()->city(),
+            'city' => fake()->city(),
+            'barangay' => fake()->streetName(),
+            'street' => fake()->streetAddress(),
+            'postal_code' => fake()->postcode(),
+            'avatar' => 'avatars/default.png',
+            'valid_id_type' => fake()->randomElement(['National ID', 'Passport', 'Driver License']),
+            'valid_id_number' => fake()->unique()->numerify('##########'),
+            'front_valid_id_picture' => 'ids/front_sample.jpg',
+            'back_valid_id_picture' => 'ids/back_sample.jpg',
         ];
     }
 
