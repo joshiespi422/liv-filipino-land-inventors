@@ -48,8 +48,8 @@ class UserFactory extends Factory
             'avatar' => 'avatars/default.png',
             'valid_id_type' => fake()->randomElement(['National ID', 'Passport', 'Driver License']),
             'valid_id_number' => fake()->unique()->numerify('##########'),
-            'front_valid_id_picture' => 'ids/front_sample.jpg',
-            'back_valid_id_picture' => 'ids/back_sample.jpg',
+            'front_valid_id_picture' => 'valid_ids/front_sample.jpg',
+            'back_valid_id_picture' => 'valid_ids/back_sample.jpg',
         ];
     }
 

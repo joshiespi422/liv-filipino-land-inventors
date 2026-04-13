@@ -57,5 +57,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             DiminishingLoanSeeder::class
         ]);
+
+        User::factory()->count(5)->create([
+            'status_id' => 10,
+        ]);
     }
 }

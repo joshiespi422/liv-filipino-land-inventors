@@ -33,4 +33,10 @@ class Status extends Model
     {
         return $this->hasMany(LoanSchedule::class);
     }
+
+    // one to many, status has many users
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
 }
