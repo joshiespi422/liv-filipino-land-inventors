@@ -85,6 +85,12 @@ class User extends Authenticatable
         return $this->hasMany(LoanSetting::class);
     }
 
+    // relationship to status, one to many
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(Status::class);
+    }
+
     // checker for service management
     public function managesService($serviceId): bool
     {
