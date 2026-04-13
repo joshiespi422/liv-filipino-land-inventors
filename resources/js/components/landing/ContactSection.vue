@@ -62,18 +62,20 @@ const submitForm = () => {
 <template>
     <div id="contact">
         <h1 class="text-3xl md:text-4xl font-bold text-center my-8 md:my-10 text-[#033E94] dark:text-white">CONTACT US</h1>
-
-        <div class="max-w-6xl mx-auto my-6 md:my-10 rounded-2xl p-6 lg:p-0 lg:bg-linear-to-r lg:from-gray-50 lg:from-60% lg:to-transparent lg:to-60% shadow-sm border border-gray-100 lg:border-none lg:shadow-none">
-            <div class="flex flex-col lg:flex-row gap-8 lg:p-6">
+        
+            <div class="max-w-6xl mx-auto my-6 md:my-10 rounded-2xl p-6 lg:p-0 
+            lg:bg-linear-to-r lg:from-white-50 lg:from-60% lg:to-transparent lg:to-60% 
+            dark:bg-none 
+            shadow-sm border border-gray-100 lg:border-none lg:shadow-none">            <div class="flex flex-col lg:flex-row gap-8 lg:p-6">
 
                 <div class="flex-1">
                     <form @submit.prevent="submitForm">
-                        <h3 class="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-[#033E94]">Send us a message</h3>
-                        <p class="text-base md:text-lg mb-6 md:mb-8 text-[#033E94]">We welcome inquiries from aspiring inventors, members, and partners.</p>
+                        <h3 class="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-[#033E94] dark:text-white">Send us a message</h3>
+                        <p class="text-base md:text-lg mb-6 md:mb-8 text-[#033E94] dark:text-white">We welcome inquiries from aspiring inventors, members, and partners.</p>
 
                         <div class="flex flex-wrap -mx-3 mb-4 md:mb-5">
                             <div class="w-full md:w-1/2 px-3 mb-4">
-                                <label for="first_name" class="block text-sm font-medium text-[#033E94] mb-2">First Name</label>
+                                <label for="first_name" class="block text-sm font-medium text-[#033E94] dark:text-white mb-2">First Name</label>
                                 <input 
                                     v-model="form.first_name" 
                                     type="text" 
@@ -83,7 +85,7 @@ const submitForm = () => {
                                 />
                             </div>
                             <div class="w-full md:w-1/2 px-3 mb-4">
-                                <label for="last_name" class="block text-sm font-medium text-[#033E94] mb-2">Last Name</label>
+                                <label for="last_name" class="block text-sm font-medium text-[#033E94] mb-2 dark:text-white">Last Name</label>
                                 <input 
                                     v-model="form.last_name" 
                                     type="text" 
@@ -93,7 +95,7 @@ const submitForm = () => {
                                 />
                             </div>
                             <div class="w-full md:w-1/2 px-3 mb-4">
-                                <label for="email" class="block text-sm font-medium text-[#033E94] mb-2">Email</label>
+                                <label for="email" class="block text-sm font-medium text-[#033E94] mb-2 dark:text-white">Email</label>
                                 <input 
                                     v-model="form.email" 
                                     type="email" 
@@ -103,7 +105,7 @@ const submitForm = () => {
                                 />
                             </div>
                             <div class="w-full md:w-1/2 px-3 mb-4">
-                                <label for="contact" class="block text-sm font-medium text-[#033E94] mb-2">Contact</label>
+                                <label for="contact" class="block text-sm font-medium text-[#033E94] dark:text-white mb-2">Contact</label>
                                 <input 
                                     v-model="form.contact" 
                                     type="text" 
@@ -116,7 +118,7 @@ const submitForm = () => {
                         </div>
 
                         <div class="mb-4 md:mb-5">
-                            <label for="subject" class="block text-sm font-medium text-[#033E94] mb-2">Subject</label>
+                            <label for="subject" class="block text-sm font-medium text-[#033E94] mb-2 dark:text-white">Subject</label>
                             <input 
                                 v-model="form.subject" 
                                 type="text" 
@@ -127,7 +129,7 @@ const submitForm = () => {
                         </div>
 
                         <div class="mb-4 md:mb-5">
-                            <label for="message" class="block text-sm font-medium text-[#033E94] mb-2">Message</label>
+                            <label for="message" class="block text-sm font-medium text-[#033E94] mb-2 dark:text-white">Message</label>
                             <textarea 
                                 v-model="form.message" 
                                 id="message" 

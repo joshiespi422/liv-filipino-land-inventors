@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// 1. Tell Inertia NOT to use the default dashboard layout
 // defineOptions({ layout: null as any });
 // import { Head, Link } from '@inertiajs/vue3';
 // import { dashboard, login, register } from '@/routes';
