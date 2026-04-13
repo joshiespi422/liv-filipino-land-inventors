@@ -48,34 +48,36 @@ const appStoreUrl = "https://www.apple.com/app-store/";
                 </div>
 
                 <div class="lg:w-1/2 relative flex justify-center w-full">
-                    <div class="relative z-20 w-[280px] h-[580px] bg-slate-800 rounded-[3rem] border-[10px] border-slate-900 shadow-2xl overflow-hidden flex flex-col">
-                        <div class="absolute top-0 inset-x-0 h-6 bg-slate-900 rounded-b-2xl w-40 mx-auto z-30"></div>
-                        
-                        <div class="flex-1 w-full bg-white dark:bg-slate-800 flex flex-col relative">
-                            <div class="bg-[#033e94] pt-12 pb-8 px-6 text-center rounded-b-3xl shadow-md relative z-10">
-                                
-                                <div class="size-16 bg-white rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg p-2">
-                                    <img 
-                                        :src="props.navLogo?.icon_path ?? '/assets/navlogo.png'"
-                                        class="w-auto h-full object-contain transition-all duration-500" 
-                                        alt="Logo"
-                                    >
-                                </div>
-
-                                <h3 class="text-white font-bold text-lg">Join Us</h3>
-                                <p class="text-blue-200 text-sm mt-1">Register today</p>
-                            </div>
-                            
-                            <div class="p-6 space-y-4">
-                                <div class="h-12 w-full bg-gray-100 dark:bg-slate-700 rounded-xl"></div>
-                                <div class="h-12 w-full bg-gray-100 dark:bg-slate-700 rounded-xl"></div>
-                                <div class="h-12 w-full bg-[#FFCC00] rounded-xl shadow-md mt-6"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-72 bg-[#FFCC00] rounded-full filter blur-[80px] opacity-30 dark:opacity-20 z-0"></div>
+    <div class="relative z-20 w-[220px] sm:w-[260px] lg:w-[280px] h-[460px] sm:h-[520px] lg:h-[580px] bg-slate-800 rounded-[2rem] sm:rounded-[2.5rem] lg:rounded-[3rem] border-[6px] sm:border-8 lg:border-[10px] border-slate-900 shadow-2xl overflow-hidden flex flex-col transition-all duration-300">
+        
+        <div class="absolute top-0 inset-x-0 h-4 sm:h-5 lg:h-6 bg-slate-900 rounded-b-xl lg:rounded-b-2xl w-24 sm:w-32 lg:w-40 mx-auto z-30 transition-all duration-300"></div>
+        
+        <div class="flex-1 w-full bg-white dark:bg-slate-800 flex flex-col relative">
+            
+            <div class="bg-[#033e94] pt-8 sm:pt-10 lg:pt-12 pb-6 lg:pb-8 px-4 lg:px-6 text-center rounded-b-2xl lg:rounded-b-3xl shadow-md relative z-10 transition-all duration-300">
+                
+                <div class="size-12 sm:size-14 lg:size-16 bg-white rounded-xl lg:rounded-2xl mx-auto mb-3 lg:mb-4 flex items-center justify-center shadow-lg p-2 transition-all duration-300">
+                    <img 
+                        :src="props.navLogo?.icon_path ?? '/assets/navlogo.png'"
+                        class="w-auto h-full object-contain transition-all duration-500" 
+                        alt="Logo"
+                    >
                 </div>
+
+                <h3 class="text-white font-bold text-base lg:text-lg">Join Us</h3>
+                <p class="text-blue-200 text-xs lg:text-sm mt-1">Register today</p>
+            </div>
+            
+            <div class="p-4 sm:p-5 lg:p-6 space-y-3 lg:space-y-4 transition-all duration-300">
+                <div class="h-10 lg:h-12 w-full bg-gray-100 dark:bg-slate-700 rounded-lg lg:rounded-xl"></div>
+                <div class="h-10 lg:h-12 w-full bg-gray-100 dark:bg-slate-700 rounded-lg lg:rounded-xl"></div>
+                <div class="h-10 lg:h-12 w-full bg-[#FFCC00] rounded-lg lg:rounded-xl shadow-md mt-4 lg:mt-6"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-56 sm:size-64 lg:size-72 bg-[#FFCC00] rounded-full filter blur-[60px] lg:blur-[80px] opacity-30 dark:opacity-20 z-0 transition-all duration-300"></div>
+</div>
 
             </div>
         </div>
