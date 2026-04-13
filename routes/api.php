@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 // Guest Routes
 Route::middleware('guest')->group(function () {
     // Auth
-    Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('api.login');
+    Route::post('/login', [AuthenticatedSessionController::class, 'store']);
     Route::post('/register', [RegisteredUserController::class, 'store'])->middleware('throttle:10,1');
 
     // Verification
