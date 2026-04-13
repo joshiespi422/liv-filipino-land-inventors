@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { home, logout, register, login } from '@/routes';
+import { home, logout, login } from '@/routes';
 import type { NavItem, NavProps } from '@/types/landing/nav-bar';
-
+import JoinUs from './JoinUs.vue';
 const props = defineProps<NavProps>();
 
 const page = usePage();
@@ -13,6 +13,7 @@ const mobileMenuIsOpen = ref(false);
 const scrolled = ref(false);
 const activeSection = ref('home');
 const isDarkMode = ref(false);
+const isJoinModalOpen = ref(false);
 
 const navItems: NavItem[] = [
     { id: 'home', label: 'Home' },
@@ -50,6 +51,15 @@ const handleScroll = () => {
             activeSection.value = item.id;
         }
     });
+};
+
+const openJoinModal = () => {
+    isJoinModalOpen.value = true;
+    mobileMenuIsOpen.value = false; // Auto-close mobile menu when modal opens
+};
+
+const closeJoinModal = () => {
+    isJoinModalOpen.value = false;
 };
 
 onMounted(() => {
@@ -139,12 +149,6 @@ onUnmounted(() => {
                     </template>
 
                     <template v-else>
-                        <!-- <Link 
-                            :href="register()"
-                            class="rounded-xl px-4 py-2 text-sm font-medium text-[#033e94] dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all"
-                        >
-                            Register
-                        </Link> -->
                         <Link 
                             :href="login()"
                             class="rounded-xl px-4 py-2 text-sm font-medium text-[#033e94] dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all"
@@ -153,12 +157,12 @@ onUnmounted(() => {
                         </Link>
                     </template>
 
-                    <Link 
-                        :href="register()" 
-                        class="rounded-xl bg-[#033e94] dark:bg-white px-5 py-2 text-sm font-medium text-white dark:text-[#033e94] hover:opacity-90 transition-all shadow-md active:scale-95"
+                    <button 
+                        @click="openJoinModal"
+                        class="rounded-xl bg-[#033e94] dark:bg-white px-5 py-2 text-sm font-medium text-white dark:text-[#033e94] hover:opacity-90 transition-all shadow-md active:scale-95 cursor-pointer focus:outline-none"
                     >
                         Join us
-                    </Link>
+                    </button>
                 </div>
 
                 <button 
@@ -224,15 +228,60 @@ onUnmounted(() => {
                         >
                             Log in
                         </Link>
-                        <Link 
-                            :href="register()" 
-                            class="w-full rounded-xl md:rounded-2xl bg-blue-600 dark:bg-white px-4 py-3 md:py-4 text-center text-sm md:text-base font-bold text-white dark:text-[#033e94] shadow-lg active:scale-[0.98] transition-transform"
+                        
+                        <button 
+                            @click="openJoinModal"
+                            class="w-full rounded-xl md:rounded-2xl bg-[#033e94] dark:bg-white px-4 py-3 md:py-4 text-center text-sm md:text-base font-bold text-white dark:text-[#033e94] shadow-lg active:scale-[0.98] transition-transform cursor-pointer block focus:outline-none"
                         >
                             Join us
-                        </Link>
+                        </button>
                     </div>
                 </div>
             </transition>
         </nav>
     </div>
+
+    <Teleport to="body">
+        <Transition
+            enter-active-class="transition duration-300 ease-out"
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="transition duration-200 ease-in"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+        >
+            <div v-if="isJoinModalOpen" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
+                <div 
+                    class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
+                    @click="closeJoinModal"
+                ></div>
+
+                <Transition
+                    enter-active-class="transition duration-300 ease-out"
+                    enter-from-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    enter-to-class="opacity-100 translate-y-0 sm:scale-100"
+                    leave-active-class="transition duration-200 ease-in"
+                    leave-from-class="opacity-100 translate-y-0 sm:scale-100"
+                    leave-to-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                >
+                    <div v-if="isJoinModalOpen" class="relative w-full max-w-4xl bg-white dark:bg-[#0a192f] rounded-2xl shadow-2xl overflow-hidden transform transition-all border border-gray-200 dark:border-white/10 max-h-[90vh] flex flex-col">
+                        
+                        <button 
+                            @click="closeJoinModal" 
+                            class="absolute top-4 right-4 z-10 p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/10 transition-colors focus:outline-none"
+                        >
+                            <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        <div class="overflow-y-auto p-6 sm:p-8 no-scrollbar">
+                            <JoinUs />
+                        </div>
+                        
+                    </div>
+                </Transition>
+            </div>
+        </Transition>
+    </Teleport>
 </template>

@@ -103,7 +103,7 @@ const isExpanded = (id: string | number) => expandedItems.value.has(id);
 </script>
 
 <template>
-    <div id="news-updates" class="py-10 md:py-20 overflow-x-hidden">
+    <div id="news-updates" class="overflow-x-hidden">
         
         <div class="relative bg-[#829FCA] w-[90%] sm:w-fit min-w-[16rem] sm:min-w-100 px-4 sm:px-6 py-3 rounded-br-[40px] mb-8
                    before:content-[''] before:absolute before:top-0 before:left-0 

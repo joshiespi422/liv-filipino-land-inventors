@@ -13,7 +13,35 @@ use Illuminate\Validation\ValidationException;
 class AuthenticatedSessionController extends Controller
 {
     /**
-     * Step 1: Authenticate via phone + password, return token.
+     * Login.
+     *
+     * Authenticate via phone + password and receive a Bearer token.
+     *
+     * @tags Auth
+     * @unauthenticated
+     *
+     * @response 200 {
+     *   "message": "Login successful.",
+     *   "token": "1|abc123...",
+     *   "token_type": "Bearer",
+     *   "user": {
+     *     "id": 1,
+     *     "name": "Juan dela Cruz",
+     *     "phone": "+639171234567"
+     *   }
+     * }
+     * @response 422 {
+     *   "message": "Invalid credentials.",
+     *   "errors": {
+     *     "phone": ["These credentials do not match our records."]
+     *   }
+     * }
+     * @response 403 {
+     *   "message": "Your account has been suspended."
+     * }
+     * @response 500 {
+     *   "message": "Something went wrong."
+     * }
      */
     public function store(LoginRequest $request, AuthenticationService $authService): JsonResponse
     {
@@ -25,7 +53,7 @@ class AuthenticatedSessionController extends Controller
                 'token' => $data['token'],
                 'token_type' => 'Bearer',
                 'user' => $data['user'],
-            ], 200);
+            ]);
 
         } catch (ValidationException $e) {
             return response()->json([
@@ -46,7 +74,18 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
-     * Revoke the current token and log out.
+     * Logout.
+     *
+     * Revoke the current Bearer token and end the session.
+     *
+     * @tags Auth
+     *
+     * @response 200 {
+     *   "message": "Logged out successfully."
+     * }
+     * @response 401 {
+     *   "message": "Unauthenticated."
+     * }
      */
     public function destroy(Request $request, AuthenticationService $authService): JsonResponse
     {
@@ -56,6 +95,6 @@ class AuthenticatedSessionController extends Controller
 
         return response()->json([
             'message' => 'Logged out successfully.',
-        ], 200);
+        ]);
     }
 }
