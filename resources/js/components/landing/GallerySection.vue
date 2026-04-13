@@ -158,8 +158,11 @@ onUnmounted(() => {
 
             <div class="relative w-full">
                 <div v-if="videos.length > 0">
-                    <BaseCarousel :items="videos" :autoplayDelay="4000">
-                        
+<BaseCarousel 
+    :items="videos" 
+    :autoplayDelay="4000"
+    slide-class="w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1.33rem)]"
+>                        
                         <template #prev-arrow>
                             <img src="/assets/leftarrow.png" class="w-10 h-10 md:w-12 md:h-12 bg-white hover:bg-gray-100 shadow-lg rounded-full cursor-pointer transition-transform active:scale-95" alt="Prev" />
                         </template>

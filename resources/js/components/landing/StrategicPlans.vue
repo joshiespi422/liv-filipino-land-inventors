@@ -198,7 +198,7 @@ onUnmounted(() => {
                     <template #slide="{ slide: plan, index }">
                         <div class="px-2 sm:px-8 lg:px-12 py-2 sm:py-4 w-full flex justify-center">
                             
-                            <div class="item relative w-full max-w-4xl h-auto bg-white/85 dark:bg-slate-900/85 backdrop-blur-md rounded-2xl pt-20 sm:pt-24 pb-6 sm:pb-8 px-5 sm:px-10 flex flex-col gap-4 sm:gap-6 shadow-xl border border-white/30 min-h-auto md:min-h-[500px]">
+                            <div class="item relative w-full max-w-7xl h-auto bg-white/85 dark:bg-slate-900/85 backdrop-blur-md rounded-2xl pt-20 sm:pt-24 pb-6 sm:pb-8 px-5 sm:px-10 flex flex-col gap-4 sm:gap-6 shadow-xl border border-white/30 min-h-auto md:min-h-[500px]">
                                 
                                 <div class="absolute top-5 sm:top-6 left-0 -ml-2 sm:-ml-4 z-10 w-[95%] sm:w-[90%] md:max-w-[85%]">
                                     <div class="absolute inset-y-0 left-0 -right-6 sm:-right-8 bg-gray-300 rounded-br-[30px]"></div>
