@@ -27,7 +27,7 @@ class RegisterRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:20', 'unique:' . User::class, 'unique:' . PendingRegistration::class],
+            'phone' => ['required', 'string', 'max:20', 'unique:' . User::class],
         ];
     }
 }
