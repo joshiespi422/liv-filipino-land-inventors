@@ -22,7 +22,7 @@ class RegistrationService
      *
      * @throws Throwable
      */
-    public function initiateRegistration(string $name, string $phone): void
+    public function initiateRegistration(string $name, string $phone): array
     {
         $pending = PendingRegistration::where('phone', $phone)->first();
 
@@ -32,7 +32,11 @@ class RegistrationService
 
             if ($secondsPassed < 300) {
                 $wait = 300 - $secondsPassed;
-                throw new \RuntimeException("Please wait {$wait} seconds before requesting a new OTP.", 429);
+                return [
+                    'status' => 'pending',
+                    'retry_after' => $wait,
+                    'message' => 'OTP already sent. Please check your phone.',
+                ];
             }
         }
 
@@ -58,6 +62,12 @@ class RegistrationService
                 'otp_sent_at' => now(),
             ]);
         });
+
+        return [
+            'status' => 'otp_sent',
+            'retry_after' => 300,
+            'message' => 'OTP sent to your phone number.',
+        ];
     }
 
     /**
@@ -144,7 +154,7 @@ class RegistrationService
      *
      * @throws Throwable
      */
-    public function resendOtp(string $phone): void
+    public function resendOtp(string $phone): array
     {
         $pending = PendingRegistration::where('phone', $phone)
             ->where('phone_verified', false)
@@ -159,7 +169,11 @@ class RegistrationService
 
             if ($secondsPassed < 300) {
                 $wait = 300 - $secondsPassed;
-                throw new \RuntimeException("Please wait {$wait} seconds before requesting a new OTP.", 429);
+                return [
+                    'status' => 'pending',
+                    'retry_after' => $wait,
+                    'message' => "Please wait {$wait} seconds before requesting a new OTP.",
+                ];
             }
         }
 
@@ -181,5 +195,11 @@ class RegistrationService
                 'verification_token' => null,
             ]);
         });
+
+        return [
+            'status' => 'otp_sent',
+            'retry_after' => 300,
+            'message' => 'A new OTP has been sent to your phone number.',
+        ];
     }
 }

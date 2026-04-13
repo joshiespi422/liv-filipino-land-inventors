@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\SetPasswordRequest;
 use App\Services\Auth\RegistrationService;
 use Illuminate\Http\JsonResponse;
+use RuntimeException;
 use Throwable;
 
 class RegisteredUserController extends Controller
@@ -21,16 +22,14 @@ class RegisteredUserController extends Controller
     public function store(RegisterRequest $request): JsonResponse
     {
         try {
-            $this->registrationService->initiateRegistration(
+            $result = $this->registrationService->initiateRegistration(
                 $request->validated('name'),
                 $request->validated('phone'),
             );
 
-            return response()->json([
-                'message' => 'OTP sent to your phone number.',
-            ], 201);
+            return response()->json($result, $result['status'] === 'pending' ? 200 : 201);
 
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             return response()->json([
                 'message' => $e->getMessage(),
             ], (int) $e->getCode() ?: 500);
@@ -57,12 +56,12 @@ class RegisteredUserController extends Controller
 
             return response()->json([
                 'message' => 'Registration complete.',
-                'access_token' => $result['token'],
+                'token' => $result['token'],
                 'token_type' => 'Bearer',
                 'user' => $result['user'],
             ], 201);
 
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             return response()->json([
                 'message' => $e->getMessage(),
             ], (int) $e->getCode() ?: 500);

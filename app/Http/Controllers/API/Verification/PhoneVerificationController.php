@@ -50,13 +50,11 @@ class PhoneVerificationController extends Controller
     public function resend(ResendOtpRequest $request): JsonResponse
     {
         try {
-            $this->registrationService->resendOtp(
+            $result = $this->registrationService->resendOtp(
                 $request->validated('phone'),
             );
 
-            return response()->json([
-                'message' => 'OTP resent successfully.',
-            ]);
+            return response()->json($result, $result['status'] === 'pending' ? 200 : 201);
 
         } catch (\RuntimeException $e) {
             return response()->json([
