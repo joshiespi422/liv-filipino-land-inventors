@@ -14,15 +14,16 @@ class StatusSeeder extends Seeder
     public function run(): void
     {
         DB::table('statuses')->insert([
-            ['id' => 1, 'name' => 'pending'],
+            ['id' => 1, 'name' => 'active'],
             ['id' => 2, 'name' => 'approved'],
             ['id' => 3, 'name' => 'rejected'],
             ['id' => 4, 'name' => 'cancelled'],
-            ['id' => 5, 'name' => 'active'],
+            ['id' => 5, 'name' => 'pending'],
             ['id' => 6, 'name' => 'finished'],
             ['id' => 7, 'name' => 'paid'],
             ['id' => 8, 'name' => 'unpaid'],
             ['id' => 9, 'name' => 'overdue'],
+            ['id' => 10, 'name' => 'pending_for_member'],
         ]);
     
     }
