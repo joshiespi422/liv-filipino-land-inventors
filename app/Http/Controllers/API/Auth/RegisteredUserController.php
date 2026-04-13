@@ -17,7 +17,28 @@ class RegisteredUserController extends Controller
     }
 
     /**
-     * Step 1: Accept name + phone, send OTP via Movider.
+     * Register — Step 1.
+     *
+     * Accept name + phone, then send an OTP via Movider.
+     *
+     * @tags Auth
+     * @unauthenticated
+     *
+     * @response 201 scenario="New registration" {
+     *   "status": "created",
+     *   "message": "OTP sent.",
+     *   "phone": "+639171234567"
+     * }
+     * @response 200 scenario="Pending registration" {
+     *   "status": "pending",
+     *   "message": "A pending registration already exists. OTP resent.",
+     *   "phone": "+639171234567"
+     * }
+     * @response 422 {
+     *   "message": "The phone has already been taken.",
+     *   "errors": { "phone": ["The phone has already been taken."] }
+     * }
+     * @response 500 { "message": "Registration failed." }
      */
     public function store(RegisterRequest $request): JsonResponse
     {
@@ -43,7 +64,27 @@ class RegisteredUserController extends Controller
     }
 
     /**
-     * Step 3: Set password and create the real User record.
+     * Register — Step 3.
+     *
+     * Set password and create the User record. Requires a valid
+     * verification token obtained from Step 2 (OTP verification).
+     *
+     * @tags Auth
+     * @unauthenticated
+     *
+     * @response 201 {
+     *   "message": "Registration complete.",
+     *   "token": "1|abc123...",
+     *   "token_type": "Bearer",
+     *   "user": {
+     *     "id": 1,
+     *     "name": "Juan dela Cruz",
+     *     "phone": "+639171234567"
+     *   }
+     * }
+     * @response 403 { "message": "Invalid or expired verification token." }
+     * @response 404 { "message": "No pending registration found for this phone." }
+     * @response 500 { "message": "Failed to complete registration." }
      */
     public function setPassword(SetPasswordRequest $request): JsonResponse
     {
