@@ -125,6 +125,8 @@ class CategoryController extends Controller
             'Category not found under this type.'
         );
 
+        $category->load('type');
+
         return new CategoryResource($category);
     }
 }
