@@ -114,13 +114,20 @@ const userDetails = computed(() => {
 
         <div v-else class="mt-2">
           <!-- avatar -->
-          <div class="mb-2 flex justify-center">
+          <div class="mb-4 flex justify-center">
             <div class="relative h-20 w-20 overflow-hidden rounded-full">
-              <img
-                :src="selectedUser.avatar"
-                class="h-full w-full cursor-pointer object-cover transition-transform hover:scale-105"
-                alt="Avatar"
-              />
+              <a
+                :href="selectedUser.avatar"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block"
+              >
+                <img
+                  :src="selectedUser.avatar"
+                  class="h-full w-full cursor-pointer object-cover transition-transform hover:scale-105"
+                  alt="Avatar"
+                />
+              </a>
             </div>
           </div>
 
@@ -139,11 +146,18 @@ const userDetails = computed(() => {
                   v-if="item.value"
                   class="mt-1 overflow-hidden rounded-md border"
                 >
-                  <img
-                    :src="item.value"
-                    class="h-32 w-full cursor-pointer object-cover transition-transform hover:scale-105"
-                    alt="ID Picture"
-                  />
+                  <a
+                    :href="item.value"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="block"
+                  >
+                    <img
+                      :src="item.value"
+                      class="h-32 w-full cursor-pointer object-cover transition-transform hover:scale-105"
+                      alt="ID Picture"
+                    />
+                  </a>
                 </div>
                 <p v-else class="text-sm text-muted-foreground italic">
                   No image uploaded
