@@ -15,7 +15,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import dashboard from '@/routes/dashboard';
 import type { NavItem, Auth, Service } from '@/types';
 
 const page = usePage<{ auth: Auth }>();
@@ -24,7 +24,7 @@ const page = usePage<{ auth: Auth }>();
 const platformNavItems: NavItem[] = [
   {
     title: 'Dashboard',
-    href: dashboard(),
+    href: dashboard.index(),
     icon: LayoutGrid,
   },
 ];
@@ -51,7 +51,7 @@ const footerNavItems: NavItem[] = [
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton size="lg" as-child>
-            <Link :href="dashboard()">
+            <Link :href="dashboard.index()">
               <AppLogo />
             </Link>
           </SidebarMenuButton>

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use App\Models\UserType;
+use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\BusinessTrainingController;
 use App\Http\Controllers\Web\LoanAssistanceController;
 use App\Http\Controllers\Web\LoanScheduleController;
@@ -15,7 +16,7 @@ Route::middleware([
     'auth', 
     'role:' . UserType::SUPER_ADMIN . ',' . UserType::ADMIN
 ])->group(function () {
-    Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 
     // Business Training Domain
     Route::middleware(['service_access:business-training'])->group(function () {
