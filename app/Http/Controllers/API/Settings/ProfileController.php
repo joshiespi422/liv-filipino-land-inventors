@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API\Settings;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\User\ChangePasswordRequest;
-use App\Http\Requests\Api\User\UpdateProfileRequest;
+use App\Http\Requests\User\ChangePasswordRequest;
+use App\Http\Requests\User\UpdateProfileRequest;
 use App\Http\Resources\Api\User\ProfileResource;
 use App\Services\User\ProfileService;
 use Illuminate\Http\Request;
