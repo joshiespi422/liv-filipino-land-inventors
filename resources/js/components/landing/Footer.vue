@@ -45,7 +45,7 @@ const currentYear = computed(() => new Date().getFullYear());
             
         </div>
 
-        <div class="w-full text-[#033E94] bg-white text-xs md:text-sm py-4 border-t border-gray-300 flex flex-col md:flex-row justify-between items-center gap-3 text-center px-6 md:px-12">
+        <div class="w-full text-[#033E94] dark:text-white bg-white dark:bg-[#192842] text-xs md:text-sm py-4 border-t border-gray-300 flex flex-col md:flex-row justify-between items-center gap-3 text-center px-6 md:px-12">
             <div class="leading-relaxed">
                 © {{ currentYear }} 
                 <a href="/" class="hover:underline font-semibold">FILIPINO INVENTORS SOCIETY MULTI-PURPOSE COOPERATIVE</a>. 
