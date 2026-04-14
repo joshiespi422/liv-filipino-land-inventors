@@ -20,6 +20,8 @@ Route::middleware([
         ->name('dashboard.index');
     Route::get('/dashboard/users/{user}', [DashboardController::class, 'show'])
         ->name('dashboard.users.show');
+    Route::patch('/dashboard/users/{user}/status', [DashboardController::class, 'updateStatus'])
+        ->name('dashboard.users.update-status');
 
     // Business Training Domain
     Route::middleware(['service_access:business-training'])->group(function () {

@@ -39,4 +39,24 @@ class DashboardController extends Controller
 
         return PendingUserDetailResource::make($user);
     }
+
+    public function updateStatus(User $user, Request $request)
+    {
+        $action = $request->input('action');
+
+        if ($action === 'approve') {
+            $user->update([
+                'user_type_id' => UserType::MEMBER,
+                'status_id' => Status::ACTIVE,
+            ]);
+        }
+
+        if ($action === 'decline') {
+            $user->update([
+                'status_id' => Status::ACTIVE,
+            ]);
+        }
+
+        return back();
+    }
 }

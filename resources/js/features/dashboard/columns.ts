@@ -20,8 +20,12 @@ const STATUS_STYLES: Record<string, string> = {
 
 export const getPendingUserColumns = ({
   showUserDetails,
+  approveUser,
+  declineUser,
 }: {
   showUserDetails: (userId: number) => void;
+  approveUser: (userId: number) => void;
+  declineUser: (userId: number) => void;
 }): ColumnDef<PendingUser>[] => [
   {
     accessorKey: 'name',
@@ -104,6 +108,27 @@ export const getPendingUserColumns = ({
               },
               () => 'View User Details',
             ),
+            user.status_name === 'pending_for_member'
+              ? [
+                  h(DropdownMenuSeparator),
+                  h(
+                    DropdownMenuItem,
+                    {
+                      class: 'cursor-pointer text-blue-500 focus:text-blue-600',
+                      onClick: () => approveUser(user.id),
+                    },
+                    () => 'Approve User',
+                  ),
+                  h(
+                    DropdownMenuItem,
+                    {
+                      class: 'cursor-pointer text-rose-500 focus:text-rose-600',
+                      onClick: () => declineUser(user.id),
+                    },
+                    () => 'Decline User',
+                  ),
+                ]
+              : null,
           ]),
         ]),
       ]);

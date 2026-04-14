@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { Head, router, useHttp } from '@inertiajs/vue3';
+import { Head, router, useHttp, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import dashboard from '@/routes/dashboard';
 import DataTable from '@/components/DataTable.vue';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { getPendingUserColumns } from '@/features/dashboard/columns';
 import type { PendingUser, PendingUserDetail, ApiResponse } from '@/types';
+import { toast } from 'vue-sonner';
 
 defineOptions({
   layout: {
@@ -31,7 +33,7 @@ const props = defineProps<{
   };
 }>();
 
-// state
+// state for details
 const selectedUser = ref<PendingUserDetail | null>(null);
 const isDetailsOpen = ref(false);
 // inertia http
@@ -53,8 +55,44 @@ const showUserDetails = async (id: number) => {
   }
 };
 
+// state for manage
+const isConfirmOpen = ref(false);
+const selectedUserId = ref<number | null>(null);
+const actionType = ref<'approve' | 'decline' | null>(null);
+
+const form = useForm({
+  action: '' as 'approve' | 'decline',
+});
+
+const openConfirm = (id: number, action: 'approve' | 'decline') => {
+  selectedUserId.value = id;
+  actionType.value = action;
+  isConfirmOpen.value = true;
+};
+
+const approveUser = (id: number) => openConfirm(id, 'approve');
+const declineUser = (id: number) => openConfirm(id, 'decline');
+
+const handleUserAction = () => {
+  if (!selectedUserId.value || !actionType.value) return;
+
+  form.action = actionType.value;
+
+  form.patch(dashboard.users.updateStatus.url(selectedUserId.value), {
+    preserveScroll: true,
+
+    onSuccess: () => {
+      isConfirmOpen.value = false;
+      form.reset();
+      toast.success(`User has been ${actionType.value}d successfully!`);
+    },
+  });
+};
+
 const columns = getPendingUserColumns({
   showUserDetails,
+  approveUser,
+  declineUser,
 });
 
 const userDetails = computed(() => {
@@ -170,6 +208,36 @@ const userDetails = computed(() => {
           </div>
         </div>
       </DialogDescription>
+    </DialogContent>
+  </Dialog>
+
+  <Dialog v-model:open="isConfirmOpen">
+    <DialogContent class="max-w-md">
+      <DialogHeader>
+        <DialogTitle>
+          {{ actionType === 'approve' ? 'Approve User' : 'Decline User' }}
+        </DialogTitle>
+        <DialogDescription>
+          Are you sure you want to
+          <span class="font-semibold">
+            {{ actionType }}
+          </span>
+          this user?
+        </DialogDescription>
+      </DialogHeader>
+
+      <div class="mt-4 flex justify-end gap-2">
+        <Button variant="outline" @click="isConfirmOpen = false">
+          Cancel
+        </Button>
+
+        <Button
+          :variant="actionType === 'approve' ? 'default' : 'destructive'"
+          @click="handleUserAction"
+        >
+          Confirm
+        </Button>
+      </div>
     </DialogContent>
   </Dialog>
 </template>
