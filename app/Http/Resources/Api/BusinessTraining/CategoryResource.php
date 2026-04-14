@@ -32,7 +32,11 @@ class CategoryResource extends JsonApiResource
             'name' => $this->name,
             'slug' => $this->slug,
             'description' => $this->description,
-            'icon' => $this->whenLoaded('type', fn() => $this->type->icon),
+            'icon' => $this->whenLoaded('type', function () {
+                return $this->type->icon
+                    ? asset('storage/' . $this->type->icon)
+                    : null;
+            }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
