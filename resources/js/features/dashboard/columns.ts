@@ -2,14 +2,27 @@ import { h } from 'vue';
 import type { ColumnDef } from '@tanstack/vue-table';
 import type { PendingUser } from '@/types';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { MoreHorizontal } from 'lucide-vue-next';
 
 const STATUS_STYLES: Record<string, string> = {
   pending_for_member: 'bg-amber-500 hover:bg-amber-600',
   active: 'bg-blue-500 hover:bg-blue-600',
-  rejected: 'bg-rose-500 hover:bg-rose-600',
 };
 
-export const pendingUserColumns: ColumnDef<PendingUser>[] = [
+export const getPendingUserColumns = ({
+  showUserDetails,
+}: {
+  showUserDetails: (userId: number) => void;
+}): ColumnDef<PendingUser>[] => [
   {
     accessorKey: 'name',
     header: 'Name',
@@ -61,6 +74,38 @@ export const pendingUserColumns: ColumnDef<PendingUser>[] = [
           { class: [badgeClass, 'text-white pb-1'] },
           () => formattedStatus || '-',
         ),
+      ]);
+    },
+  },
+  {
+    id: 'actions',
+    header: () => h('div', { class: 'text-center' }, 'Actions'),
+    cell: ({ row }) => {
+      const user = row.original;
+
+      return h('div', { class: 'relative text-center' }, [
+        h(DropdownMenu, null, () => [
+          h(
+            DropdownMenuTrigger,
+            { asChild: true, class: 'cursor-pointer' },
+            () =>
+              h(Button, { variant: 'ghost', class: 'h-8 w-8 p-0' }, () => [
+                h('span', { class: 'sr-only' }, 'Open menu'),
+                h(MoreHorizontal, { class: 'h-4 w-4' }),
+              ]),
+          ),
+          h(DropdownMenuContent, { align: 'end', class: 'border-2' }, () => [
+            h(DropdownMenuLabel, { class: 'text-gray-500' }, () => 'Actions'),
+            h(
+              DropdownMenuItem,
+              {
+                class: 'cursor-pointer',
+                onClick: () => showUserDetails(user.id),
+              },
+              () => 'View User Details',
+            ),
+          ]),
+        ]),
       ]);
     },
   },

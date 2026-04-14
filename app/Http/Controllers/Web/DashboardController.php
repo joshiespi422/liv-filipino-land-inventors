@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\UserType;
 use App\Models\Status;
 use App\Http\Resources\PendingUserResource;
+use App\Http\Resources\PendingUserDetailResource;
 use Inertia\Response;
 use Inertia\Inertia;
 
@@ -27,5 +28,15 @@ class DashboardController extends Controller
         return Inertia::render('dashboard/Index', [
             'pendingUsers' => PendingUserResource::collection($users),
         ]);
+    }
+
+    public function show(User $user)
+    {
+        $user->load([
+            'status:id,name',
+            'userType:id,name',
+        ]);
+
+        return PendingUserDetailResource::make($user);
     }
 }

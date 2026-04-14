@@ -16,7 +16,10 @@ Route::middleware([
     'auth', 
     'role:' . UserType::SUPER_ADMIN . ',' . UserType::ADMIN
 ])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard.index');
+    Route::get('/dashboard/users/{user}', [DashboardController::class, 'show'])
+        ->name('dashboard.users.show');
 
     // Business Training Domain
     Route::middleware(['service_access:business-training'])->group(function () {
