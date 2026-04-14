@@ -2,12 +2,14 @@
 
 namespace App\Http\Requests\User;
 
+use App\Concerns\PasswordValidationRules;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
 class ChangePasswordRequest extends FormRequest
 {
+    use PasswordValidationRules;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -24,9 +26,8 @@ class ChangePasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'current_password' => ['required', 'string'],
-            'new_password' => ['required', 'confirmed', Password::min(8)],
-            'new_password_confirmation' => ['required', 'string'],
+            'current_password' => $this->currentPasswordRules(),
+            'new_password' => $this->passwordRules(),
         ];
     }
 }

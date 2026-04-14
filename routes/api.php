@@ -24,9 +24,6 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
 
     // Business Training Routes
