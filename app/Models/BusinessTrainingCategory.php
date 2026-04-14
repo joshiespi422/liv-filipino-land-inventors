@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class BusinessTrainingCategory extends Model
 {
     protected $fillable = [
-        'business_training_type_id', 
-        'name', 
-        'slug', 
+        'business_training_type_id',
+        'name',
+        'slug',
         'description'
     ];
 
@@ -34,8 +34,8 @@ class BusinessTrainingCategory extends Model
     /**
      * Relationship: Category has many Training Modules
      */
-    public function trainings(): HasMany
-    {
-        return $this->hasMany(BusinessTraining::class);
-    }
+  public function trainings(): HasMany
+{
+    return $this->hasMany(BusinessTraining::class);
+}
 }

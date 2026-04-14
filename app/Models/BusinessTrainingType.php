@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class BusinessTrainingType extends Model
 {
     protected $fillable = [
-        'name', 
+        'name',
         'slug'
     ];
 

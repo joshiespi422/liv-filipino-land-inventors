@@ -127,9 +127,14 @@ class RegistrationService
         }
 
         return DB::transaction(function () use ($pending, $password): array {
+            $formattedPhone = $pending->phone;
+            if (str_starts_with($formattedPhone, '63')) {
+                $formattedPhone = '0' . substr($formattedPhone, 2);
+            }
+
             $user = User::create([
                 'name' => $pending->name,
-                'phone' => $pending->phone,
+                'phone' => $formattedPhone,
                 'phone_verified_at' => now(),
             ]);
 

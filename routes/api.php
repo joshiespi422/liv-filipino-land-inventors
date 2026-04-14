@@ -31,7 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Business Training Routes
     Route::prefix('business-training')
-        ->middleware('role.api:' . UserType::MEMBER)
+        ->middleware('role.api:' . UserType::BASIC)
         ->group(function () {
             // Types
             Route::get('types', [TypeController::class, 'index']);
