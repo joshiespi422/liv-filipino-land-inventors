@@ -209,8 +209,8 @@ const submitForm = () => {
             </div>
         </div>
         
-        <div class="bg-[#fdfdfd] flex items-center justify-center text-center py-8 px-4 md:px-8">
-            <p class="text-base md:text-lg lg:text-xl text-gray-800 max-w-5xl leading-relaxed">
+        <div class="bg-[#fdfdfd] dark:bg-[#192842] flex items-center justify-center text-center py-8 px-4 md:px-8">
+            <p class="text-base md:text-lg lg:text-xl text-gray-800 dark:text-white max-w-5xl leading-relaxed">
                 Feel free to visit our office hours during business days, or reach out by phone or email anytime for more information about membership, programs, or how to present your invention to the cooperative.
             </p>
         </div>
