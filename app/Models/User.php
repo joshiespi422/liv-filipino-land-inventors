@@ -20,23 +20,33 @@ use Laravel\Sanctum\HasApiTokens;
     'email',
     'password',
     'user_type_id',
-    'is_active',
+    'status_id',
     'phone',
     'phone_verified_at',
     'gender',
+    'birthdate',
     'region',
     'province',
     'city',
     'barangay',
     'street',
     'postal_code',
+    'avatar',
+    'valid_id_type',
+    'valid_id_number',
+    'front_valid_id_picture',
+    'back_valid_id_picture',
+    'is_active',
 ])]
 
 #[Hidden([
     'password',
+    'remember_token',
     'two_factor_secret',
     'two_factor_recovery_codes',
-    'remember_token',
+    'valid_id_number',
+    'front_valid_id_picture',
+    'back_valid_id_picture',
 ])]
 class User extends Authenticatable
 {
@@ -56,6 +66,9 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'phone_verified_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
+
+            'birthdate' => 'date',
+
             'is_active' => 'boolean',
             'password' => 'hashed',
         ];
