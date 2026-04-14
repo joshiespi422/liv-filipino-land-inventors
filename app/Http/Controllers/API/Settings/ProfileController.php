@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\ChangePasswordRequest;
+use App\Http\Requests\User\UpdateAvatarRequest;
 use App\Http\Requests\User\UpdateProfileRequest;
 use App\Http\Resources\Api\User\ProfileResource;
 use App\Services\User\ProfileService;
@@ -198,21 +199,18 @@ class ProfileController extends Controller
      *   }
      * }
      */
-    public function updateAvatar(Request $request): JsonResponse
+    public function updateAvatar(UpdateAvatarRequest $request): JsonResponse
     {
-        $request->validate([
-            'avatar' => 'required|image|max:2048',
-        ]);
-
-        $path = $request->file('avatar')->store('avatars', 'public');
-
-        $request->user()->update(['avatar' => $path]);
+        $url = $this->profileService->updateAvatar(
+            $request->user(),
+            $request->file('avatar'),
+        );
 
         return response()->json([
             'success' => true,
             'message' => 'Avatar updated.',
             'data' => [
-                'avatar' => asset('storage/' . $path),
+                'avatar' => $url,
             ],
         ]);
     }

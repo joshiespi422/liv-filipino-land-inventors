@@ -6,6 +6,7 @@ use App\Http\Requests\User\UpdateProfileRequest;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileService
 {
@@ -46,5 +47,19 @@ class ProfileService
         // $user->tokens()->delete();
 
         return true;
+    }
+
+    // Update Avatar logic
+    public function updateAvatar(User $user, UploadedFile $avatar): string
+    {
+        if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        $path = $avatar->store('avatars', 'public');
+
+        $user->update(['avatar' => $path]);
+
+        return asset('storage/' . $path);
     }
 }
