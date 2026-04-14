@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class BusinessTraining extends Model
 {
     protected $fillable = [
-        'business_training_categories_id', 
-        'module', 
+        'business_training_category_id',
+        'module',
         'content'
     ];
 

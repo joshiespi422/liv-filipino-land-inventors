@@ -5,6 +5,7 @@ use App\Http\Controllers\API\Auth\RegisteredUserController;
 use App\Http\Controllers\API\BusinessTraining\CategoryController;
 use App\Http\Controllers\API\BusinessTraining\TrainingController;
 use App\Http\Controllers\API\BusinessTraining\TypeController;
+use App\Http\Controllers\API\Settings\ProfileController;
 use App\Http\Controllers\API\Verification\PhoneVerificationController;
 use App\Models\UserType;
 use Illuminate\Http\Request;
@@ -23,13 +24,11 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
 
+    // Business Training Routes
     Route::prefix('business-training')
-        ->middleware('role.api:' . UserType::MEMBER)
+        ->middleware('role.api:' . UserType::BASIC)
         ->group(function () {
             // Types
             Route::get('types', [TypeController::class, 'index']);
@@ -43,5 +42,14 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('categories/{category}/trainings', [TrainingController::class, 'index']);
             Route::get('categories/{category}/trainings/{module}', [TrainingController::class, 'show'])
                 ->whereNumber('module');
+        });
+
+    // Profile Routes
+    Route::prefix('profile')
+        ->group(function () {
+            Route::get('/', [ProfileController::class, 'show']);
+            Route::post('update', [ProfileController::class, 'update']);
+            Route::patch('change-password', [ProfileController::class, 'changePassword']);
+            Route::post('avatar', [ProfileController::class, 'updateAvatar']);
         });
 });

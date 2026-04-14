@@ -25,4 +25,20 @@ class CategoryResource extends JsonApiResource
         'type' => TypeResource::class,
         'trainings' => TrainingResource::class,
     ];
+
+    public function toAttributes(Request $request): array
+    {
+        return [
+            'name' => $this->name,
+            'slug' => $this->slug,
+            'description' => $this->description,
+            'icon' => $this->whenLoaded('type', function () {
+                return $this->type->icon
+                    ? asset('storage/' . $this->type->icon)
+                    : null;
+            }),
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ];
+    }
 }
