@@ -68,22 +68,53 @@ class ProfileController extends Controller
      *
      * @tags Settings > Profile
      *
-     * @bodyParam first_name string required User's first name. Example: Juan
-     * @bodyParam last_name string required User's last name. Example: dela Cruz
+     * @bodyParam name string required Full name of the user. Example: Juan dela Cruz
      * @bodyParam phone string optional Contact phone number. Example: +639171234567
-     * @bodyParam address string optional Residential address. Example: 123 Rizal St, Manila
-     * @bodyParam bio string optional Short bio or description. Example: Licensed real estate broker.
-     * @bodyParam id_document file optional Government-issued ID image (jpg/png/pdf). Max: 2MB.
+     * @bodyParam email string optional Email address. Example: juan@example.com
+     * @bodyParam gender string optional Gender of the user. Example: male
+     * @bodyParam birthdate string optional Date of birth (YYYY-MM-DD). Example: 1990-01-15
+     * @bodyParam region string optional Region. Example: NCR
+     * @bodyParam province string optional Province. Example: Metro Manila
+     * @bodyParam city string optional City or municipality. Example: Quezon City
+     * @bodyParam barangay string optional Barangay. Example: Bagong Silangan
+     * @bodyParam street string optional Street address. Example: 123 Rizal St.
+     * @bodyParam postal_code string optional Postal code. Example: 1110
+     * @bodyParam avatar file optional Profile avatar image (jpg/png). Max: 2MB.
+     * @bodyParam valid_id_type string optional Type of government-issued ID. Example: passport
+     * @bodyParam valid_id_number string optional ID number. Example: P1234567A
+     * @bodyParam front_valid_id_picture file optional Front side of the ID image (jpg/png). Max: 2MB.
+     * @bodyParam back_valid_id_picture file optional Back side of the ID image (jpg/png). Max: 2MB.
      *
-     * @response 200 {
+     * @response scenario="success" {
      *   "success": true,
      *   "message": "Your account details have been completed. Please wait 2-3 days for approval. Updates will be sent to your email.",
-     *   "data": {}
+     *   "data": {
+     *     "id": 1,
+     *     "name": "Juan dela Cruz",
+     *     "phone": "+639171234567",
+     *     "email": "juan@example.com",
+     *     "gender": "male",
+     *     "birthdate": "1990-01-15",
+     *     "region": "NCR",
+     *     "province": "Metro Manila",
+     *     "city": "Quezon City",
+     *     "barangay": "Bagong Silangan",
+     *     "street": "123 Rizal St.",
+     *     "postal_code": "1110",
+     *     "avatar": "https://example.com/storage/avatars/abc.jpg",
+     *     "valid_id_type": "passport",
+     *     "valid_id_number": "P1234567A",
+     *     "front_valid_id_picture": "https://example.com/storage/valid-ids/front.jpg",
+     *     "back_valid_id_picture": "https://example.com/storage/valid-ids/back.jpg",
+     *     "is_verified": true,
+     *     "status": { "id": 1, "name": "Pending" },
+     *     "user_type": { "id": 2, "name": "Agent" }
+     *   }
      * }
      * @response 422 {
      *   "message": "The given data was invalid.",
      *   "errors": {
-     *     "first_name": ["The first name field is required."]
+     *     "name": ["The name field is required."]
      *   }
      * }
      */
