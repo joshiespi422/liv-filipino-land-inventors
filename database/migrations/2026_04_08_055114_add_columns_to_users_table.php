@@ -16,7 +16,8 @@ return new class extends Migration {
             $table->string('phone', 20)->unique()->nullable()->after('email_verified_at');
             $table->timestamp('phone_verified_at')->nullable()->after('phone');
             $table->enum('gender', ['Male', 'Female', 'Other', 'Prefer not to say'])->nullable()->after('phone_verified_at');
-            $table->string('region')->nullable()->after('gender');
+            $table->date('birthdate')->nullable()->after('gender');
+            $table->string('region')->nullable()->after('birthdate');
             $table->string('province')->nullable()->after('region');
             $table->string('city')->nullable()->after('province');
             $table->string('barangay')->nullable()->after('city');

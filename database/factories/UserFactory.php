@@ -39,6 +39,7 @@ class UserFactory extends Factory
             'phone' => fake()->unique()->phoneNumber(),
             'phone_verified_at' => now(),
             'gender' => fake()->randomElement(['Male', 'Female', 'Other', 'Prefer not to say']),
+            'birthdate' => fake()->dateTimeBetween('-17 years', 'now')->format('Y-m-d'),
             'region' => fake()->state(),
             'province' => fake()->city(),
             'city' => fake()->city(),
