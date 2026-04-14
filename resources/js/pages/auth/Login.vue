@@ -73,7 +73,8 @@ defineProps<{
                                 :tabindex="1"
                                 autocomplete="email"
                                 placeholder="Enter email or mobile number"
-                                class="w-full px-4 py-3 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-[#033e94] transition-all outline-none bg-white text-gray-800"
+                                class="w-full px-4 py-3 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-1 focus:ring-blue-100 focus:border-[#033e94] transition-all outline-none bg-white text-gray-800 
+                                    dark:bg-gray-200 dark:text-gray-800 dark:placeholder-gray-400 dark:focus:ring-[#033e94]"
                             />
                             <InputError :message="errors.email" class="mt-1" />
                         </div>
@@ -89,13 +90,14 @@ defineProps<{
                                 :tabindex="2"
                                 autocomplete="current-password"
                                 placeholder="••••••••"
-                                class="w-full px-4 py-3 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-[#033e94] transition-all outline-none bg-white text-gray-800"
+                                class="w-full px-4 py-3 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-[#033e94] transition-all outline-none bg-white text-gray-800
+                                dark:bg-gray-200 dark:text-gray-800 dark:placeholder-gray-400 dark:focus:ring-[#033e94]"
                             />
                             <InputError :message="errors.password" class="mt-1" />
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-between gap-4 mt-5 mb-8">
+                    <div class="flex items-center justify-between gap-4 mt-2 mb-4">
                         <Label for="remember" class="flex items-center text-sm text-gray-700 font-medium cursor-pointer space-x-2 select-none">
                             <Checkbox 
                                 id="remember" 
@@ -109,7 +111,7 @@ defineProps<{
                         <TextLink
                             v-if="canResetPassword"
                             :href="request()"
-                            class="text-sm font-bold text-[#033e94] hover:text-blue-700 transition-colors"
+                            class="text-sm font-bold text-[#033e94] dark:text-gray-700 hover:text-blue-700 transition-colors"
                             :tabindex="5"
                         >
                             Forgot password?
@@ -129,7 +131,7 @@ defineProps<{
                     </Button>
                 </Form> 
                 
-                <div class="mt-6 pt-6 border-t border-gray-100">
+                <div class="mt-3 pt-3 border-t border-gray-100">
                     <a href="/" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center text-sm sm:text-base">
                         Cancel
                     </a>
