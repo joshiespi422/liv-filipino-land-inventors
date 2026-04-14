@@ -38,6 +38,9 @@ Route::middleware([
         Route::get('/loan-assistance', [LoanAssistanceController::class, 'index'])
             ->name('loan-assistance.index');
 
+        Route::patch('/loan-assistance/{loan}/status', [LoanAssistanceController::class, 'updateStatus'])
+            ->name('loan-assistance.update-status');
+
         Route::get('/loan-assistance/{loan}/schedule', [LoanScheduleController::class, 'index'])
             ->name('loan-assistance.schedule.index');
     });

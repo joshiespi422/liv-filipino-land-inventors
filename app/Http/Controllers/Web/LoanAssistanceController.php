@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\UserType;
 use App\Models\LoanSetting;
 use App\Models\Loan;
+use App\Models\Status;
 use App\Http\Resources\LoanAssistanceResource;
 use Inertia\Inertia;
 
@@ -61,15 +62,27 @@ class LoanAssistanceController extends Controller
         return $query;
     }
 
-    public function store(Request $request)
+    public function updateStatus(Loan $loan, Request $request)
     {
-        if (! $this->canMutate()) {
+        if (!$this->canMutate()) {
             abort(403, 'Unauthorized action.');
         }
 
-        // ... validation and creation logic ...
+        $action = $request->input('action');
 
-        return redirect()->route('business-trainings.index');
+        if ($action === 'approve') {
+            $loan->update([
+                'status_id' => Status::ACTIVE,
+            ]);
+        }
+
+        if ($action === 'decline') {
+            $loan->update([
+                'status_id' => Status::REJECTED,
+            ]);
+        }
+
+        return back();
     }
 
 }

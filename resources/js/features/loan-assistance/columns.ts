@@ -27,9 +27,11 @@ const STATUS_STYLES: Record<string, string> = {
 export const getAssistanceColumns = ({
   navigateToSchedule,
   approveLoan,
+  declineLoan,
 }: {
   navigateToSchedule: (id: number) => void;
   approveLoan: (id: number) => void;
+  declineLoan: (id: number) => void;
 }): ColumnDef<LoanAssistance>[] => [
   {
     accessorKey: 'user_name',
@@ -121,6 +123,14 @@ export const getAssistanceColumns = ({
                       onClick: () => approveLoan(loan.id),
                     },
                     () => 'Approve Loan',
+                  ),
+                  h(
+                    DropdownMenuItem,
+                    {
+                      class: 'cursor-pointer text-rose-500 focus:text-rose-600',
+                      onClick: () => declineLoan(loan.id),
+                    },
+                    () => 'Decline Loan',
                   ),
                 ]
               : null,

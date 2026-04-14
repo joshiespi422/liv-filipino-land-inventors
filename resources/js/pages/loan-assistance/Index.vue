@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -8,6 +9,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import loanAssistance from '@/routes/loan-assistance';
 import loanSchedule from '@/routes/loan-assistance/schedule';
 import { CreditCard, Calendar, Percent } from 'lucide-vue-next';
@@ -16,6 +24,7 @@ import { computed, ref, watch } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
 import { getAssistanceColumns } from '@/features/loan-assistance/columns';
 import type { GlobalSetting, LoanAssistance, LoanStatus } from '@/types';
+import { toast } from 'vue-sonner';
 
 defineOptions({
   layout: {
@@ -84,15 +93,47 @@ const updateFilters = () => {
 const debouncedUpdate = useDebounceFn(updateFilters, 300);
 watch([selectedStatus], debouncedUpdate);
 
+const form = useForm({
+  action: '' as 'approve' | 'decline',
+});
+
+const isConfirmOpen = ref(false);
+const selectedLoanId = ref<number | null>(null);
+const actionType = ref<'approve' | 'decline' | null>(null);
+
+const openConfirm = (id: number, action: 'approve' | 'decline') => {
+  selectedLoanId.value = id;
+  actionType.value = action;
+  isConfirmOpen.value = true;
+};
+
+const approveLoan = (id: number) => openConfirm(id, 'approve');
+const declineLoan = (id: number) => openConfirm(id, 'decline');
+
+const handleLoanAction = () => {
+  if (!selectedLoanId.value || !actionType.value) return;
+
+  form.action = actionType.value;
+
+  form.patch(loanAssistance.updateStatus.url(selectedLoanId.value), {
+    preserveScroll: true,
+
+    onSuccess: () => {
+      isConfirmOpen.value = false;
+      form.reset();
+      toast.success(`Loan has been ${actionType.value}d successfully!`);
+    },
+  });
+};
+
 const navigateToSchedule = (loanId: number) => {
   router.visit(loanSchedule.index(loanId));
 };
 
 const columns = getAssistanceColumns({
   navigateToSchedule,
-  approveLoan: (id: number) => {
-    console.log('Approve loan', id);
-  },
+  approveLoan,
+  declineLoan,
 });
 </script>
 
@@ -165,5 +206,36 @@ const columns = getAssistanceColumns({
       :data="loans.data"
       search-placeholder="Search borrowers or status..."
     />
+
+    <Dialog v-model:open="isConfirmOpen">
+      <DialogContent class="max-w-md">
+        <DialogHeader>
+          <DialogTitle>
+            {{ actionType === 'approve' ? 'Approve Loan' : 'Decline Loan' }}
+          </DialogTitle>
+          <DialogDescription>
+            Are you sure you want to
+            <span class="font-semibold">
+              {{ actionType }}
+            </span>
+            this loan?
+          </DialogDescription>
+        </DialogHeader>
+
+        <div class="mt-4 flex justify-end gap-2">
+          <Button variant="outline" @click="isConfirmOpen = false">
+            Cancel
+          </Button>
+
+          <Button
+            :variant="actionType === 'approve' ? 'default' : 'destructive'"
+            :disabled="form.processing"
+            @click="handleLoanAction"
+          >
+            {{ form.processing ? 'Processing...' : 'Confirm' }}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
