@@ -5,6 +5,7 @@ use App\Http\Controllers\API\Auth\RegisteredUserController;
 use App\Http\Controllers\API\BusinessTraining\CategoryController;
 use App\Http\Controllers\API\BusinessTraining\TrainingController;
 use App\Http\Controllers\API\BusinessTraining\TypeController;
+use App\Http\Controllers\API\Loan\LoanController;
 use App\Http\Controllers\API\Settings\ProfileController;
 use App\Http\Controllers\API\Verification\PhoneVerificationController;
 use App\Models\UserType;
@@ -52,4 +53,16 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::patch('change-password', [ProfileController::class, 'changePassword']);
             Route::post('avatar', [ProfileController::class, 'updateAvatar']);
         });
+
+    // Loan Routes
+    Route::prefix('loans')->group(function () {
+        Route::get('/', [LoanController::class, 'index']);
+        Route::post('/', [LoanController::class, 'store']);
+
+        Route::get('loanable-amount', [LoanController::class, 'getLoanableAmount']);
+        Route::get('compute', [LoanController::class, 'compute']);
+
+        Route::get('{loan}', [LoanController::class, 'show']);
+        Route::post('{loan}/pay', [LoanController::class, 'pay']);
+    });
 });

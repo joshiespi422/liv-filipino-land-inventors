@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\Loan\LoanLimitExceededException;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -116,6 +117,16 @@ return Application::configure(basePath: dirname(__DIR__))
                     'errors' => $e->errors(),
                 ], 422);
             }
+        });
+
+        $exceptions->render(function (LoanLimitExceededException $e, $request) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Loan amount exceeds your loanable limit.',
+                'data' => [
+                    'loanable_amount' => $e->limit,
+                ],
+            ], 422);
         });
 
     })->create();
