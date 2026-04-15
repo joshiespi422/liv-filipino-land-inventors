@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api\User;
 
+use App\Http\Resources\Api\ApiStatusResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\JsonApi\JsonApiResource;
 
@@ -29,8 +30,8 @@ class ProfileResource extends JsonApiResource
      * The resource's relationships.
      */
     public $relationships = [
-        'status' => StatusResource::class,
-        'userType' => UserTypeResource::class,
+        'status' => ApiStatusResource::class,
+        'userType' => ApiUserResource::class,
     ];
 
     public function toAttributes(Request $request): array
