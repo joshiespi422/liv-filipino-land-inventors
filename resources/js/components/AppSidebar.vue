@@ -34,7 +34,7 @@ const serviceNavItems = computed(() => {
   return page.props.auth.managed_services.map(
     (service: Service): NavItem => ({
       title: service.name,
-      href: service.slug,
+      href: `/${service.slug}`,
       icon: Box,
     }),
   );
