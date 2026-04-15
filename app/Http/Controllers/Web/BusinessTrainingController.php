@@ -66,8 +66,10 @@ class BusinessTrainingController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        // ... validation and creation logic ...
+        $request->validate([
+            ...
+        ]);
 
-        return redirect()->route('business-trainings.index');
+        back();
     }
 }

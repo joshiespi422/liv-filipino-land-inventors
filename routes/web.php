@@ -27,6 +27,8 @@ Route::middleware([
     Route::middleware(['service_access:business-training'])->group(function () {
         Route::get('/business-training', [BusinessTrainingController::class, 'index'])
             ->name('business-training.index');
+        Route::post('/business-training', [BusinessTrainingController::class, 'store'])
+            ->name('business-training.store');
         Route::get('/business-training/type/{slug}', [BusinessTrainingController::class, 'showType'])
             ->name('business-training.type.show');
         Route::get('/business-training/categories/{slug}/modules', [BusinessTrainingController::class, 'getCategoryModules'])

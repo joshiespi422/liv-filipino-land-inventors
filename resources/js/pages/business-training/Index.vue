@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { businessTrainingTypeFields } from '@/features/business-training/fields';
+import FormDialog from '@/components/FormDialog.vue';
 import businessTraining from '@/routes/business-training';
+import { toast } from 'vue-sonner';
 
 defineOptions({
   layout: {
@@ -18,6 +22,18 @@ defineProps<{
   types: Array<{ id: number; name: string; slug: string; icon: string | null }>;
   can_mutate: boolean;
 }>();
+
+// state
+const isFormOpen = ref(false);
+
+const handleCreateType = (data: any) => {
+  router.post(businessTraining.store(), data, {
+    onSuccess: () => {
+      isFormOpen.value = false;
+      toast.success('Training type created successfully!');
+    },
+  });
+};
 
 const navigateToType = (slug: string) => {
   router.visit(businessTraining.type.show(slug));
@@ -51,6 +67,25 @@ const navigateToType = (slug: string) => {
           </div>
         </CardContent>
       </Card>
+      <Card
+        v-if="can_mutate"
+        class="flex cursor-pointer items-center justify-center border-dashed hover:border-primary hover:shadow-md"
+        @click="isFormOpen = true"
+      >
+        <CardContent class="flex flex-col items-center justify-center">
+          <div class="text-3xl font-bold">+</div>
+          <p class="mt-2 text-sm text-muted-foreground">Add Type</p>
+        </CardContent>
+      </Card>
     </div>
+
+    <FormDialog
+      v-model:open="isFormOpen"
+      title="Create Training Type"
+      description="Add a new training type."
+      :fields="businessTrainingTypeFields"
+      show-default
+      @submit="handleCreateType"
+    />
   </div>
 </template>
