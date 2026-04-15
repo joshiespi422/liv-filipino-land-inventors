@@ -29,7 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Business Training Routes
     Route::prefix('business-training')
-        ->middleware('role.api:' . UserType::BASIC)
+        ->middleware('role.api:' . UserType::MEMBER)
         ->group(function () {
             // Types
             Route::get('types', [TypeController::class, 'index']);
@@ -47,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Profile Routes
     Route::prefix('profile')
+        ->middleware('role.api:' . UserType::BASIC)
         ->group(function () {
             Route::get('/', [ProfileController::class, 'show']);
             Route::post('update', [ProfileController::class, 'update']);
@@ -55,14 +56,16 @@ Route::middleware('auth:sanctum')->group(function () {
         });
 
     // Loan Routes
-    Route::prefix('loans')->group(function () {
-        Route::get('/', [LoanController::class, 'index']);
-        Route::post('/', [LoanController::class, 'store']);
+    Route::prefix('loans')
+        ->middleware('role.api:' . UserType::MEMBER)
+        ->group(function () {
+            Route::get('/', [LoanController::class, 'index']);
+            Route::post('/', [LoanController::class, 'store']);
 
-        Route::get('loanable-amount', [LoanController::class, 'getLoanableAmount']);
-        Route::get('compute', [LoanController::class, 'compute']);
+            Route::get('loanable-amount', [LoanController::class, 'getLoanableAmount']);
+            Route::get('compute', [LoanController::class, 'compute']);
 
-        Route::get('{loan}', [LoanController::class, 'show']);
-        Route::post('{loan}/pay', [LoanController::class, 'pay']);
-    });
+            Route::get('{loan}', [LoanController::class, 'show']);
+            Route::post('{loan}/pay', [LoanController::class, 'pay']);
+        });
 });
