@@ -19,6 +19,11 @@ class Loan extends Model
         'monthly_principal',
     ];
 
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+    ];
+
     // one to many, loan has one user
     public function user(): BelongsTo
     {
