@@ -15,12 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('status_id')->constrained();
-            $table->decimal('amount', 10, 2);
+            $table->decimal('amount', 15, 2);
             $table->decimal('interest_rate', 5, 4);
             $table->integer('term_months');
             $table->date('start_date');
             $table->date('end_date');
-            $table->decimal('monthly_principal', 10, 2);
+            $table->decimal('monthly_principal', 15, 2);
             $table->timestamps();
         });
     }

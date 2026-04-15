@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('loan_schedule_id')->constrained()->cascadeOnDelete();
             $table->foreignId('payment_method_id')->constrained()->cascadeOnDelete();
             $table->date('date');
-            $table->decimal('amount', 10, 2);
+            $table->decimal('amount', 15, 2);
             $table->timestamps();
         });
     }

@@ -16,11 +16,11 @@ return new class extends Migration
             $table->foreignId('loan_id')->constrained()->cascadeOnDelete();
             $table->foreignId('status_id')->constrained();
             $table->integer('month_no');
-            $table->decimal('beginning_balance', 10, 2);
-            $table->decimal('interest_amount', 10, 2);
-            $table->decimal('principal_amount', 10, 2);
-            $table->decimal('total_payment', 10, 2);
-            $table->decimal('ending_balance', 10, 2);
+            $table->decimal('beginning_balance', 15, 2);
+            $table->decimal('interest_amount', 15, 2);
+            $table->decimal('principal_amount', 15, 2);
+            $table->decimal('total_payment', 15, 2);
+            $table->decimal('ending_balance', 15, 2);
             $table->date('due_date');
             $table->timestamps();
         });

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->nullable()->unique()->constrained()->cascadeOnDelete();
             $table->string('label')->nullable();
-            $table->decimal('default_amount', 10, 2);
+            $table->decimal('default_amount', 15, 2);
             $table->decimal('default_interest_rate', 5, 4);
             $table->tinyInteger('default_term_months');
             $table->timestamps();
