@@ -47,7 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Profile Routes
     Route::prefix('profile')
-        ->middleware('role.api:' . UserType::BASIC)
+        ->middleware('role.api:' . UserType::BASIC . ',' . UserType::MEMBER)
         ->group(function () {
             Route::get('/', [ProfileController::class, 'show']);
             Route::post('update', [ProfileController::class, 'update']);
