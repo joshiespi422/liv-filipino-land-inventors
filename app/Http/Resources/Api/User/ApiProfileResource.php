@@ -2,11 +2,11 @@
 
 namespace App\Http\Resources\Api\User;
 
-use App\Http\Resources\Api\ApiStatusResource;
 use Illuminate\Http\Request;
+use App\Http\Resources\Api\ApiStatusResource;
 use Illuminate\Http\Resources\JsonApi\JsonApiResource;
 
-class ProfileResource extends JsonApiResource
+class ApiProfileResource extends JsonApiResource
 {
     /**
      * The resource's attributes.

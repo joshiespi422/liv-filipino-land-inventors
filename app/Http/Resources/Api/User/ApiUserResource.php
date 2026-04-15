@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api\User;
 
+use App\Http\Resources\Api\ApiStatusResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\JsonApi\JsonApiResource;
 
@@ -69,7 +70,7 @@ class ApiUserResource extends JsonApiResource
      * The resource's relationships.
      */
     public $relationships = [
-        'status' => StatusResource::class,
+        'status' => ApiStatusResource::class,
         'userType' => ApiUserTypeResource::class,
     ];
 }
