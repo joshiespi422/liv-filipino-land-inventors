@@ -15,6 +15,10 @@ class LoanPayment extends Model
         'amount',
     ];
 
+    protected $casts = [
+        'payment_date' => 'date',
+    ];
+
     // one to many, payment has one loan
     public function loan(): BelongsTo
     {
