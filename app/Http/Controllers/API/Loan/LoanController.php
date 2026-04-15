@@ -66,7 +66,8 @@ class LoanController extends Controller
                     'loanable_amount' => number_format($amount, 2, '.', ''),
                     'settings' => $settings ? [
                         'default_amount' => number_format($settings->default_amount, 2, '.', ''),
-                        'default_interest_rate' => number_format($settings->default_interest_rate, 2, '.', '') . '% per month',
+                        // 'default_interest_rate' => number_format($settings->default_interest_rate, 2, '.', '') . '% per month',
+                        'default_interest_rate' => number_format($settings->default_interest_rate, 2, '.', ''),
                         'default_term_months' => $settings->default_term_months,
                     ] : null,
                 ],
