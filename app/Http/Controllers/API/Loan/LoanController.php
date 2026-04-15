@@ -58,11 +58,18 @@ class LoanController extends Controller
         $user = $request->user();
         $loans = $this->loanService->getUserLoans($user);
         $amount = $this->loanService->getLoanableAmount($user);
+        $settings = $user->getActiveLoanSetting();
 
         return ApiLoanResource::collection($loans)
             ->additional([
                 'meta' => [
                     'loanable_amount' => number_format($amount, 2, '.', ''),
+                    'settings' => $settings ? [
+                        'default_amount' => number_format($settings->default_amount, 2, '.', ''),
+                        // 'default_interest_rate' => number_format($settings->default_interest_rate, 2, '.', '') . '% per month',
+                        'default_interest_rate' => number_format($settings->default_interest_rate, 2, '.', ''),
+                        'default_term_months' => $settings->default_term_months,
+                    ] : null,
                 ],
             ])
             ->response();
