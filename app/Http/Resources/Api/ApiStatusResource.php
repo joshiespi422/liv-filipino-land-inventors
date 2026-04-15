@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources\Api\User;
+namespace App\Http\Resources\Api;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\JsonApi\JsonApiResource;
 
-class StatusResource extends JsonApiResource
+class ApiStatusResource extends JsonApiResource
 {
     /**
      * The resource's attributes.

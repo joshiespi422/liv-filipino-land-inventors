@@ -5,7 +5,7 @@ namespace App\Http\Resources\Api\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\JsonApi\JsonApiResource;
 
-class UserTypeResource extends JsonApiResource
+class ApiUserTypeResource extends JsonApiResource
 {
     /**
      * The resource's attributes.

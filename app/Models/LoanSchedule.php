@@ -20,6 +20,10 @@ class LoanSchedule extends Model
         'due_date',
     ];
 
+    protected $casts = [
+        'due_date' => 'date',
+    ];
+
     // one to many, schedule has one loan
     public function loan(): BelongsTo
     {

@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\ChangePasswordRequest;
 use App\Http\Requests\User\UpdateAvatarRequest;
 use App\Http\Requests\User\UpdateProfileRequest;
-use App\Http\Resources\Api\User\ProfileResource;
+use App\Http\Resources\Api\User\ApiProfileResource;
 use App\Services\User\ProfileService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -51,14 +51,14 @@ class ProfileController extends Controller
      *   }
      * }
      */
-    public function show(Request $request): ProfileResource
+    public function show(Request $request): ApiProfileResource
     {
         $user = $request->user()->load([
             'status',
             'userType',
         ]);
 
-        return new ProfileResource($user);
+        return new ApiProfileResource($user);
     }
 
     /**
@@ -129,7 +129,7 @@ class ProfileController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Your account details have been completed. Please wait 2-3 days for approval. Updates will be sent to your email.',
-            'data' => new ProfileResource($updatedUser),
+            'data' => new ApiProfileResource($updatedUser),
         ]);
     }
 

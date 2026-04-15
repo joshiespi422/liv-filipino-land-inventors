@@ -3,6 +3,7 @@
 namespace App\Services\User;
 
 use App\Http\Requests\User\UpdateProfileRequest;
+use App\Models\Status;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
@@ -29,6 +30,8 @@ class ProfileService
         $data['back_valid_id_picture'] = $this->storeIdPhoto(
             $request->file('back_valid_id_picture')
         );
+
+        $data['user_status_id'] = Status::PENDING_FOR_MEMBER;
 
         $user->update($data);
 

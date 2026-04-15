@@ -132,11 +132,20 @@ class User extends Authenticatable
     }
 
     // instance method to get active loan setting
+    // public function getActiveLoanSetting()
+    // {
+    //     return $this->loanSettings()
+    //         ->orWhereNull('user_id')
+    //         ->orderByRaw('user_id DESC')
+    //         ->first();
+    // }
     public function getActiveLoanSetting()
     {
-        return $this->loanSettings()
-            ->orWhereNull('user_id')
-            ->orderByRaw('user_id DESC')
+        return LoanSetting::where(function ($query) {
+            $query->where('user_id', $this->id)
+                ->orWhereNull('user_id');
+        })
+            ->orderByRaw('user_id IS NULL')
             ->first();
     }
 }
