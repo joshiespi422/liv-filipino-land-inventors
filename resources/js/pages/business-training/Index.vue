@@ -29,7 +29,7 @@ defineProps<{
 const isFormOpen = ref(false);
 
 const navigateToType = (slug: string) => {
-  router.visit(businessTraining.type.show(slug));
+  router.visit(businessTraining.types.show(slug));
 };
 </script>
 
@@ -99,7 +99,7 @@ const navigateToType = (slug: string) => {
       description="Add a new training type."
       show-default
       :fields="businessTrainingTypeFields"
-      :endpoint="businessTraining.store.url()"
+      :endpoint="businessTraining.types.store.url()"
       @success="toast.success('Training type created successfully!')"
     />
   </div>

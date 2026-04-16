@@ -25,16 +25,21 @@ Route::middleware([
 
     // Business Training Domain
     Route::middleware(['service_access:business-training'])->group(function () {
+
         Route::get('/business-training', [BusinessTrainingController::class, 'index'])
             ->name('business-training.index');
-        Route::post('/business-training', [BusinessTrainingController::class, 'store'])
-            ->name('business-training.store');
-        Route::get('/business-training/type/{slug}', [BusinessTrainingController::class, 'showType'])
-            ->name('business-training.type.show');
-        Route::post('/business-training/type', [BusinessTrainingController::class, 'storeType'])
-            ->name('business-training.type.store');
-        Route::get('/business-training/categories/{slug}/modules', [BusinessTrainingController::class, 'getCategoryModules'])
-            ->name('business-training.modules');
+
+        Route::post('/business-training/types', [BusinessTrainingController::class, 'storeType'])
+            ->name('business-training.types.store');
+
+        Route::get('/business-training/types/{type:slug}', [BusinessTrainingController::class, 'showType'])
+            ->name('business-training.types.show');
+
+        Route::post('/business-training/types/{type:slug}/categories', [BusinessTrainingController::class, 'storeCategory'])
+            ->name('business-training.categories.store');
+
+        Route::get('/business-training/categories/{category:slug}/modules', [BusinessTrainingController::class, 'getCategoryModules'])
+            ->name('business-training.modules.show');
     });
 
     // Loan Assistance Domain

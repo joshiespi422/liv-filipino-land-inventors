@@ -42,7 +42,7 @@ const breadcrumbs = [
   },
   {
     title: props.type.name,
-    href: businessTraining.type.show.url({ slug: props.type.slug }),
+    href: businessTraining.types.show.url({ slug: props.type.slug }),
   },
 ];
 
@@ -59,7 +59,7 @@ const openCategoryModal = async (categorySlug: string) => {
   isModalOpen.value = true;
 
   http
-    .get(businessTraining.modules.url({ slug: categorySlug }))
+    .get(businessTraining.modules.show.url({ slug: categorySlug }))
     .then((response: any) => {
       const data = response.data || response;
 
@@ -212,7 +212,7 @@ const isFormOpen = ref(false);
         description="Add a new training category under {{ type.name }} type and its modules."
         show-default
         :fields="businessTrainingCategoryFields"
-        :endpoint="businessTraining.type.store.url()"
+        :endpoint="businessTraining.categories.store({ type: type.slug })"
         @success="
           toast.success('Training category & modules created successfully!')
         "

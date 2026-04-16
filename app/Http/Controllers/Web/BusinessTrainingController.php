@@ -51,7 +51,7 @@ class BusinessTrainingController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function storeType(Request $request, BusinessTrainingType $type)
     {
         if (! $this->canMutate()) {
             abort(403, 'Unauthorized action.');
@@ -78,7 +78,7 @@ class BusinessTrainingController extends Controller
         return back();
     }
 
-    public function storeType(Request $request)
+    public function storeCategory(Request $request)
     {
         if (! $this->canMutate()) {
             abort(403, 'Unauthorized action.');
