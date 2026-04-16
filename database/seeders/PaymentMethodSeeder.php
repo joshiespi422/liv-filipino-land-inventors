@@ -14,9 +14,13 @@ class PaymentMethodSeeder extends Seeder
     public function run(): void
     {
         DB::table('payment_methods')->insert([
-            ['id' => 1, 'name' => 'Cash'], 
-            ['id' => 2, 'name' => 'Credit Card'], 
-            ['id' => 3, 'name' => 'QR Code'], 
+            ['id' => 1, 'name' => 'Cash', 'gateway_type' => null],
+            ['id' => 2, 'name' => 'Credit Card', 'gateway_type' => 'card'],
+            ['id' => 3, 'name' => 'QR Code', 'gateway_type' => 'qrph'],
+            ['id' => 4, 'name' => 'Maya', 'gateway_type' => 'paymaya'],
+            ['id' => 5, 'name' => 'BillEase', 'gateway_type' => 'billease'],
+            ['id' => 6, 'name' => 'GrabPay', 'gateway_type' => 'grab_pay'],
+            ['id' => 7, 'name' => 'DOB', 'gateway_type' => 'dob'],
         ]);
     }
 }
