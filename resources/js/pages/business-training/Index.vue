@@ -26,15 +26,6 @@ defineProps<{
 // state
 const isFormOpen = ref(false);
 
-const handleCreateType = (data: any) => {
-  router.post(businessTraining.store(), data, {
-    onSuccess: () => {
-      isFormOpen.value = false;
-      toast.success('Training type created successfully!');
-    },
-  });
-};
-
 const navigateToType = (slug: string) => {
   router.visit(businessTraining.type.show(slug));
 };
@@ -83,9 +74,10 @@ const navigateToType = (slug: string) => {
       v-model:open="isFormOpen"
       title="Create Training Type"
       description="Add a new training type."
-      :fields="businessTrainingTypeFields"
       show-default
-      @submit="handleCreateType"
+      :fields="businessTrainingTypeFields"
+      :endpoint="businessTraining.store.url()"
+      @success="toast.success('Training type created successfully!')"
     />
   </div>
 </template>

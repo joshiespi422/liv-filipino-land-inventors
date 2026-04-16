@@ -9,7 +9,8 @@ class BusinessTrainingType extends Model
 {
     protected $fillable = [
         'name',
-        'slug'
+        'slug',
+        'icon',
     ];
 
     /**
