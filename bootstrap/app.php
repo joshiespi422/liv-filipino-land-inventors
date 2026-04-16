@@ -1,6 +1,5 @@
 <?php
 
-use App\Exceptions\Loan\LoanLimitExceededException;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -43,89 +42,58 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
 
-        // CONTROLLER — firstOrFail()
         $exceptions->render(function (ModelNotFoundException $e, Request $request) {
-            if ($request->is('api/*')) {
-                $model = class_basename($e->getModel());
+            if (!$request->is('api/*'))
+                return;
 
-                $messages = [
-                    'BusinessTrainingType' => 'Business training type not found.',
-                    'BusinessTrainingCategory' => 'Business training category not found.',
-                    'BusinessTraining' => 'Business Training module not found.',
-                ];
+            $modelClass = $e->getModel();
+            $message = method_exists($modelClass, 'notFoundMessage')
+                ? $modelClass::notFoundMessage()
+                : 'Record not found.';
 
-                return response()->json([
-                    'success' => false,
-                    'message' => $messages[$model] ?? 'Record not found.',
-                ], 404);
-            }
+            return response()->json(['success' => false, 'message' => $message], 404);
         });
 
-        // ModelNotFoundException
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
-            if ($request->is('api/*')) {
-                $previous = $e->getPrevious();
+            if (!$request->is('api/*'))
+                return;
 
-                if ($previous instanceof ModelNotFoundException) {
-                    $model = class_basename($previous->getModel());
+            $previous = $e->getPrevious();
 
-                    $messages = [
-                        'BusinessTrainingType' => 'Business training type not found.',
-                        'BusinessTrainingCategory' => 'Business training category not found.',
-                        'BusinessTraining' => 'Business Training module not found.',
-                    ];
+            if ($previous instanceof ModelNotFoundException) {
+                $modelClass = $previous->getModel();
+                $message = method_exists($modelClass, 'notFoundMessage')
+                    ? $modelClass::notFoundMessage()
+                    : 'Record not found.';
 
-                    return response()->json([
-                        'success' => false,
-                        'message' => $messages[$model] ?? 'Record not found.',
-                    ], 404);
-                }
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Route not found.',
-                ], 404);
+                return response()->json(['success' => false, 'message' => $message], 404);
             }
+
+            return response()->json(['success' => false, 'message' => 'Route not found.'], 404);
         });
 
-        // 401
         $exceptions->render(function (AuthenticationException $e, Request $request) {
-            if ($request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthenticated.',
-                ], 401);
-            }
+            if (!$request->is('api/*'))
+                return;
+
+            return response()->json(['success' => false, 'message' => 'Unauthenticated.'], 401);
         });
 
-        // 403
         $exceptions->render(function (AuthorizationException $e, Request $request) {
-            if ($request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthorized.',
-                ], 403);
-            }
+            if (!$request->is('api/*'))
+                return;
+
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
         });
 
-        // 422
         $exceptions->render(function (ValidationException $e, Request $request) {
-            if ($request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed.',
-                    'errors' => $e->errors(),
-                ], 422);
-            }
-        });
+            if (!$request->is('api/*'))
+                return;
 
-        $exceptions->render(function (LoanLimitExceededException $e, $request) {
             return response()->json([
                 'success' => false,
-                'message' => 'Loan amount exceeds your loanable limit.',
-                'data' => [
-                    'loanable_amount' => $e->limit,
-                ],
+                'message' => 'Validation failed.',
+                'errors' => $e->errors(),
             ], 422);
         });
 

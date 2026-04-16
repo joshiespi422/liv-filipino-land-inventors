@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Concerns\HasNotFoundMessage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BusinessTrainingCategory extends Model
 {
+    use HasNotFoundMessage;
+
     protected $fillable = [
         'business_training_type_id',
         'name',
@@ -34,8 +37,13 @@ class BusinessTrainingCategory extends Model
     /**
      * Relationship: Category has many Training Modules
      */
-  public function trainings(): HasMany
-{
-    return $this->hasMany(BusinessTraining::class);
-}
+    public function trainings(): HasMany
+    {
+        return $this->hasMany(BusinessTraining::class);
+    }
+
+    public static function notFoundMessage(): string
+    {
+        return 'Business training category not found.';
+    }
 }
