@@ -15,3 +15,15 @@ export interface DetailItem {
   class?: string;
   full?: boolean;
 }
+
+export type FormFieldType = 'text' | 'textarea' | 'number' | 'select' | 'file';
+
+export interface FormField {
+  type: FormFieldType;
+  name: string;
+  label: string;
+  placeholder?: string;
+  options?: { label: string; value: string | number }[];
+  required?: boolean;
+  col?: number;
+}

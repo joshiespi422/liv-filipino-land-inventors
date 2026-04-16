@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { reactive, watch } from 'vue';
+import { computed, watch } from 'vue';
+import { useForm } from '@inertiajs/vue3';
 import {
   Dialog,
   DialogContent,
@@ -25,44 +26,81 @@ import {
   NumberFieldIncrement,
   NumberFieldInput,
 } from '@/components/ui/number-field';
-
-type FieldType = 'text' | 'textarea' | 'number' | 'select' | 'file';
-
-interface Field {
-  type: FieldType;
-  name: string;
-  label: string;
-  placeholder?: string;
-  options?: { label: string; value: string | number }[];
-}
+import type { FormField } from '@/types';
 
 const props = defineProps<{
   open: boolean;
   title?: string;
   description?: string;
-  fields: Field[];
-  initialValues?: Record<string, any>;
-  loading?: boolean;
+  fields: FormField[];
+  endpoint: string | { url: string; method: string };
+  method?: 'post' | 'put' | 'patch';
+  forceFormData?: boolean;
   showDefault?: boolean;
+  columns?: 1 | 2;
 }>();
 
-const emit = defineEmits(['update:open', 'submit']);
+const emit = defineEmits(['update:open', 'success']);
 
-// reactive form
-const form = reactive<Record<string, any>>({});
+// build initial form dynamically
+const initialData = Object.fromEntries(props.fields.map((f) => [f.name, '']));
 
-// initialize / reset form when dialog opens
-watch(
-  () => props.open,
-  (val) => {
-    if (val) {
-      Object.assign(form, props.initialValues || {});
-    }
-  },
+// inertia form
+const form = useForm(initialData);
+
+// reset when opened, doesn't need for now
+// watch(
+//   () => props.open,
+//   (val) => {
+//     if (val) {
+//       form.reset();
+//       form.clearErrors();
+//     }
+//   },
+// );
+
+// validation
+const isValid = computed(() =>
+  props.fields.every((f) => {
+    if (!f.required) return true;
+    return !!form[f.name];
+  }),
 );
 
+// submit
 const handleSubmit = () => {
-  emit('submit', { ...form });
+  // Resolve URL and Method first (Wayfinder objects contain the method)
+  const isWayfinder = typeof props.endpoint !== 'string';
+  const url = isWayfinder ? props.endpoint.url : props.endpoint;
+  const method = isWayfinder ? props.endpoint.method : props.method || 'post';
+
+  // Logic flags based on the RESOLVED method, not just props
+  const hasFiles = props.fields.some((f) => f.type === 'file');
+  const isUpdating =
+    method.toLowerCase() === 'put' || method.toLowerCase() === 'patch';
+  const requiresFormData = props.forceFormData || hasFiles;
+
+  const options = {
+    forceFormData: requiresFormData,
+    onSuccess: () => {
+      emit('update:open', false);
+      emit('success');
+      form.reset();
+    },
+  };
+
+  // Logic for PUT/PATCH with files (Method Spoofing)
+  if (isUpdating && hasFiles) {
+    form
+      .transform((data) => ({
+        ...data,
+        _method: method.toUpperCase(),
+      }))
+      .post(url, options);
+  } else {
+    // Logic for standard POST or PUT/PATCH without files
+    form[method as 'post' | 'put' | 'patch'](url, options);
+  }
 };
 </script>
 
@@ -80,30 +118,38 @@ const handleSubmit = () => {
       <slot name="top" />
 
       <!-- DEFAULT FORM -->
-      <div v-if="showDefault !== false" class="mt-4 space-y-4">
-        <div v-for="field in fields" :key="field.name" class="space-y-2">
+      <div
+        v-if="showDefault !== false"
+        :class="[
+          'mt-4 gap-4',
+          columns === 2 ? 'grid grid-cols-2' : 'grid grid-cols-1',
+        ]"
+      >
+        <div
+          v-for="field in fields"
+          :key="field.name"
+          :class="['space-y-2', field.col === 2 ? 'col-span-2' : '']"
+        >
           <Label>{{ field.label }}</Label>
 
-          <!-- TEXT / FILE -->
+          <!-- TEXT -->
           <Input
-            v-if="field.type === 'text' || field.type === 'file'"
+            v-if="field.type === 'text'"
             v-model="form[field.name]"
-            :type="field.type"
             :placeholder="field.placeholder"
           />
 
-          <!-- for file if v-model is not working although need an adjustment "any" types? -->
-          <!-- <Input
-            v-if="field.type === 'file'"
+          <!-- FILE -->
+          <Input
+            v-else-if="field.type === 'file'"
             type="file"
-            @change="(e: any) => form[field.name] = e.target.files?.[0]"
-            /> -->
+            @change="(e: any) => (form[field.name] = e.target.files?.[0])"
+          />
 
           <!-- TEXTAREA -->
           <Textarea
             v-else-if="field.type === 'textarea'"
             v-model="form[field.name]"
-            :placeholder="field.placeholder"
           />
 
           <!-- NUMBER -->
@@ -121,9 +167,7 @@ const handleSubmit = () => {
             v-model="form[field.name]"
           >
             <SelectTrigger>
-              <SelectValue
-                :placeholder="field.placeholder || 'Select option'"
-              />
+              <SelectValue :placeholder="field.placeholder" />
             </SelectTrigger>
 
             <SelectContent>
@@ -136,6 +180,11 @@ const handleSubmit = () => {
               </SelectItem>
             </SelectContent>
           </Select>
+
+          <!-- ERROR -->
+          <p v-if="form.errors[field.name]" class="text-sm text-destructive">
+            {{ form.errors[field.name] }}
+          </p>
         </div>
       </div>
 
@@ -148,7 +197,9 @@ const handleSubmit = () => {
           Cancel
         </Button>
 
-        <Button :disabled="loading" @click="handleSubmit"> Submit </Button>
+        <Button :disabled="form.processing || !isValid" @click="handleSubmit">
+          {{ form.processing ? 'Submitting...' : 'Submit' }}
+        </Button>
       </div>
     </DialogContent>
   </Dialog>
