@@ -31,6 +31,8 @@ Route::middleware([
             ->name('business-training.store');
         Route::get('/business-training/type/{slug}', [BusinessTrainingController::class, 'showType'])
             ->name('business-training.type.show');
+        Route::post('/business-training/type', [BusinessTrainingController::class, 'storeType'])
+            ->name('business-training.type.store');
         Route::get('/business-training/categories/{slug}/modules', [BusinessTrainingController::class, 'getCategoryModules'])
             ->name('business-training.modules');
     });

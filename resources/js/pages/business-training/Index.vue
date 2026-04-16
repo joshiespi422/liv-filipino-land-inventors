@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { PlusIcon } from 'lucide-vue-next';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { businessTrainingTypeFields } from '@/features/business-training/fields';
 import FormDialog from '@/components/FormDialog.vue';
@@ -80,11 +81,13 @@ const navigateToType = (slug: string) => {
       </Card>
       <Card
         v-if="can_mutate"
-        class="flex cursor-pointer items-center justify-center border-dashed hover:border-primary hover:shadow-md"
+        class="flex cursor-pointer flex-col items-center justify-center border-dashed transition-colors hover:border-primary hover:shadow-md"
         @click="isFormOpen = true"
       >
         <CardContent class="flex flex-col items-center justify-center">
-          <div class="text-3xl font-bold">+</div>
+          <div class="rounded-full bg-primary/10 p-1.5">
+            <PlusIcon class="h-8 w-8" />
+          </div>
           <p class="mt-2 text-sm text-muted-foreground">Add Type</p>
         </CardContent>
       </Card>

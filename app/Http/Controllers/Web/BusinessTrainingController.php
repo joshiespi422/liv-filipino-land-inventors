@@ -77,4 +77,17 @@ class BusinessTrainingController extends Controller
 
         return back();
     }
+
+    public function storeType(Request $request)
+    {
+        if (! $this->canMutate()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // $validated = $request->validate([
+        //     ...
+        // ]);
+
+        return back();
+    }
 }

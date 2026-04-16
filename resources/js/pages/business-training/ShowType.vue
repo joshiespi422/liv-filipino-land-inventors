@@ -8,7 +8,10 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-vue-next';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { InfoIcon, ArrowLeft, PlusIcon } from 'lucide-vue-next';
+import FormDialog from '@/components/FormDialog.vue';
+import { businessTrainingCategoryFields } from '@/features/business-training/fields';
 import { Button } from '@/components/ui/button';
 import businessTraining from '@/routes/business-training';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -20,23 +23,15 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'vue-sonner';
+import type { BusinessTrainingTypeDetail } from '@/types';
 
 defineOptions({
   layout: [],
 });
 
 const props = defineProps<{
-  type: {
-    id: number;
-    name: string;
-    slug: string;
-    categories: Array<{
-      id: number;
-      name: string;
-      slug: string;
-      description: string;
-    }>;
-  };
+  type: BusinessTrainingTypeDetail;
   can_mutate: boolean;
 }>();
 
@@ -77,6 +72,9 @@ const openCategoryModal = async (categorySlug: string) => {
       isLoading.value = false;
     });
 };
+
+// state
+const isFormOpen = ref(false);
 </script>
 
 <template>
@@ -102,23 +100,43 @@ const openCategoryModal = async (categorySlug: string) => {
         </Button>
       </div>
 
+      <Alert v-if="type.categories.length === 0" class="bg-muted/50">
+        <InfoIcon class="h-4 w-4" />
+        <AlertTitle>No Categories Found</AlertTitle>
+        <AlertDescription>
+          There are currently no categories listed for this training type.
+          {{ can_mutate ? 'Click the button below to add one.' : '' }}
+        </AlertDescription>
+      </Alert>
+
       <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card
           v-for="category in type.categories"
           :key="category.id"
-          class="flex cursor-pointer flex-col transition-all hover:border-primary"
+          class="flex cursor-pointer flex-col transition-all hover:border-primary hover:shadow-md"
           @click="openCategoryModal(category.slug)"
         >
           <CardHeader>
             <CardTitle>{{ category.name }}</CardTitle>
-            <CardDescription class="line-clamp-2">{{
-              category.description
-            }}</CardDescription>
+            <CardDescription class="line-clamp-2">
+              {{ category.description }}
+            </CardDescription>
           </CardHeader>
           <CardContent class="mt-auto pt-4">
-            <Button variant="secondary" class="w-full cursor-pointer"
-              >View Modules</Button
-            >
+            <Button variant="secondary" class="w-full"> View Modules </Button>
+          </CardContent>
+        </Card>
+
+        <Card
+          v-if="can_mutate"
+          @click="isFormOpen = true"
+          class="flex cursor-pointer flex-col items-center justify-center border-dashed transition-colors hover:border-primary hover:shadow-md"
+        >
+          <CardContent class="flex flex-col items-center justify-center">
+            <div class="rounded-full bg-primary/10 p-1.5">
+              <PlusIcon class="h-8 w-8" />
+            </div>
+            <p class="mt-2 text-sm text-muted-foreground">Add Category</p>
           </CardContent>
         </Card>
       </div>
@@ -187,6 +205,18 @@ const openCategoryModal = async (categorySlug: string) => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <FormDialog
+        v-model:open="isFormOpen"
+        title="Create Training Category & Modules"
+        description="Add a new training category under {{ type.name }} type and its modules."
+        show-default
+        :fields="businessTrainingCategoryFields"
+        :endpoint="businessTraining.type.store.url()"
+        @success="
+          toast.success('Training category & modules created successfully!')
+        "
+      />
     </div>
   </AppLayout>
 </template>

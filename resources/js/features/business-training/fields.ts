@@ -16,3 +16,20 @@ export const businessTrainingTypeFields: FormField[] = [
     required: true,
   },
 ];
+
+export const businessTrainingCategoryFields: FormField[] = [
+  {
+    type: 'text',
+    name: 'name',
+    label: 'Category Name',
+    placeholder: 'Enter Business training category',
+    required: true,
+  },
+  {
+    type: 'text',
+    name: 'description',
+    label: 'Category Description',
+    placeholder: 'Enter Business training category description',
+    required: true,
+  },
+];
