@@ -30,7 +30,12 @@ class LoanService
         //     ->whereIn('status_id', [Status::ACTIVE, Status::FINISHED])
         //     ->get();
         return Loan::where('user_id', $user->id)
-            ->whereIn('status_id', [Status::ACTIVE, Status::FINISHED])
+            ->whereIn('status_id', [
+                Status::ACTIVE,
+                Status::FINISHED,
+                Status::PENDING,
+                Status::REJECTED
+            ])
             ->orderByRaw("status_id = ? DESC", [Status::ACTIVE])
             ->get();
 
