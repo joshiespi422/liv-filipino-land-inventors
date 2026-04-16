@@ -6,6 +6,7 @@ import { businessTrainingTypeFields } from '@/features/business-training/fields'
 import FormDialog from '@/components/FormDialog.vue';
 import businessTraining from '@/routes/business-training';
 import { toast } from 'vue-sonner';
+import type { BusinessTrainingType } from '@/types';
 
 defineOptions({
   layout: {
@@ -19,7 +20,7 @@ defineOptions({
 });
 
 defineProps<{
-  types: Array<{ id: number; name: string; slug: string; icon: string | null }>;
+  types: BusinessTrainingType[];
   can_mutate: boolean;
 }>();
 
@@ -49,8 +50,27 @@ const navigateToType = (slug: string) => {
         class="cursor-pointer transition-all hover:border-primary hover:shadow-md"
         @click="navigateToType(type.slug)"
       >
-        <CardHeader class="pb-2">
-          <CardTitle class="text-lg">{{ type.name }}</CardTitle>
+        <CardHeader
+          class="flex flex-row items-center justify-between space-y-0"
+        >
+          <CardTitle class="text-lg font-bold">{{ type.name }}</CardTitle>
+
+          <div
+            v-if="type.icon"
+            class="h-10 w-10 shrink-0 overflow-hidden rounded-md border bg-muted"
+          >
+            <img
+              :src="`/storage/${type.icon}`"
+              :alt="type.name"
+              class="h-full w-full object-cover"
+            />
+          </div>
+          <div
+            v-else
+            class="flex h-10 w-10 items-center justify-center rounded-md bg-muted text-muted-foreground"
+          >
+            <span class="text-xs">N/A</span>
+          </div>
         </CardHeader>
         <CardContent>
           <div class="flex items-center text-sm text-muted-foreground">
