@@ -26,21 +26,18 @@ class LoanPaymentWebhookController extends Controller
 
         $data = $service->parseWebhook($request->all());
 
-        if (
-            empty($data['intent_id']) ||
-            empty($data['status'])
-        ) {
+        if (empty($data['intent_id']) || empty($data['status'])) {
             return response()->json([
                 'message' => 'Invalid webhook payload'
-            ], 400);
+            ], 200);
         }
 
         $this->webhookService->handle(
             gatewayPaymentIntentId: $data['intent_id'],
             gatewayStatus: $data['status'],
-            gatewayPaymentId: $data['gateway_payment_id'] ?? null,
+            gatewayPaymentId: $data['gateway_payment_id'],
         );
 
-        return response()->json(['ok' => true]);
+        return response()->json(['ok' => true], 200);
     }
 }

@@ -18,26 +18,24 @@ class PaymentController extends Controller
 
         if (!$payment) {
             return response()->json([
-                'status' => 'not_found',
-                'message' => 'Payment not found',
+                'status' => 'not_found'
             ], 404);
         }
 
         return response()->json([
-            'status' => $payment->status, // pending | paid | failed
-            'payment_intent_id' => $payment->payment_intent_id,
+            'status' => $payment->status,
             'paid_at' => $payment->paid_at,
+            'payment_intent_id' => $payment->payment_intent_id,
         ]);
     }
 
     /**
      * Optional fallback endpoint (NO BUSINESS LOGIC HERE)
      */
-    public function success(Request $request): JsonResponse
+    public function success(): JsonResponse
     {
         return response()->json([
-            'message' => 'Payment redirect received (for UI only)',
-            'payment_intent_id' => $request->get('payment_intent_id'),
+            'message' => 'Redirect received (UI only)'
         ]);
     }
 }

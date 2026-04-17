@@ -10,8 +10,13 @@ use Illuminate\Support\Facades\Log;
 
 class LoanPaymentWebhookService
 {
-    public function handle(string $gatewayPaymentIntentId, string $gatewayStatus, string $gatewayPaymentId): void
-    {
+    public function handle(
+        string $gatewayPaymentIntentId,
+        string $gatewayStatus,
+        ?string $gatewayPaymentId = null
+    ): void {
+        $gatewayStatus = $this->normalizeStatus($gatewayStatus);
+
         $payment = LoanPayment::where('gateway_payment_intent_id', $gatewayPaymentIntentId)->first();
 
         if (!$payment) {
@@ -66,5 +71,20 @@ class LoanPaymentWebhookService
 
             Log::info('Loan automatically marked as finished.', ['loan_id' => $loan->id]);
         }
+    }
+
+    private function normalizeStatus(string $status): string
+    {
+        return match ($status) {
+            'paid',
+            'payment.paid',
+            'success',
+            'succeeded' => Status::SUCCESS,
+
+            'failed',
+            'payment.failed' => Status::FAILED,
+
+            default => $status,
+        };
     }
 }

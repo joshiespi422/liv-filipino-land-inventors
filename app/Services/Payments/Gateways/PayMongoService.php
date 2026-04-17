@@ -135,25 +135,36 @@ class PayMongoService implements PaymentGatewayInterface
      * @param array $payload
      * @return array{event: mixed, intent_id: null, status_id: null|array{event: string, gateway_payment_id: mixed, intent_id: mixed, status_id: int}}
      */
+    // public function parseWebhook(array $payload): array
+    // {
+    //     $type = data_get($payload, 'data.attributes.type');
+
+    //     if ($type === 'payment.paid') {
+    //         $attr = data_get($payload, 'data.attributes.data.attributes');
+
+    //         return [
+    //             'intent_id' => $attr['payment_intent_id'] ?? null,
+    //             'status_id' => Status::PAID,
+    //             'gateway_payment_id' => data_get($payload, 'data.id'),
+    //             'event' => $type,
+    //         ];
+    //     }
+
+    //     return [
+    //         'intent_id' => null,
+    //         'status_id' => null,
+    //         'event' => $type,
+    //     ];
+    // }
     public function parseWebhook(array $payload): array
     {
-        $type = data_get($payload, 'data.attributes.type');
-
-        if ($type === 'payment.paid') {
-            $attr = data_get($payload, 'data.attributes.data.attributes');
-
-            return [
-                'intent_id' => $attr['payment_intent_id'] ?? null,
-                'status_id' => Status::PAID,
-                'gateway_payment_id' => data_get($payload, 'data.id'),
-                'event' => $type,
-            ];
-        }
+        $attr = data_get($payload, 'data.attributes');
 
         return [
-            'intent_id' => null,
-            'status_id' => null,
-            'event' => $type,
+            'intent_id' => $attr['payment_intent_id'] ?? null,
+            'status' => $attr['status'] ?? null,
+            'gateway_payment_id' => data_get($payload, 'data.id'),
+            'event' => $attr['type'] ?? null,
         ];
     }
 }
