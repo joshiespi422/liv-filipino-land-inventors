@@ -27,7 +27,7 @@ class LoanPaymentWebhookService
         }
 
         // Idempotency guard
-        if ($payment->status_id === Status::SUCCESS) {
+        if ((int) $payment->status_id === Status::SUCCESS) {
             Log::info('Webhook already processed for payment.', ['payment_id' => $payment->id]);
             return;
         }
@@ -73,7 +73,7 @@ class LoanPaymentWebhookService
         }
     }
 
-    private function normalizeStatus(string $status): string
+    private function normalizeStatus(string $status): string|int
     {
         return match ($status) {
             'paid',

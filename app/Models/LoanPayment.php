@@ -24,6 +24,7 @@ class LoanPayment extends Model
     ];
 
     protected $casts = [
+        'status_id' => 'integer',
         'payment_date' => 'date',
         'gateway_response' => 'array',
     ];

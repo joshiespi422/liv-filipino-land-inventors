@@ -21,6 +21,7 @@ class LoanSchedule extends Model
     ];
 
     protected $casts = [
+        'status_id' => 'integer',
         'due_date' => 'date',
     ];
 
