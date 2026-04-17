@@ -7,6 +7,7 @@ use App\Http\Controllers\API\BusinessTraining\TrainingController;
 use App\Http\Controllers\API\BusinessTraining\TypeController;
 use App\Http\Controllers\API\Loan\LoanController;
 use App\Http\Controllers\API\Loan\LoanPaymentWebhookController;
+use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\API\Settings\ProfileController;
 use App\Http\Controllers\API\Verification\PhoneVerificationController;
 use App\Models\UserType;
@@ -25,8 +26,8 @@ Route::middleware('guest')->group(function () {
     Route::post('/register/set-password', [RegisteredUserController::class, 'setPassword'])->middleware('throttle:5,1');
 });
 
-Route::get('/payment/status/{paymentIntentId}', [LoanPaymentWebhookController::class, 'status']);
-Route::get('/payment/success', [LoanPaymentWebhookController::class, 'success']);
+Route::get('/payment/status/{paymentIntentId}', [PaymentController::class, 'status']);
+Route::get('/payment/success', [PaymentController::class, 'success']);
 Route::post('/webhooks/{gateway}', LoanPaymentWebhookController::class);
 
 Route::middleware('auth:sanctum')->group(function () {
