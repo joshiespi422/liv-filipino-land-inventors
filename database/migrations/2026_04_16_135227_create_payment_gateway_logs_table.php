@@ -10,10 +10,17 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('payment_methods', function (Blueprint $table) {
+        Schema::create('payment_gateway_logs', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
-            $table->string('gateway_type')->nullable();
+
+            $table->foreignId('loan_payment_id')->nullable()->constrained()->nullOnDelete();
+
+            $table->string('gateway');
+            $table->string('event')->nullable();
+
+            $table->json('payload');
+
+            $table->timestamps();
         });
     }
 
@@ -22,6 +29,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('payment_methods');
+        Schema::dropIfExists('payment_gateway_logs');
     }
 };

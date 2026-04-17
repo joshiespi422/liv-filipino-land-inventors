@@ -12,9 +12,19 @@ return new class extends Migration {
     {
         Schema::create('loan_payments', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('status_id')->constrained('statuses');
+
             $table->foreignId('loan_id')->constrained()->cascadeOnDelete();
             $table->foreignId('loan_schedule_id')->constrained()->cascadeOnDelete();
             $table->foreignId('payment_method_id')->constrained()->cascadeOnDelete();
+
+            $table->string('gateway')->nullable();
+
+            $table->string('gateway_payment_intent_id')->nullable();
+            $table->string('gateway_payment_id')->nullable();
+
+            $table->json('gateway_response')->nullable();
+
             $table->date('payment_date');
             $table->decimal('amount', 15, 2);
             $table->timestamps();
