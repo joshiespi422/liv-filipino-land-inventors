@@ -94,7 +94,7 @@ class PayMongoService implements PaymentGatewayInterface
                 'data' => [
                     'attributes' => [
                         'payment_method' => $methodId,
-                        'return_url' => config('app.url') . '/payment/success',
+                        'return_url' => config('app.url') . '/api/payment/success',
                     ],
                 ],
             ])
