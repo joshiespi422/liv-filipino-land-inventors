@@ -9,11 +9,33 @@ class PaymentMethod extends Model
 {
     public $timestamps = false;
 
+    protected $fillable = ['name', 'gateway_type'];
+
     public const CASH = 1;
-    public const CREDIT_CARD = 2;
+    public const CARD = 2;
     public const QR_CODE = 3;
-    
-    // protected $fillable = [];
+    public const MAYA = 4;
+    public const BILLEASE = 5;
+    public const GRAB_PAY = 6;
+    public const DOB = 7;
+
+    public const CLIENT_SIDE_METHODS = [
+        self::CARD,
+    ];
+
+    public const OFFLINE_METHODS = [
+        self::CASH,
+    ];
+
+    public function isOffline(): bool
+    {
+        return in_array($this->id, self::OFFLINE_METHODS);
+    }
+
+    public function isClientSide(): bool
+    {
+        return in_array($this->id, self::CLIENT_SIDE_METHODS);
+    }
 
     // one to many, payment method has many loan payments
     public function loanPayments(): HasMany

@@ -14,10 +14,18 @@ class LoanPayment extends Model
         'payment_method_id',
         'payment_date',
         'amount',
+
+        'gateway',
+        'gateway_payment_intent_id',
+        'gateway_payment_id',
+        'gateway_response',
+
+        'status_id',
     ];
 
     protected $casts = [
         'payment_date' => 'date',
+        'gateway_response' => 'array',
     ];
 
     // one to many, payment has one loan
@@ -44,4 +52,13 @@ class LoanPayment extends Model
         return $this->morphMany(WalletTransaction::class, 'reference');
     }
 
+    /**
+     * Summary of status
+     *
+     * @return BelongsTo<Status, LoanPayment>
+     */
+    public function status()
+    {
+        return $this->belongsTo(Status::class);
+    }
 }
