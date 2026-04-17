@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Head, router, useHttp } from '@inertiajs/vue3';
+import { Head, router, useHttp, useForm } from '@inertiajs/vue3';
 import {
   Card,
   CardHeader,
@@ -11,6 +11,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { InfoIcon, ArrowLeft, PlusIcon } from 'lucide-vue-next';
 import FormDialog from '@/components/FormDialog.vue';
+import ModuleBuilder from '@/components/ModuleBuilder.vue';
 import { businessTrainingCategoryFields } from '@/features/business-training/fields';
 import { Button } from '@/components/ui/button';
 import businessTraining from '@/routes/business-training';
@@ -209,14 +210,34 @@ const isFormOpen = ref(false);
       <FormDialog
         v-model:open="isFormOpen"
         title="Create Training Category & Modules"
-        description="Add a new training category under {{ type.name }} type and its modules."
+        :description="`Add a new training category under ${type.name} type and its modules.`"
         show-default
         :fields="businessTrainingCategoryFields"
         :endpoint="businessTraining.categories.store({ type: type.slug })"
+        :extraData="{
+          modules: [
+            {
+              intro_title: '',
+              intro_description: '',
+              advantages: [],
+              challenges: [],
+              required_mindset: [],
+            },
+            { items: [] },
+            { budget: [], min_cost: null, max_cost: null },
+            { items: [] },
+            { items: [] },
+            { items: [] },
+          ],
+        }"
         @success="
           toast.success('Training category & modules created successfully!')
         "
-      />
+      >
+        <template #default="{ form }">
+          <ModuleBuilder v-model="form.modules" :errors="form.errors" />
+        </template>
+      </FormDialog>
     </div>
   </AppLayout>
 </template>
