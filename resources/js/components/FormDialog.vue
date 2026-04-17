@@ -36,6 +36,7 @@ const props = defineProps<{
   endpoint: string | { url: string; method: string };
   method?: 'post' | 'put' | 'patch';
   forceFormData?: boolean;
+  extraData?: Record<string, any>;
   showDefault?: boolean;
   columns?: 1 | 2;
 }>();
@@ -43,7 +44,10 @@ const props = defineProps<{
 const emit = defineEmits(['update:open', 'success']);
 
 // build initial form dynamically
-const initialData = Object.fromEntries(props.fields.map((f) => [f.name, '']));
+const initialData = {
+  ...Object.fromEntries(props.fields.map((f) => [f.name, ''])),
+  ...(props.extraData ?? {}),
+};
 
 // inertia form
 const form = useForm(initialData);
@@ -106,90 +110,92 @@ const handleSubmit = () => {
 
 <template>
   <Dialog :open="open" @update:open="emit('update:open', $event)">
-    <DialogContent class="max-w-lg">
-      <DialogHeader>
+    <DialogContent class="flex max-h-[85vh] flex-col p-3 pe-2">
+      <DialogHeader class="p-3">
         <DialogTitle>{{ title || 'Form' }}</DialogTitle>
         <DialogDescription>
           {{ description || '' }}
         </DialogDescription>
       </DialogHeader>
 
-      <!-- CUSTOM TOP -->
-      <slot name="top" />
+      <div class="flex-1 overflow-y-auto px-2 py-0">
+        <!-- CUSTOM TOP -->
+        <slot name="top" :form="form" />
 
-      <!-- DEFAULT FORM -->
-      <div
-        v-if="showDefault !== false"
-        :class="[
-          'mt-4 gap-4',
-          columns === 2 ? 'grid grid-cols-2' : 'grid grid-cols-1',
-        ]"
-      >
+        <!-- DEFAULT FORM -->
         <div
-          v-for="field in fields"
-          :key="field.name"
-          :class="['space-y-2', field.col === 2 ? 'col-span-2' : '']"
+          v-if="showDefault !== false"
+          :class="[
+            'gap-4',
+            columns === 2 ? 'grid grid-cols-2' : 'grid grid-cols-1',
+          ]"
         >
-          <Label>{{ field.label }}</Label>
-
-          <!-- TEXT -->
-          <Input
-            v-if="field.type === 'text'"
-            v-model="form[field.name]"
-            :placeholder="field.placeholder"
-          />
-
-          <!-- FILE -->
-          <Input
-            v-else-if="field.type === 'file'"
-            type="file"
-            @change="(e: any) => (form[field.name] = e.target.files?.[0])"
-          />
-
-          <!-- TEXTAREA -->
-          <Textarea
-            v-else-if="field.type === 'textarea'"
-            v-model="form[field.name]"
-          />
-
-          <!-- NUMBER -->
-          <NumberField v-else-if="field.type === 'number'">
-            <NumberFieldContent>
-              <NumberFieldDecrement />
-              <NumberFieldInput v-model="form[field.name]" />
-              <NumberFieldIncrement />
-            </NumberFieldContent>
-          </NumberField>
-
-          <!-- SELECT -->
-          <Select
-            v-else-if="field.type === 'select'"
-            v-model="form[field.name]"
+          <div
+            v-for="field in fields"
+            :key="field.name"
+            :class="['space-y-2', field.col === 2 ? 'col-span-2' : '']"
           >
-            <SelectTrigger>
-              <SelectValue :placeholder="field.placeholder" />
-            </SelectTrigger>
+            <Label>{{ field.label }}</Label>
 
-            <SelectContent>
-              <SelectItem
-                v-for="opt in field.options"
-                :key="opt.value"
-                :value="opt.value"
-              >
-                {{ opt.label }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
+            <!-- TEXT -->
+            <Input
+              v-if="field.type === 'text'"
+              v-model="form[field.name]"
+              :placeholder="field.placeholder"
+            />
 
-          <!-- ERROR -->
-          <p v-if="form.errors[field.name]" class="text-sm text-destructive">
-            {{ form.errors[field.name] }}
-          </p>
+            <!-- FILE -->
+            <Input
+              v-else-if="field.type === 'file'"
+              type="file"
+              @change="(e: any) => (form[field.name] = e.target.files?.[0])"
+            />
+
+            <!-- TEXTAREA -->
+            <Textarea
+              v-else-if="field.type === 'textarea'"
+              v-model="form[field.name]"
+            />
+
+            <!-- NUMBER -->
+            <NumberField v-else-if="field.type === 'number'">
+              <NumberFieldContent>
+                <NumberFieldDecrement />
+                <NumberFieldInput v-model="form[field.name]" />
+                <NumberFieldIncrement />
+              </NumberFieldContent>
+            </NumberField>
+
+            <!-- SELECT -->
+            <Select
+              v-else-if="field.type === 'select'"
+              v-model="form[field.name]"
+            >
+              <SelectTrigger>
+                <SelectValue :placeholder="field.placeholder" />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem
+                  v-for="opt in field.options"
+                  :key="opt.value"
+                  :value="opt.value"
+                >
+                  {{ opt.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+
+            <!-- ERROR -->
+            <p v-if="form.errors[field.name]" class="text-sm text-destructive">
+              {{ form.errors[field.name] }}
+            </p>
+          </div>
         </div>
-      </div>
 
-      <!-- CUSTOM BODY -->
-      <slot />
+        <!-- CUSTOM BODY -->
+        <slot :form="form" />
+      </div>
 
       <!-- ACTIONS -->
       <div class="mt-6 flex justify-end gap-2">
