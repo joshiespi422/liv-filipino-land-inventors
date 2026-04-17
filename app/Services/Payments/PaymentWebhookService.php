@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Loan;
+namespace App\Services\Payments;
 
 use App\Models\Payment;
 use App\Models\LoanSchedule;
@@ -8,8 +8,11 @@ use App\Models\Status;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class LoanPaymentWebhookService
+class PaymentWebhookService
 {
+    /**
+     * Create a new class instance.
+     */
     public function handle(
         string $gatewayPaymentIntentId,
         string $gatewayStatus,

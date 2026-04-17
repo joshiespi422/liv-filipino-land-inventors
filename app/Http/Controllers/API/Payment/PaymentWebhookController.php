@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\API\Payment;
 
 use App\Http\Controllers\Controller;
-use App\Services\Loan\LoanPaymentWebhookService;
+use App\Models\PaymentGatewayLog;
 use App\Services\Payments\PaymentGatewayFactory;
+use App\Services\Payments\PaymentWebhookService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class PaymentWebhookController extends Controller
 {
     public function __construct(
-        private readonly LoanPaymentWebhookService $webhookService,
+        private readonly PaymentWebhookService $webhookService,
     ) {
     }
 
@@ -26,10 +27,22 @@ class PaymentWebhookController extends Controller
 
         $data = $service->parseWebhook($request->all());
 
+        PaymentGatewayLog::create([
+            'payment_id' => null,
+            'gateway' => $gateway,
+            'event' => 'webhook_received',
+            'payload' => $request->all(),
+        ]);
+
         if (empty($data['intent_id']) || empty($data['status'])) {
-            return response()->json([
-                'message' => 'Invalid webhook payload'
-            ], 200);
+            PaymentGatewayLog::create([
+                'payment_id' => null,
+                'gateway' => $gateway,
+                'event' => 'invalid_payload',
+                'payload' => $request->all(),
+            ]);
+
+            return response()->json(['message' => 'Invalid webhook payload'], 200);
         }
 
         $this->webhookService->handle(
