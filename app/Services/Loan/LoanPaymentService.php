@@ -7,7 +7,7 @@ use App\Exceptions\Loan\LoanInvalidPaymentAmountException;
 use App\Exceptions\Loan\LoanPendingPaymentExistsException;
 use App\Exceptions\Loan\LoanScheduleAlreadyPaidException;
 use App\Models\Loan;
-use App\Models\LoanPayment;
+use App\Models\Payment;
 use App\Models\LoanSchedule;
 use App\Models\PaymentMethod;
 use App\Models\Status;
@@ -63,7 +63,7 @@ class LoanPaymentService
 
     private function validateAmount(LoanSchedule $schedule, float $amount): void
     {
-        $paid = (float) LoanPayment::where('loan_schedule_id', $schedule->id)
+        $paid = (float) $schedule->payments()
             ->where('status_id', Status::SUCCESS)
             ->sum('amount');
 
@@ -78,13 +78,11 @@ class LoanPaymentService
         }
     }
 
-    private function createPendingPayment(Loan $loan, LoanSchedule $schedule, array $data): LoanPayment
+    private function createPendingPayment(Loan $loan, LoanSchedule $schedule, array $data): Payment
     {
         $this->validateAmount($schedule, (float) $data['amount']);
 
-        return LoanPayment::create([
-            'loan_id' => $loan->id,
-            'loan_schedule_id' => $schedule->id,
+        return $schedule->payments()->create([
             'payment_method_id' => $data['payment_method_id'],
             'payment_date' => now(),
             'amount' => $data['amount'],
@@ -93,7 +91,7 @@ class LoanPaymentService
         ]);
     }
 
-    private function settleOffline(LoanPayment $payment, LoanSchedule $schedule): array
+    private function settleOffline(Payment $payment, LoanSchedule $schedule): array
     {
         $payment->update(['status_id' => Status::SUCCESS]);
         $schedule->update(['status_id' => Status::PAID]);
@@ -101,7 +99,7 @@ class LoanPaymentService
         return ['payment' => $payment, 'next_action' => null];
     }
 
-    private function processGatewayPayment(LoanPayment $payment, PaymentMethod $paymentMethod, array $data): array
+    private function processGatewayPayment(Payment $payment, PaymentMethod $paymentMethod, array $data): array
     {
         try {
             $gateway = PaymentGatewayFactory::make($data['gateway'] ?? 'paymongo');
@@ -151,7 +149,7 @@ class LoanPaymentService
 
     private function hasPendingPayment(LoanSchedule $schedule): bool
     {
-        return LoanPayment::where('loan_schedule_id', $schedule->id)
+        return $schedule->payments()
             ->where('status_id', Status::PENDING)
             ->exists();
     }

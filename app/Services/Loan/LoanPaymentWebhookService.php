@@ -2,7 +2,7 @@
 
 namespace App\Services\Loan;
 
-use App\Models\LoanPayment;
+use App\Models\Payment;
 use App\Models\LoanSchedule;
 use App\Models\Status;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +17,7 @@ class LoanPaymentWebhookService
     ): void {
         $gatewayStatus = $this->normalizeStatus($gatewayStatus);
 
-        $payment = LoanPayment::where('gateway_payment_intent_id', $gatewayPaymentIntentId)->first();
+        $payment = Payment::where('gateway_payment_intent_id', $gatewayPaymentIntentId)->first();
 
         if (!$payment) {
             Log::warning('Webhook received for unknown payment intent.', [
@@ -28,28 +28,38 @@ class LoanPaymentWebhookService
 
         // Idempotency guard
         if ((int) $payment->status_id === Status::SUCCESS) {
-            Log::info('Webhook already processed for payment.', ['payment_id' => $payment->id]);
+            Log::info('Webhook already processed.', ['payment_id' => $payment->id]);
+            return;
+        }
+
+        $payable = $payment->payable;
+
+        if (!$payable instanceof LoanSchedule) {
+            Log::warning('Payment not linked to LoanSchedule.', [
+                'payment_id' => $payment->id,
+                'type' => $payment->payable_type,
+            ]);
             return;
         }
 
         if ($gatewayStatus === Status::SUCCESS || $gatewayStatus === 'paid') {
-            DB::transaction(function () use ($payment, $gatewayPaymentId) {
+            DB::transaction(function () use ($payment, $payable, $gatewayPaymentId) {
                 $payment->update([
                     'status_id' => Status::SUCCESS,
                     'gateway_payment_id' => $gatewayPaymentId,
                 ]);
 
-                $schedule = $payment->loanSchedule;
-                $schedule->update(['status_id' => Status::PAID]);
+                // mark schedule as paid
+                $payable->update(['status_id' => Status::PAID]);
 
-                $this->tryFinishLoan($schedule);
+                $this->tryFinishLoan($payable);
             });
         }
 
         if ($gatewayStatus === Status::FAILED) {
             $payment->update(['status_id' => Status::FAILED]);
 
-            Log::info('Webhook marked payment as failed.', ['payment_id' => $payment->id]);
+            Log::info('Payment marked as failed.', ['payment_id' => $payment->id]);
         }
     }
 
@@ -58,7 +68,7 @@ class LoanPaymentWebhookService
         $loan = $schedule->loan;
 
         if (!$loan) {
-            Log::error('LoanSchedule has no associated loan.', ['schedule_id' => $schedule->id]);
+            Log::error('LoanSchedule has no loan.', ['schedule_id' => $schedule->id]);
             return;
         }
 
@@ -69,7 +79,7 @@ class LoanPaymentWebhookService
         if (!$hasUnpaid) {
             $loan->update(['status_id' => Status::FINISHED]);
 
-            Log::info('Loan automatically marked as finished.', ['loan_id' => $loan->id]);
+            Log::info('Loan marked as finished.', ['loan_id' => $loan->id]);
         }
     }
 
