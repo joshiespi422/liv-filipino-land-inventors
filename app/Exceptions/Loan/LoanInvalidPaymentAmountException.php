@@ -7,13 +7,13 @@ use Exception;
 class LoanInvalidPaymentAmountException extends Exception
 {
     public function __construct(
-        public float $required,
-        public float $provided
+        public readonly float $required,
+        public readonly float $provided,
     ) {
-        parent::__construct('Payment must be exact full remaining balance.');
+        parent::__construct('Payment must be the exact full remaining balance.');
     }
 
-    public function render()
+    public function render(): \Illuminate\Http\JsonResponse
     {
         return response()->json([
             'success' => false,

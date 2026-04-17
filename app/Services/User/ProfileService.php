@@ -5,6 +5,7 @@ namespace App\Services\User;
 use App\Http\Requests\User\UpdateProfileRequest;
 use App\Models\Status;
 use App\Models\User;
+use App\Models\UserType;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -31,7 +32,9 @@ class ProfileService
             $request->file('back_valid_id_picture')
         );
 
-        $data['user_status_id'] = Status::PENDING_FOR_MEMBER;
+        if ($user->user_type_id === UserType::BASIC) {
+            $data['status_id'] = Status::PENDING_FOR_MEMBER;
+        }
 
         $user->update($data);
 

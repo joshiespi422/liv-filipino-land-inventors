@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Loan;
 
+use App\Models\PaymentMethod;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -26,6 +27,14 @@ class PayLoanRequest extends FormRequest
             'loan_schedule_id' => ['required', 'exists:loan_schedules,id'],
             'payment_method_id' => ['required', 'exists:payment_methods,id'],
             'amount' => ['required', 'numeric', 'gt:0'],
+
+            'gateway' => ['required', 'string', 'in:paymongo'],
+
+            'gateway_payment_method_id' => [
+                'required_if:payment_method_id,' . PaymentMethod::CARD,
+                'nullable',
+                'string',
+            ],
         ];
     }
 }

@@ -5,12 +5,12 @@ namespace App\Exceptions\Loan;
 use App\Models\LoanSchedule;
 use Exception;
 
-class LoanScheduleAlreadyPaidException extends Exception
+class LoanPendingPaymentExistsException extends Exception
 {
     public function __construct(
         public readonly LoanSchedule $schedule,
     ) {
-        parent::__construct('This loan schedule is already fully paid.');
+        parent::__construct('A payment is already pending for this schedule. Complete or cancel it first.');
     }
 
     public function render(): \Illuminate\Http\JsonResponse
@@ -20,8 +20,7 @@ class LoanScheduleAlreadyPaidException extends Exception
             'message' => $this->getMessage(),
             'data' => [
                 'schedule_id' => $this->schedule->id,
-                'status' => 'PAID',
             ],
-        ], 422);
+        ], 409);
     }
 }

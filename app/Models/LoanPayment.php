@@ -14,10 +14,19 @@ class LoanPayment extends Model
         'payment_method_id',
         'payment_date',
         'amount',
+
+        'gateway',
+        'gateway_payment_intent_id',
+        'gateway_payment_id',
+        'gateway_response',
+
+        'status_id',
     ];
 
     protected $casts = [
+        'status_id' => 'integer',
         'payment_date' => 'date',
+        'gateway_response' => 'array',
     ];
 
     // one to many, payment has one loan
@@ -27,9 +36,9 @@ class LoanPayment extends Model
     }
 
     // one to many, payment has one schedule
-    public function loanSchedule(): BelongsTo
+    public function loanSchedule()
     {
-        return $this->belongsTo(LoanSchedule::class);
+        return $this->belongsTo(LoanSchedule::class, 'loan_schedule_id');
     }
 
     // one to many, payment has one payment method
@@ -44,4 +53,13 @@ class LoanPayment extends Model
         return $this->morphMany(WalletTransaction::class, 'reference');
     }
 
+    /**
+     * Summary of status
+     *
+     * @return BelongsTo<Status, LoanPayment>
+     */
+    public function status()
+    {
+        return $this->belongsTo(Status::class);
+    }
 }

@@ -19,7 +19,11 @@ class Status extends Model
     public const UNPAID = 8;
     public const OVERDUE = 9;
     public const PENDING_FOR_MEMBER = 10;
-    
+
+    public const SUCCESS = 11;
+
+    public const FAILED = 12;
+
     // protected $fillable = [];
 
     // one to many, status has many loans

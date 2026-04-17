@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class LoanSchedule extends Model
 {
@@ -21,6 +22,7 @@ class LoanSchedule extends Model
     ];
 
     protected $casts = [
+        'status_id' => 'integer',
         'due_date' => 'date',
     ];
 
@@ -37,8 +39,36 @@ class LoanSchedule extends Model
     }
 
     // one to many, schedule has many payments
-    public function loanPayments(): HasMany
+    // public function loanPayments(): HasMany
+    // {
+    //     return $this->hasMany(LoanPayment::class);
+    // }
+
+    public function payments(): MorphMany
     {
-        return $this->hasMany(LoanPayment::class);
+        return $this->morphMany(Payment::class, 'payable');
+    }
+
+    public function onPaymentSuccess(Payment $payment): void
+    {
+        $schedule = LoanSchedule::findOrFail($payment->meta['loan_schedule_id']);
+        $schedule->update(['status_id' => Status::PAID]);
+        $this->tryFinish();
+    }
+
+    public function onPaymentFailed(Payment $payment): void
+    {
+        // notify, log, etc.
+    }
+
+    private function tryFinish(): void
+    {
+        $hasUnpaid = $this->loanSchedules()
+            ->where('status_id', '!=', Status::PAID)
+            ->exists();
+
+        if (!$hasUnpaid) {
+            $this->update(['status_id' => Status::FINISHED]);
+        }
     }
 }

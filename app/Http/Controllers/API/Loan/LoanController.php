@@ -339,18 +339,18 @@ class LoanController extends Controller
         PayLoanRequest $request,
         Loan $loan,
         LoanPaymentService $service
-    ) {
+    ): JsonResponse {
         abort_if(
             $loan->user_id !== $request->user()->id,
             403,
-            'You are not authorized to pay this loan.'
+            'Unauthorized'
         );
 
         $result = $service->pay($loan, $request->validated());
 
         return response()->json([
             'success' => true,
-            'message' => 'Schedule fully paid successfully.',
+            'message' => 'Payment initiated',
             'data' => $result,
         ]);
     }

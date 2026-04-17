@@ -6,8 +6,11 @@ use App\Http\Controllers\API\BusinessTraining\CategoryController;
 use App\Http\Controllers\API\BusinessTraining\TrainingController;
 use App\Http\Controllers\API\BusinessTraining\TypeController;
 use App\Http\Controllers\API\Loan\LoanController;
+use App\Http\Controllers\API\Loan\LoanPaymentWebhookController;
+use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\API\Settings\ProfileController;
 use App\Http\Controllers\API\Verification\PhoneVerificationController;
+use App\Http\Controllers\API\Wallet\WalletController;
 use App\Models\UserType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +26,10 @@ Route::middleware('guest')->group(function () {
     Route::post('/verify-phone/resend', [PhoneVerificationController::class, 'resend'])->middleware('throttle:3,1');
     Route::post('/register/set-password', [RegisteredUserController::class, 'setPassword'])->middleware('throttle:5,1');
 });
+
+Route::get('/payment/status/{paymentIntentId}', [PaymentController::class, 'status']);
+Route::get('/payment/success', [PaymentController::class, 'success']);
+Route::post('/webhooks/{gateway}', LoanPaymentWebhookController::class);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
@@ -53,6 +60,15 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('update', [ProfileController::class, 'update']);
             Route::patch('change-password', [ProfileController::class, 'changePassword']);
             Route::post('avatar', [ProfileController::class, 'updateAvatar']);
+        });
+
+     // Wallet Routes
+    Route::prefix('wallet')
+        ->middleware('role.api:' . UserType::MEMBER)
+        ->group(function () {
+            Route::get('/', [WalletController::class, 'index']);
+            Route::get('/update', [WalletController::class, 'update']);
+            Route::get('transaction', [WalletController::class, 'transaction']);
         });
 
     // Loan Routes

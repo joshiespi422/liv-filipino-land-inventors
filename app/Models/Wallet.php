@@ -8,15 +8,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Wallet extends Model
 {
-    // protected $fillable = [];
+    protected $fillable = [
+        'user_id',
+        'balance',
+        'show'
+    ];
 
-    // relationship to wallet transactions
     public function walletTransactions(): HasMany
     {
         return $this->hasMany(WalletTransaction::class);
     }
 
-    // relationship to user
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

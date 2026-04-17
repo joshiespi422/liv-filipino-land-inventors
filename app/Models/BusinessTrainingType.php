@@ -28,4 +28,9 @@ class BusinessTrainingType extends Model
     {
         return $this->hasMany(BusinessTrainingCategory::class);
     }
+
+    public static function notFoundMessage(): string
+    {
+        return 'Business training type not found.';
+    }
 }

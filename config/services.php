@@ -41,4 +41,10 @@ return [
         'sender' => env('MOVIDER_SENDER_ID', 'BB88'),
     ],
 
+    'paymongo' => [
+        'secret_key' => env('PAYMONGO_SECRET_KEY'),
+        'public_key' => env('PAYMONGO_PUBLIC_KEY'),
+        'base_url' => 'https://api.paymongo.com/v1',
+    ],
+
 ];

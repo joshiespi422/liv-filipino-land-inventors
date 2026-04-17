@@ -14,6 +14,7 @@ class ApiProfileResource extends JsonApiResource
     public $attributes = [
         'name',
         'phone',
+        'user_type_id',
         'email',
         'gender',
         'region',
@@ -42,6 +43,7 @@ class ApiProfileResource extends JsonApiResource
             'email' => $this->email,
             'gender' => $this->gender,
             'birthdate' => $this->birthdate,
+            'user_type_id' => $this->user_type_id,
 
             'region' => $this->region,
             'province' => $this->province,
