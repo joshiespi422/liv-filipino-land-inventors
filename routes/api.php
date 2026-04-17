@@ -10,6 +10,7 @@ use App\Http\Controllers\API\Loan\LoanPaymentWebhookController;
 use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\API\Settings\ProfileController;
 use App\Http\Controllers\API\Verification\PhoneVerificationController;
+use App\Http\Controllers\API\Wallet\WalletController;
 use App\Models\UserType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -59,6 +60,15 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('update', [ProfileController::class, 'update']);
             Route::patch('change-password', [ProfileController::class, 'changePassword']);
             Route::post('avatar', [ProfileController::class, 'updateAvatar']);
+        });
+
+     // Wallet Routes
+    Route::prefix('wallet')
+        ->middleware('role.api:' . UserType::MEMBER)
+        ->group(function () {
+            Route::get('/', [WalletController::class, 'index']);
+            Route::get('/update', [WalletController::class, 'update']);
+            Route::get('transaction', [WalletController::class, 'transaction']);
         });
 
     // Loan Routes
