@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable(
-    'loan_payment_id',
+    'payment_id',
     'gateway',
     'event',
     'payload',

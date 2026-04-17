@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\Loan;
+namespace App\Http\Controllers\API\Payment;
 
 use App\Http\Controllers\Controller;
 use App\Services\Loan\LoanPaymentWebhookService;
@@ -8,7 +8,7 @@ use App\Services\Payments\PaymentGatewayFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class LoanPaymentWebhookController extends Controller
+class PaymentWebhookController extends Controller
 {
     public function __construct(
         private readonly LoanPaymentWebhookService $webhookService,

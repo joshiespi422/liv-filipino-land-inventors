@@ -6,7 +6,7 @@ use App\Http\Controllers\API\BusinessTraining\CategoryController;
 use App\Http\Controllers\API\BusinessTraining\TrainingController;
 use App\Http\Controllers\API\BusinessTraining\TypeController;
 use App\Http\Controllers\API\Loan\LoanController;
-use App\Http\Controllers\API\Loan\LoanPaymentWebhookController;
+use App\Http\Controllers\API\Payment\PaymentWebhookController;
 use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\API\Settings\ProfileController;
 use App\Http\Controllers\API\Verification\PhoneVerificationController;
@@ -29,7 +29,7 @@ Route::middleware('guest')->group(function () {
 
 Route::get('/payment/status/{paymentIntentId}', [PaymentController::class, 'status']);
 Route::get('/payment/success', [PaymentController::class, 'success']);
-Route::post('/webhooks/{gateway}', LoanPaymentWebhookController::class);
+Route::post('/webhooks/{gateway}', PaymentWebhookController::class);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
@@ -62,7 +62,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('avatar', [ProfileController::class, 'updateAvatar']);
         });
 
-     // Wallet Routes
+    // Wallet Routes
     Route::prefix('wallet')
         ->middleware('role.api:' . UserType::MEMBER)
         ->group(function () {
