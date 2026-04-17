@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Resources\Api\User\ApiProfileResource;
 use App\Services\Auth\AuthenticationService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -52,7 +53,7 @@ class AuthenticatedSessionController extends Controller
                 'message' => 'Login successful.',
                 'token' => $data['token'],
                 'token_type' => 'Bearer',
-                'user' => $data['user'],
+                'user' => new ApiProfileResource($data['user']),
             ]);
 
         } catch (ValidationException $e) {

@@ -9,10 +9,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class WalletTransaction extends Model
 {
     protected $fillable = [
-        'wallet_id', 
-        'amount', 
-        'type', 
-        'description', 
+        'wallet_id',
+        'amount',
+        'type',
+        'description',
         'reference_id',
         'reference_type',
     ];
