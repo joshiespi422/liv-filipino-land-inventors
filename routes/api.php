@@ -25,6 +25,8 @@ Route::middleware('guest')->group(function () {
     Route::post('/register/set-password', [RegisteredUserController::class, 'setPassword'])->middleware('throttle:5,1');
 });
 
+Route::get('/payments/status/{paymentIntentId}', [LoanPaymentWebhookController::class, 'status']);
+Route::get('/payments/success', [LoanPaymentWebhookController::class, 'success']);
 Route::post('/webhooks/{gateway}', LoanPaymentWebhookController::class);
 
 Route::middleware('auth:sanctum')->group(function () {
