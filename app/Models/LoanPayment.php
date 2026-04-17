@@ -35,9 +35,9 @@ class LoanPayment extends Model
     }
 
     // one to many, payment has one schedule
-    public function loanSchedule(): BelongsTo
+    public function loanSchedule()
     {
-        return $this->belongsTo(LoanSchedule::class);
+        return $this->belongsTo(LoanSchedule::class, 'loan_schedule_id');
     }
 
     // one to many, payment has one payment method

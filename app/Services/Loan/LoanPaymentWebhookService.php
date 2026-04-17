@@ -32,7 +32,7 @@ class LoanPaymentWebhookService
             return;
         }
 
-        if ($gatewayStatus === Status::SUCCESS) {
+        if ($gatewayStatus === Status::SUCCESS || $gatewayStatus === 'paid') {
             DB::transaction(function () use ($payment, $gatewayPaymentId) {
                 $payment->update([
                     'status_id' => Status::SUCCESS,
