@@ -20,11 +20,6 @@ class PaymentWebhookController extends Controller
     {
         $service = PaymentGatewayFactory::make($gateway);
 
-        // Verify the request actually came from the gateway
-        // if (! $service->verifyWebhookSignature($request)) {
-        //     return response()->json(['message' => 'Invalid signature.'], 401);
-        // }
-
         $data = $service->parseWebhook($request->all());
 
         PaymentGatewayLog::create([
