@@ -4,6 +4,7 @@ namespace App\Services\Loan;
 
 use App\Exceptions\Loan\LoanGatewayException;
 use App\Exceptions\Loan\LoanInvalidPaymentAmountException;
+use App\Exceptions\Loan\LoanPendingApplicationException;
 use App\Exceptions\Loan\LoanPendingPaymentExistsException;
 use App\Exceptions\Loan\LoanScheduleAlreadyPaidException;
 use App\Models\Loan;
@@ -22,6 +23,7 @@ class LoanPaymentService
         $paymentMethod = PaymentMethod::findOrFail($data['payment_method_id']);
 
         return DB::transaction(function () use ($loan, $data, $paymentMethod) {
+            $this->checkLoanStatus($loan, $data['loan_schedule_id']);
             $schedule = $this->lockAndValidateSchedule($loan, $data['loan_schedule_id']);
             $payment = $this->createPendingPayment($schedule, $data);
 
@@ -31,6 +33,20 @@ class LoanPaymentService
 
             return $this->processGatewayPayment($payment, $paymentMethod, $data);
         });
+    }
+
+    /**
+     * Summary of checkLoanStatus
+     *
+     * @param Loan $loan
+     * @throws LoanPendingApplicationException
+     * @return void
+     */
+    public function checkLoanStatus(Loan $loan, int $scheduleId): void
+    {
+        if ($loan->status_id === Status::PENDING) {
+            throw new LoanPendingApplicationException($loan, $scheduleId ?? null);
+        }
     }
 
     /**
