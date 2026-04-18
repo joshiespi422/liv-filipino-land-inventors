@@ -148,4 +148,16 @@ class User extends Authenticatable
             ->orderByRaw('user_id IS NULL')
             ->first();
     }
+
+    public function membership(): HasOne
+    {
+        return $this->hasOne(MemberMembership::class);
+    }
+
+    public function hasActiveMembership(): bool
+    {
+        return $this->membership()
+            ->where('status_id', Status::ACTIVE)
+            ->exists();
+    }
 }

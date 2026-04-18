@@ -21,7 +21,8 @@ class DatabaseSeeder extends Seeder
             BusinessTrainingSeeder::class,
             StatusSeeder::class,
             PaymentMethodSeeder::class,
-            LoanSettingSeeder::class
+            LoanSettingSeeder::class,
+            MembershipSettingSeeder::class,
         ]);
 
         User::factory()->create([

@@ -3,7 +3,7 @@
 namespace App\Services\Payments;
 
 use App\Models\Payment;
-use App\Models\LoanSchedule;
+use App\Contracts\Payable;
 use App\Models\PaymentGatewayLog;
 use App\Models\Status;
 use Illuminate\Support\Facades\DB;
@@ -19,8 +19,7 @@ class PaymentWebhookService
         string $gatewayStatus,
         ?string $gatewayPaymentId = null
     ): void {
-        $gatewayStatus = $this->normalizeStatus($gatewayStatus);
-
+        $status = $this->normalizeStatus($gatewayStatus);
         $payment = Payment::where('gateway_payment_intent_id', $gatewayPaymentIntentId)->first();
 
         if (!$payment) {
@@ -33,7 +32,7 @@ class PaymentWebhookService
                 'event' => 'unknown_payment_intent',
                 'payload' => [
                     'intent_id' => $gatewayPaymentIntentId,
-                    'status' => $gatewayStatus,
+                    'status' => $status,
                 ],
             ]);
             return;
@@ -53,10 +52,11 @@ class PaymentWebhookService
 
         $payable = $payment->payable;
 
-        if (!$payable instanceof LoanSchedule) {
-            Log::warning('Payment not linked to LoanSchedule.', [
+        // ↓ THIS is the fix — check the contract, not a specific model
+        if (!$payable instanceof Payable) {
+            Log::warning('Payable does not implement Payable contract.', [
                 'payment_id' => $payment->id,
-                'type' => $payment->payable_type,
+                'payable_type' => $payment->payable_type,
             ]);
             PaymentGatewayLog::create([
                 'payment_id' => $payment->id,
@@ -67,15 +67,15 @@ class PaymentWebhookService
             return;
         }
 
-        if ($gatewayStatus === Status::SUCCESS || $gatewayStatus === 'paid') {
+        if ($status === 'paid') {
             DB::transaction(function () use ($payment, $payable, $gatewayPaymentId) {
                 $payment->update([
                     'status_id' => Status::SUCCESS,
                     'gateway_payment_id' => $gatewayPaymentId,
                 ]);
 
-                // mark schedule as paid
-                $payable->update(['status_id' => Status::PAID]);
+                // delegates to LoanSchedule or MembershipSchedule automatically
+                $payable->onPaymentSuccess($payment);
 
                 PaymentGatewayLog::create([
                     'payment_id' => $payment->id,
@@ -84,72 +84,40 @@ class PaymentWebhookService
                     'payload' => [
                         'intent_id' => $payment->gateway_payment_intent_id,
                         'gateway_payment_id' => $gatewayPaymentId,
+                        'payable_type' => $payment->payable_type,
+                        'payable_id' => $payment->payable_id,
                     ],
                 ]);
-
-                $this->tryFinishLoan($payable);
             });
         }
 
-        if ($gatewayStatus === Status::FAILED) {
-            $payment->update(['status_id' => Status::FAILED]);
+        if ($status === 'failed') {
+            DB::transaction(function () use ($payment, $payable, $gatewayPaymentIntentId) {
+                $payment->update(['status_id' => Status::FAILED]);
 
-            PaymentGatewayLog::create([
-                'payment_id' => $payment->id,
-                'gateway' => $payment->gateway ?? 'paymongo',
-                'event' => 'payment_failed',
-                'payload' => [
-                    'intent_id' => $gatewayPaymentIntentId,
-                ],
-            ]);
+                $payable->onPaymentFailed($payment);
+
+                PaymentGatewayLog::create([
+                    'payment_id' => $payment->id,
+                    'gateway' => $payment->gateway ?? 'paymongo',
+                    'event' => 'payment_failed',
+                    'payload' => [
+                        'intent_id' => $gatewayPaymentIntentId,
+                        'payable_type' => $payment->payable_type,
+                        'payable_id' => $payment->payable_id,
+                    ],
+                ]);
+            });
 
             Log::info('Payment marked as failed.', ['payment_id' => $payment->id]);
         }
     }
 
-    private function tryFinishLoan(LoanSchedule $schedule): void
-    {
-        $loan = $schedule->loan;
-
-        if (!$loan) {
-            Log::error('LoanSchedule has no loan.', ['schedule_id' => $schedule->id]);
-            PaymentGatewayLog::create([
-                'payment_id' => null,
-                'gateway' => 'system',
-                'event' => 'missing_loan_relation',
-                'payload' => ['schedule_id' => $schedule->id],
-            ]);
-            return;
-        }
-
-        $hasUnpaid = LoanSchedule::where('loan_id', $loan->id)
-            ->where('status_id', '!=', Status::PAID)
-            ->exists();
-
-        if (!$hasUnpaid) {
-            $loan->update(['status_id' => Status::FINISHED]);
-
-            Log::info('Loan marked as finished.', ['loan_id' => $loan->id]);
-            PaymentGatewayLog::create([
-                'payment_id' => null,
-                'gateway' => 'system',
-                'event' => 'loan_finished',
-                'payload' => ['loan_id' => $loan->id],
-            ]);
-        }
-    }
-
-    private function normalizeStatus(string $status): string|int
+    private function normalizeStatus(string $status): string
     {
         return match ($status) {
-            'paid',
-            'payment.paid',
-            'success',
-            'succeeded' => Status::SUCCESS,
-
-            'failed',
-            'payment.failed' => Status::FAILED,
-
+            'paid', 'payment.paid', 'success', 'succeeded' => 'paid',
+            'failed', 'payment.failed' => 'failed',
             default => $status,
         };
     }

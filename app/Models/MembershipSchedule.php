@@ -7,28 +7,25 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-class LoanSchedule extends Model implements Payable
+class MembershipSchedule extends Model implements Payable
 {
     protected $fillable = [
-        'loan_id',
+        'member_membership_id',
         'status_id',
-        'month_no',
-        'beginning_balance',
-        'interest_amount',
-        'principal_amount',
-        'total_payment',
-        'ending_balance',
+        'installment_no',
+        'amount',
         'due_date',
     ];
 
     protected $casts = [
         'status_id' => 'integer',
+        'amount' => 'integer',
         'due_date' => 'date',
     ];
 
-    public function loan(): BelongsTo
+    public function membership(): BelongsTo
     {
-        return $this->belongsTo(Loan::class);
+        return $this->belongsTo(MemberMembership::class, 'member_membership_id');
     }
 
     public function status(): BelongsTo
@@ -41,11 +38,11 @@ class LoanSchedule extends Model implements Payable
         return $this->morphMany(Payment::class, 'payable');
     }
 
-    // Payable contract — this
+    // Payable contract — mark itself paid then bubble up
     public function onPaymentSuccess(Payment $payment): void
     {
         $this->update(['status_id' => Status::PAID]);
-        $this->loan->tryFinish();
+        $this->membership->tryActivate();
     }
 
     public function onPaymentFailed(Payment $payment): void
