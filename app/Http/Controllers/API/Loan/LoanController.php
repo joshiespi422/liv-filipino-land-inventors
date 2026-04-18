@@ -118,6 +118,8 @@ class LoanController extends Controller
             'user',
             'status',
             'loanSchedules',
+            'loanSchedules.payments.status',
+            'loanSchedules.payments.paymentMethod',
         ]);
 
         return new ApiLoanResource($loan);

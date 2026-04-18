@@ -42,6 +42,5 @@ class ApiLoanResource extends JsonApiResource
     public $relationships = [
         'user' => ApiUserResource::class,
         'loanSchedules' => ApiLoanScheduleResource::class,
-        'loanPayments' => ApiLoanPaymentResource::class,
     ];
 }

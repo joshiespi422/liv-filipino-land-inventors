@@ -39,7 +39,7 @@ class ApiLoanScheduleResource extends JsonApiResource
      * The resource's relationships.
      */
     public $relationships = [
-        'loanPayments' => ApiLoanPaymentResource::class,
+        'payments' => ApiLoanPaymentResource::class,
     ];
 
 }
