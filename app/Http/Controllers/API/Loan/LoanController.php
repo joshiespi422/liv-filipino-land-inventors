@@ -8,16 +8,12 @@ use App\Http\Requests\Loan\PayLoanRequest;
 use App\Http\Requests\Loan\StoreLoanRequest;
 use App\Http\Resources\Api\Loan\ApiLoanResource;
 use App\Models\Loan;
-use App\Models\LoanPayment;
-use App\Models\LoanSchedule;
-use App\Models\Status;
 use App\Services\Loan\LoanApplicationService;
 use App\Services\Loan\LoanPaymentService;
 use App\Services\Loan\LoanService;
 use DomainException;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 
 class LoanController extends Controller
 {
@@ -118,7 +114,8 @@ class LoanController extends Controller
             'user',
             'status',
             'loanSchedules',
-            'loanPayments',
+            'loanSchedules.payments.status',
+            'loanSchedules.payments.paymentMethod',
         ]);
 
         return new ApiLoanResource($loan);
