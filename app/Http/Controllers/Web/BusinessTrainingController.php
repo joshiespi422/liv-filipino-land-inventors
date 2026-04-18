@@ -12,6 +12,8 @@ use App\Models\UserType;
 use Inertia\Inertia;
 use App\Models\BusinessTrainingType;
 use App\Models\BusinessTrainingCategory;
+use App\Http\Requests\BusinessTraining\StoreTypeRequest;
+use App\Http\Requests\BusinessTraining\StoreCategoryRequest;
 
 class BusinessTrainingController extends Controller
 {
@@ -53,17 +55,10 @@ class BusinessTrainingController extends Controller
         ]);
     }
 
-    public function storeType(Request $request)
+    public function storeType(StoreTypeRequest $request)
     {
-        if (! $this->canMutate()) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'icon' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
-
+        // Authorization and Validation
+        $validated = $request->validated();
         // Generate the Slug
         $validated['slug'] = Str::slug($validated['name']);
 
@@ -80,48 +75,10 @@ class BusinessTrainingController extends Controller
         return back();
     }
 
-    public function storeCategory(Request $request, BusinessTrainingType $type)
+    public function storeCategory(StoreCategoryRequest $request, BusinessTrainingType $type)
     {
-        if (! $this->canMutate()) {
-            abort(403);
-        }
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:business_training_categories,name',
-            'description' => 'required|string|max:1000',
-            
-            'modules' => 'required|array|size:6',
-
-            // MODULE 1
-            'modules.0.intro_title' => 'required|string|max:255',
-            'modules.0.intro_description' => 'required|string|max:1000',
-
-            'modules.0.advantages' => 'array|max:10',
-            'modules.0.challenges' => 'array|max:10',
-            'modules.0.advantages.*' => 'required|string|max:255',
-            'modules.0.challenges.*' => 'required|string|max:255',
-
-            'modules.0.required_mindset' => 'array|max:10',
-            'modules.0.required_mindset.*.name' => 'required|string|max:255',
-            'modules.0.required_mindset.*.description' => 'required|string|max:1000',
-
-            // MODULE 2,4,5,6
-            'modules.1.items' => 'array|max:5',
-            'modules.3.items' => 'array|max:5',
-            'modules.4.items' => 'array|max:5',
-            'modules.5.items' => 'array|max:5',
-            'modules.*.items.*.title' => 'required|string|max:255',
-            'modules.*.items.*.description' => 'required|string|max:1000',
-
-            // MODULE 3
-            'modules.2.budget' => 'array|max:10',
-            'modules.2.budget.*.item' => 'required|string|max:255',
-            'modules.2.budget.*.min_cost' => 'required|numeric|min:0|max:1000000000',
-            'modules.2.budget.*.max_cost' => 'required|numeric|min:0|max:1000000000',
-
-            'modules.2.min_cost' => 'required|numeric|min:0|max:1000000000',
-            'modules.2.max_cost' => 'required|numeric|min:0|max:1000000000',
-        ]);
+        // Authorization and Validation
+        $validated = $request->validated();
 
         DB::transaction(function () use ($validated, $type) {
 
@@ -164,7 +121,7 @@ class BusinessTrainingController extends Controller
                 ],
                 [
                     'title' => 'Required mindset',
-                    'description' => $data['mindset_description'],
+                    'description' => 'To succeed in a food cart business, you need',
                     'required_mindset' => array_slice($data['required_mindset'] ?? [], 0, 10),
                 ],
             ],
