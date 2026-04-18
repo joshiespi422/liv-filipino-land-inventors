@@ -89,6 +89,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('memberships')
         ->middleware('role.api:' . UserType::BASIC . ',' . UserType::MEMBER)
         ->group(function () {
+            Route::get('/', [MembershipController::class, 'index']);
             Route::get('settings', [MembershipController::class, 'settings']);
             Route::post('apply', [MembershipController::class, 'apply']);
             Route::post('schedules/{schedule}/pay', [MembershipController::class, 'pay']);
