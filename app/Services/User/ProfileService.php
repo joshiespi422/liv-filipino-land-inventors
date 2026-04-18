@@ -22,20 +22,34 @@ class ProfileService
      */
     public function updateProfile(User $user, UpdateProfileRequest $request): User
     {
+        // 1. Get validated data (excludes files not in the rules)
         $data = $request->validated();
 
-        $data['front_valid_id_picture'] = $this->storeIdPhoto(
-            $request->file('front_valid_id_picture')
-        );
+        // 2. Handle Front ID Photo
+        if ($request->hasFile('front_valid_id_picture')) {
+            $data['front_valid_id_picture'] = $this->storeIdPhoto(
+                $request->file('front_valid_id_picture')
+            );
+        } else {
+            // Remove it from the update array so we don't overwrite the existing path with null
+            unset($data['front_valid_id_picture']);
+        }
 
-        $data['back_valid_id_picture'] = $this->storeIdPhoto(
-            $request->file('back_valid_id_picture')
-        );
+        // 3. Handle Back ID Photo
+        if ($request->hasFile('back_valid_id_picture')) {
+            $data['back_valid_id_picture'] = $this->storeIdPhoto(
+                $request->file('back_valid_id_picture')
+            );
+        } else {
+            unset($data['back_valid_id_picture']);
+        }
 
+        // 4. Update Status logic
         if ($user->user_type_id === UserType::BASIC) {
             $data['status_id'] = Status::PENDING_FOR_MEMBER;
         }
 
+        // 5. Perform the update
         $user->update($data);
 
         return $user->fresh();

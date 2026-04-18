@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api\User;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Resources\Api\ApiStatusResource;
 use Illuminate\Http\Resources\JsonApi\JsonApiResource;
@@ -42,7 +43,7 @@ class ApiProfileResource extends JsonApiResource
             'phone' => $this->phone,
             'email' => $this->email,
             'gender' => $this->gender,
-            'birthdate' => $this->birthdate,
+            'birthdate' => $this->birthdate ? Carbon::parse($this->birthdate)->format('Y-m-d') : null,
             'user_type_id' => $this->user_type_id,
 
             'region' => $this->region,
@@ -52,20 +53,13 @@ class ApiProfileResource extends JsonApiResource
             'street' => $this->street,
             'postal_code' => $this->postal_code,
 
-            'avatar' => fn() => $this->avatar
-                ? asset('storage/' . $this->avatar)
-                : null,
+            'avatar' => $this->avatar ? asset('storage/' . $this->avatar) : null,
 
             'valid_id_type' => $this->valid_id_type,
             'valid_id_number' => $this->valid_id_number,
 
-            'front_valid_id_picture' => fn() => $this->front_valid_id_picture
-                ? asset('storage/' . $this->front_valid_id_picture)
-                : null,
-
-            'back_valid_id_picture' => fn() => $this->back_valid_id_picture
-                ? asset('storage/' . $this->back_valid_id_picture)
-                : null,
+            'front_valid_id_picture' => $this->front_valid_id_picture ? asset('storage/' . $this->front_valid_id_picture) : null,
+            'back_valid_id_picture' => $this->back_valid_id_picture ? asset('storage/' . $this->back_valid_id_picture) : null,
 
             'is_verified' => fn() => !is_null($this->valid_id_number),
             'status' => $this->whenLoaded('status', fn() => [
