@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Loan extends Model
 {
@@ -51,6 +52,11 @@ class Loan extends Model
             'loan_id',
             'payable_id',
         )->where('payments.payable_type', LoanSchedule::class);
+    }
+
+    public function walletTransactions(): MorphMany
+    {
+        return $this->morphMany(WalletTransaction::class, 'reference');
     }
 
     // called by LoanSchedule::onPaymentSuccess after each paid schedule

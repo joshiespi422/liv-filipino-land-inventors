@@ -74,6 +74,25 @@ class LoanAssistanceController extends Controller
             $loan->update([
                 'status_id' => Status::ACTIVE,
             ]);
+
+            $wallet = $loan->user->wallet()->firstOrCreate(
+                ['user_id' => $loan->user_id],
+                ['balance' => 0, 'show' => true]
+            );
+
+            // Lock the wallet for the update to ensure balance accuracy
+            $wallet->lockForUpdate()->get();
+
+            // Increment balance
+            $wallet->increment('balance', $loan->amount);
+
+            // Log the transaction
+            $loan->walletTransactions()->create([
+                'wallet_id'   => $wallet->id,
+                'amount'      => $loan->amount,
+                'type'        => 'deposit',
+                'description' => "Loan disbursement for Loan ID: #{$loan->id}",
+            ]);
         }
 
         if ($action === 'decline') {
