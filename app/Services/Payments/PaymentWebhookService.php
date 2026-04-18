@@ -3,7 +3,7 @@
 namespace App\Services\Payments;
 
 use App\Models\Payment;
-use App\Models\LoanSchedule;
+use App\Contracts\Payable;
 use App\Models\PaymentGatewayLog;
 use App\Models\Status;
 use Illuminate\Support\Facades\DB;
