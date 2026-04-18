@@ -110,10 +110,12 @@ const openConfirm = (id: number, action: 'approve' | 'decline') => {
 const approveLoan = (id: number) => openConfirm(id, 'approve');
 const declineLoan = (id: number) => openConfirm(id, 'decline');
 
+const isClosing = ref(false);
 const handleLoanAction = () => {
   if (!selectedLoanId.value || !actionType.value) return;
 
   form.action = actionType.value;
+  isClosing.value = true;
 
   form.patch(loanAssistance.updateStatus.url(selectedLoanId.value), {
     preserveScroll: true,
@@ -122,6 +124,7 @@ const handleLoanAction = () => {
       isConfirmOpen.value = false;
       form.reset();
       toast.success(`Loan has been ${actionType.value}d successfully!`);
+      setTimeout(() => (isClosing.value = false), 500);
     },
   });
 };
@@ -229,10 +232,10 @@ const columns = getAssistanceColumns({
 
           <Button
             :variant="actionType === 'approve' ? 'default' : 'destructive'"
-            :disabled="form.processing"
+            :disabled="form.processing || isClosing"
             @click="handleLoanAction"
           >
-            {{ form.processing ? 'Processing...' : 'Confirm' }}
+            {{ form.processing || isClosing ? 'Processing...' : 'Confirm' }}
           </Button>
         </div>
       </DialogContent>

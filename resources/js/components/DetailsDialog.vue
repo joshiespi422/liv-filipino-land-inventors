@@ -12,6 +12,7 @@ import type { DetailItem } from '@/types';
 defineProps<{
   open: boolean;
   title?: string;
+  description?: string;
   loading?: boolean;
   items?: DetailItem[];
   showDefault?: boolean;
@@ -22,12 +23,14 @@ const emit = defineEmits(['update:open']);
 
 <template>
   <Dialog :open="open" @update:open="emit('update:open', $event)">
-    <DialogContent class="max-w-2xl">
-      <DialogHeader>
+    <DialogContent class="flex max-h-[85vh] flex-col p-3 pe-2">
+      <DialogHeader class="p-3 pb-0">
         <DialogTitle>{{ title || 'Details' }}</DialogTitle>
       </DialogHeader>
-
-      <DialogDescription>
+      <DialogDescription class="px-3 py-0">
+        {{ description || '' }}
+      </DialogDescription>
+      <div class="flex-1 overflow-y-auto px-2 py-0">
         <!-- LOADING -->
         <div v-if="loading" class="mt-4 grid grid-cols-2 gap-4">
           <div v-for="i in 10" :key="i" class="space-y-2">
@@ -36,7 +39,7 @@ const emit = defineEmits(['update:open']);
           </div>
         </div>
 
-        <div v-else class="mt-2">
+        <div v-else>
           <!-- CUSTOM TOP SLOT -->
           <slot name="top" />
 
@@ -83,7 +86,7 @@ const emit = defineEmits(['update:open']);
           <!-- CUSTOM BOTTOM SLOT -->
           <slot name="bottom" />
         </div>
-      </DialogDescription>
+      </div>
     </DialogContent>
   </Dialog>
 </template>

@@ -11,19 +11,13 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { InfoIcon, ArrowLeft, PlusIcon } from 'lucide-vue-next';
 import FormDialog from '@/components/FormDialog.vue';
+import DetailsDialog from '@/components/DetailsDialog.vue';
 import ModuleBuilder from '@/components/ModuleBuilder.vue';
+import ModuleViewer from '@/components/ModuleViewer.vue';
 import { businessTrainingCategoryFields } from '@/features/business-training/fields';
 import { Button } from '@/components/ui/button';
 import businessTraining from '@/routes/business-training';
 import AppLayout from '@/layouts/AppLayout.vue';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'vue-sonner';
 import type { BusinessTrainingTypeDetail } from '@/types';
 
@@ -49,15 +43,17 @@ const breadcrumbs = [
 
 const http = useHttp();
 
-// Modal State
-const isModalOpen = ref(false);
+// state for form
+const isFormOpen = ref(false);
+// state for details
+const isDetailsOpen = ref(false);
 const isLoading = ref(false);
 const activeCategory = ref<any>(null);
 const activeModules = ref<any[]>([]);
 
 const openCategoryModal = async (categorySlug: string) => {
   isLoading.value = true;
-  isModalOpen.value = true;
+  isDetailsOpen.value = true;
 
   http
     .get(businessTraining.modules.show.url({ slug: categorySlug }))
@@ -73,9 +69,6 @@ const openCategoryModal = async (categorySlug: string) => {
       isLoading.value = false;
     });
 };
-
-// state
-const isFormOpen = ref(false);
 </script>
 
 <template>
@@ -142,70 +135,18 @@ const isFormOpen = ref(false);
         </Card>
       </div>
 
-      <Dialog v-model:open="isModalOpen">
-        <DialogContent
-          class="flex max-h-[85vh] flex-col p-3 pb-10 sm:max-w-5xl"
-        >
-          <DialogHeader class="p-3">
-            <DialogTitle>{{
-              activeCategory?.name || 'Loading...'
-            }}</DialogTitle>
-            <DialogDescription>
-              {{ activeCategory?.description || 'Fetching module content...' }}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div class="flex-1 overflow-y-auto px-6 py-0">
-            <div v-if="isLoading" class="flex flex-col gap-6">
-              <div
-                v-for="i in 3"
-                :key="i"
-                class="animate-pulse rounded-lg border p-4"
-              >
-                <div class="mb-4 h-10 w-48 rounded bg-muted/60"></div>
-
-                <div class="flex flex-col gap-4">
-                  <div v-for="j in 2" :key="j" class="space-y-2">
-                    <Skeleton class="h-5 w-1/3" />
-                    <Skeleton class="h-4 w-full" />
-                    <Skeleton class="h-4 w-5/6" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div
-              v-else-if="activeModules.length > 0"
-              class="flex flex-col gap-6"
-            >
-              <div
-                v-for="module in activeModules"
-                :key="module.id"
-                class="rounded-lg border p-4"
-              >
-                <h3 class="mb-4 rounded bg-muted p-2 text-lg font-semibold">
-                  Module {{ module.module }}
-                </h3>
-                <div class="flex flex-col gap-4">
-                  <div
-                    v-for="(contentBlock, index) in module.content"
-                    :key="index"
-                  >
-                    <h4 class="font-medium">{{ contentBlock.title }}</h4>
-                    <p class="mt-1 text-sm text-muted-foreground">
-                      {{ contentBlock.description }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div v-else class="py-8 text-center text-muted-foreground">
-              No modules found for this category.
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <DetailsDialog
+        v-model:open="isDetailsOpen"
+        :title="activeCategory?.name"
+        :description="activeCategory?.description"
+        :loading="isLoading"
+        :show-default="false"
+      >
+        <!-- BOTTOM -->
+        <template #bottom>
+          <ModuleViewer :modules="activeModules" />
+        </template>
+      </DetailsDialog>
 
       <FormDialog
         v-model:open="isFormOpen"

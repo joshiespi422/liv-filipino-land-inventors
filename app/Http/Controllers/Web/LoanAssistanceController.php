@@ -13,6 +13,7 @@ use App\Models\LoanSetting;
 use App\Models\Loan;
 use App\Models\Status;
 use App\Http\Resources\LoanAssistanceResource;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class LoanAssistanceController extends Controller
@@ -70,32 +71,36 @@ class LoanAssistanceController extends Controller
 
         $action = $request->input('action');
 
-        if ($action === 'approve') {
-            $loan->update([
-                'status_id' => Status::ACTIVE,
-            ]);
+        if ($action === 'approve' && $loan->status_id === Status::PENDING) {
+            DB::transaction(function () use ($loan) {
 
-            $wallet = $loan->user->wallet()->firstOrCreate(
-                ['user_id' => $loan->user_id],
-                ['balance' => 0, 'show' => true]
-            );
+                // Refresh & Lock the loan record to prevent concurrent approval hits
+                $loan->lockForUpdate();
 
-            // Lock the wallet for the update to ensure balance accuracy
-            $wallet->lockForUpdate()->get();
+                // Get or Create the wallet (Unique constraint in DB prevents duplicates)
+                $wallet = $loan->user->wallet()->firstOrCreate(
+                    ['user_id' => $loan->user_id],
+                    ['balance' => 0, 'show' => true]
+                );
 
-            // Increment balance
-            $wallet->increment('balance', $loan->amount);
+                // Lock the wallet balance for the update
+                $wallet->lockForUpdate()->get();
 
-            // Log the transaction
-            $loan->walletTransactions()->create([
-                'wallet_id'   => $wallet->id,
-                'amount'      => $loan->amount,
-                'type'        => 'deposit',
-                'description' => "Loan disbursement for Loan ID: #{$loan->id}",
-            ]);
+                // Update status and increment balance
+                $loan->update(['status_id' => Status::ACTIVE]);
+                $wallet->increment('balance', $loan->amount);
+
+                // Log the transaction
+                $loan->walletTransactions()->create([
+                    'wallet_id'   => $wallet->id,
+                    'amount'      => $loan->amount,
+                    'type'        => 'deposit',
+                    'description' => "Loan disbursement for Loan ID: #{$loan->id}",
+                ]);
+            });
         }
 
-        if ($action === 'decline') {
+        if ($action === 'decline' && $loan->status_id === Status::PENDING) {
             $loan->update([
                 'status_id' => Status::REJECTED,
             ]);
