@@ -28,7 +28,7 @@ class MembershipApplicationService
         return DB::transaction(function () use ($user, $termMonths, $setting) {
             $membership = MemberMembership::create([
                 'user_id' => $user->id,
-                'status_id' => Status::PENDING,
+                'status_id' => Status::APPROVED,
                 'amount' => $setting->share_capital_amount,
                 'term_months' => $termMonths,
             ]);
@@ -42,7 +42,7 @@ class MembershipApplicationService
     public function cancel(User $user): void
     {
         $membership = MemberMembership::where('user_id', $user->id)
-            ->whereIn('status_id', [Status::PENDING, Status::ACTIVE])
+            ->whereIn('status_id', [Status::APPROVED, Status::ACTIVE])
             ->first();
 
         if (!$membership) {
@@ -80,7 +80,7 @@ class MembershipApplicationService
     private function ensureNoActiveMembership(User $user): void
     {
         $existing = MemberMembership::where('user_id', $user->id)
-            ->whereIn('status_id', [Status::PENDING, Status::ACTIVE])
+            ->whereIn('status_id', [Status::APPROVED, Status::ACTIVE])
             ->first();
 
         if (!$existing) {
