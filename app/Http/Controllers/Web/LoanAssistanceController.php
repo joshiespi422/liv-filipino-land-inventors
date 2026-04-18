@@ -20,7 +20,7 @@ class LoanAssistanceController extends Controller
     // for write permission
     private function canMutate(): bool
     {
-        return Auth::user()->user_type_id === UserType::ADMIN;
+        return Auth::user()->user_type_id === UserType::SUPER_ADMIN;
     }
 
     public function index(Request $request): Response
