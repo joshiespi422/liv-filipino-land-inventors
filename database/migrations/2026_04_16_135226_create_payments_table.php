@@ -22,6 +22,7 @@ return new class extends Migration {
             $table->string('gateway_payment_intent_id')->nullable()->index();
             $table->string('gateway_payment_id')->nullable();
             $table->json('gateway_response')->nullable();
+            $table->json('meta')->nullable();
 
             $table->timestamps();
         });
