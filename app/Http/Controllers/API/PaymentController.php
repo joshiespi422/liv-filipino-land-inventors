@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\LoanPayment;
+use App\Models\Payment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -14,7 +14,7 @@ class PaymentController extends Controller
      */
     public function status(string $paymentIntentId): JsonResponse
     {
-        $payment = LoanPayment::where('payment_intent_id', $paymentIntentId)->first();
+        $payment = Payment::where('	gateway_payment_intent_id ', $paymentIntentId)->first();
 
         if (!$payment) {
             return response()->json([
@@ -25,7 +25,7 @@ class PaymentController extends Controller
         return response()->json([
             'status' => $payment->status,
             'paid_at' => $payment->paid_at,
-            'payment_intent_id' => $payment->payment_intent_id,
+            '	gateway_payment_intent_id ' => $payment->gateway_payment_intent_id,
         ]);
     }
 

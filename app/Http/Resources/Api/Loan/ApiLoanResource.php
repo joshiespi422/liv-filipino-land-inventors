@@ -3,7 +3,6 @@
 namespace App\Http\Resources\Api\Loan;
 
 use App\Http\Resources\Api\Loan\ApiLoanScheduleResource;
-use App\Http\Resources\Api\Loan\ApiLoanPaymentResource;
 use App\Http\Resources\Api\User\ApiUserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\JsonApi\JsonApiResource;
