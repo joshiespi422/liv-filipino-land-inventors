@@ -54,11 +54,19 @@ class MembershipApplicationService
             );
         }
 
-        if ($membership->status_id === Status::CANCELLED) {
+        // if ($membership->status_id === Status::CANCELLED) {
+        //     throw new \Illuminate\Http\Exceptions\HttpResponseException(
+        //         response()->json([
+        //             'success' => false,
+        //             'message' => 'Membership is already cancelled.',
+        //         ], 422)
+        //     );
+        // }
+        if ($membership->status_id === Status::ACTIVE) {
             throw new \Illuminate\Http\Exceptions\HttpResponseException(
                 response()->json([
                     'success' => false,
-                    'message' => 'Membership is already cancelled.',
+                    'message' => 'Cannot cancel an active membership.',
                 ], 422)
             );
         }
@@ -75,6 +83,12 @@ class MembershipApplicationService
 
         $membership->update(['status_id' => Status::CANCELLED]);
         $membership->schedules()->update(['status_id' => Status::CANCELLED]);
+
+        $membership->schedules->each(function ($schedule) {
+            $schedule->payments()
+                ->whereNotIn('status_id', [Status::PAID])
+                ->update(['status_id' => Status::CANCELLED]);
+        });
     }
 
     private function ensureNoActiveMembership(User $user): void
