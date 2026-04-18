@@ -59,7 +59,9 @@ class MembershipApplicationService
             );
         }
 
+        // Cancel both membership and its schedules
         $membership->update(['status_id' => Status::CANCELLED]);
+        $membership->schedules()->update(['status_id' => Status::CANCELLED]);
     }
 
     private function ensureNoActiveMembership(User $user): void
@@ -85,8 +87,9 @@ class MembershipApplicationService
             throw new MembershipAlreadyExistsException('You already have a pending membership.');
         }
 
-        // All payments failed — auto cancel
+        // Cancel both membership and its schedules
         $existing->update(['status_id' => Status::CANCELLED]);
+        $existing->schedules()->update(['status_id' => Status::CANCELLED]);
     }
 
     private function generateSchedules(MemberMembership $membership): void
