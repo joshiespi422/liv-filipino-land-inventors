@@ -16,7 +16,7 @@ class LoanScheduleResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $isPaid = $this->loan_payments_exists && $this->status_id === Status::PAID;
+        $isPaid = $this->payment_exists && $this->status_id === Status::PAID;
         $dueDate = Carbon::parse($this->due_date);
 
         return [

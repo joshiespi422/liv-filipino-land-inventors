@@ -19,7 +19,7 @@ class LoanScheduleController extends Controller
         $schedules = LoanSchedule::query()
             ->where('loan_id', $loan->id)
             ->with(['status:id,name'])
-            ->withExists('loanPayments')
+            ->withExists('payments')
             ->orderBy('due_date', 'asc')
             ->get();
 
