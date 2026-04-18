@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Web\Auth\RegistrationController; 
 use Laravel\Fortify\Features;
 use App\Models\UserType;
 use App\Http\Controllers\Web\DashboardController;
@@ -11,6 +12,15 @@ use App\Http\Controllers\Web\LoanScheduleController;
 Route::inertia('/', 'Home', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
+
+Route::middleware('guest')->group(function () {
+    Route::prefix('register')->group(function () {
+        Route::post('/initiate', [RegistrationController::class, 'initiate']);
+        Route::post('/verify', [RegistrationController::class, 'verify']);
+        Route::post('/complete', [RegistrationController::class, 'complete']);
+        Route::post('/resend', [RegistrationController::class, 'resend']);
+    });
+});
 
 Route::middleware([
     'auth', 
