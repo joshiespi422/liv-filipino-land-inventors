@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\Membership;
 
+use App\Exceptions\Membership\MembershipAlreadyExistsException;
 use App\Http\Controllers\Controller;
 use App\Models\MembershipSchedule;
 use App\Services\Membership\MembershipApplicationService;
@@ -42,10 +43,7 @@ class MembershipController extends Controller
             termMonths: $validated['term_months'],
         );
 
-        return response()->json(
-            $membership->load('schedules'),
-            201
-        );
+        return response()->json($membership->load('schedules'), 201);
     }
 
     // POST /memberships/schedules/{schedule}/pay
@@ -61,5 +59,12 @@ class MembershipController extends Controller
         );
 
         return response()->json($result);
+    }
+
+    public function cancel(Request $request): JsonResponse
+    {
+        $this->applicationService->cancel($request->user());
+
+        return response()->json(['message' => 'Membership cancelled.']);
     }
 }

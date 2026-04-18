@@ -92,5 +92,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('settings', [MembershipController::class, 'settings']);
             Route::post('apply', [MembershipController::class, 'apply']);
             Route::post('schedules/{schedule}/pay', [MembershipController::class, 'pay']);
+            Route::delete('cancel', [MembershipController::class, 'cancel']);
         });
 });
