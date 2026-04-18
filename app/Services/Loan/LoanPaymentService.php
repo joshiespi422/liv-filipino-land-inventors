@@ -23,10 +23,10 @@ class LoanPaymentService
 
         return DB::transaction(function () use ($loan, $data, $paymentMethod) {
             $schedule = $this->lockAndValidateSchedule($loan, $data['loan_schedule_id']);
-            $payment = $this->createPendingPayment($loan, $schedule, $data);
+            $payment = $this->createPendingPayment($schedule, $data);
 
             if ($paymentMethod->isOffline()) {
-                return $this->settleOffline($payment, $schedule);
+                return $this->settleOffline($payment);
             }
 
             return $this->processGatewayPayment($payment, $paymentMethod, $data);
@@ -61,40 +61,46 @@ class LoanPaymentService
         return $schedule;
     }
 
-    private function validateAmount(LoanSchedule $schedule, float $amount): void
+    private function validateAmount(LoanSchedule $schedule, float $amountInPhp): void
     {
-        $paid = (float) $schedule->payments()
+        $paidInCents = (int) $schedule->payments()
             ->where('status_id', Status::SUCCESS)
             ->sum('amount');
 
-        $remaining = round($schedule->total_payment - $paid, 2);
+        $totalInCents = (int) round($schedule->total_payment * 100);
+        $remainingInCents = $totalInCents - $paidInCents;
 
-        if ($remaining <= 0) {
+        if ($remainingInCents <= 0) {
             throw new LoanScheduleAlreadyPaidException($schedule);
         }
 
-        if ((int) round($amount * 100) !== (int) round($remaining * 100)) {
-            throw new LoanInvalidPaymentAmountException(required: $remaining, provided: $amount);
+        $providedInCents = (int) round($amountInPhp * 100);
+
+        if ($providedInCents !== $remainingInCents) {
+            throw new LoanInvalidPaymentAmountException(
+                required: $remainingInCents / 100,
+                provided: $amountInPhp,
+            );
         }
     }
 
-    private function createPendingPayment(Loan $loan, LoanSchedule $schedule, array $data): Payment
+    private function createPendingPayment(LoanSchedule $schedule, array $data): Payment
     {
         $this->validateAmount($schedule, (float) $data['amount']);
 
         return $schedule->payments()->create([
             'payment_method_id' => $data['payment_method_id'],
             'payment_date' => now(),
-            'amount' => $data['amount'],
+            'amount' => (int) round((float) $data['amount'] * 100), // store in cents
             'gateway' => $data['gateway'] ?? 'paymongo',
             'status_id' => Status::PENDING,
         ]);
     }
 
-    private function settleOffline(Payment $payment, LoanSchedule $schedule): array
+    private function settleOffline(Payment $payment): array
     {
         $payment->update(['status_id' => Status::SUCCESS]);
-        $schedule->update(['status_id' => Status::PAID]);
+        $payment->payable->onPaymentSuccess($payment);
 
         return ['payment' => $payment, 'next_action' => null];
     }
@@ -105,7 +111,8 @@ class LoanPaymentService
             $gateway = PaymentGatewayFactory::make($data['gateway'] ?? 'paymongo');
             $gatewayMethodId = $this->resolveGatewayMethodId($gateway, $paymentMethod, $data);
 
-            $intent = $gateway->createPaymentIntent($data['amount']);
+            $amountInPhp = $payment->amount / 100;
+            $intent = $gateway->createPaymentIntent($amountInPhp);
             $intentId = data_get($intent, 'data.id')
                 ?? throw LoanGatewayException::failedToCreatePaymentIntent(
                     data_get($intent, 'errors')
