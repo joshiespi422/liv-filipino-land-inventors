@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\API\Membership;
 
-use App\Exceptions\Membership\MembershipAlreadyExistsException;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\Membership\ApiMembershipResource;
+use App\Http\Resources\Api\Membership\ApiMembershipScheduleResource;
 use App\Models\MemberMembership;
 use App\Models\MembershipSchedule;
 use App\Models\Status;
@@ -25,7 +26,7 @@ class MembershipController extends Controller
     ) {
     }
 
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): ApiMembershipResource|JsonResponse
     {
         $membership = MemberMembership::where('user_id', $request->user()->id)
             ->whereIn('status_id', [Status::PENDING, Status::ACTIVE])
@@ -35,6 +36,7 @@ class MembershipController extends Controller
                 'schedules.status',
                 'schedules.payments' => fn($q) => $q->latest(),
                 'schedules.payments.status',
+                'schedules.payments.paymentMethod',
             ])
             ->first();
 
@@ -45,21 +47,7 @@ class MembershipController extends Controller
             ], 404);
         }
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'membership' => $membership,
-                'summary' => [
-                    'total_amount' => $membership->amount,
-                    'term_months' => $membership->term_months,
-                    'paid_schedules' => $membership->schedules->where('status_id', Status::PAID)->count(),
-                    'unpaid_schedules' => $membership->schedules->whereIn('status_id', [Status::UNPAID, Status::OVERDUE])->count(),
-                    'total_schedules' => $membership->schedules->count(),
-                    'activated_at' => $membership->activated_at,
-                    'expires_at' => $membership->expires_at,
-                ],
-            ],
-        ]);
+        return new ApiMembershipResource($membership);
     }
 
     // GET /memberships/settings
@@ -71,7 +59,7 @@ class MembershipController extends Controller
     }
 
     // POST /memberships/apply
-    public function apply(Request $request): JsonResponse
+    public function apply(Request $request): ApiMembershipResource
     {
         $validated = $request->validate([
             'term_months' => ['required', 'integer', 'min:1'],
@@ -82,7 +70,12 @@ class MembershipController extends Controller
             termMonths: $validated['term_months'],
         );
 
-        return response()->json($membership->load('schedules'), 201);
+        $membership->load([
+            'status',
+            'schedules.status',
+        ]);
+
+        return new ApiMembershipResource($membership);
     }
 
     // POST /memberships/schedules/{schedule}/pay
@@ -103,13 +96,27 @@ class MembershipController extends Controller
             paymentMethodId: $validated['payment_method_id'],
         );
 
-        return response()->json($result);
+        $schedule->load([
+            'status',
+            'payments.status',
+            'payments.paymentMethod',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment initiated.',
+            'data' => new ApiMembershipScheduleResource($schedule),
+            'next_action' => $result['next_action'],
+        ]);
     }
 
     public function cancel(Request $request): JsonResponse
     {
         $this->applicationService->cancel($request->user());
 
-        return response()->json(['message' => 'Membership cancelled.']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Membership cancelled.',
+        ]);
     }
 }

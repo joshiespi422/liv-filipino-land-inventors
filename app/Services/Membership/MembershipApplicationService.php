@@ -28,7 +28,7 @@ class MembershipApplicationService
         return DB::transaction(function () use ($user, $termMonths, $setting) {
             $membership = MemberMembership::create([
                 'user_id' => $user->id,
-                'status_id' => Status::PENDING,
+                'status_id' => Status::APPROVED,
                 'amount' => $setting->share_capital_amount,
                 'term_months' => $termMonths,
             ]);
@@ -42,11 +42,25 @@ class MembershipApplicationService
     public function cancel(User $user): void
     {
         $membership = MemberMembership::where('user_id', $user->id)
-            ->where('status_id', Status::PENDING)
+            ->whereIn('status_id', [Status::APPROVED, Status::ACTIVE])
             ->first();
 
         if (!$membership) {
-            throw new ModelNotFoundException('No pending membership found.');
+            throw new \Illuminate\Http\Exceptions\HttpResponseException(
+                response()->json([
+                    'success' => false,
+                    'message' => 'No active or pending membership found to cancel.',
+                ], 404)
+            );
+        }
+
+        if ($membership->status_id === Status::CANCELLED) {
+            throw new \Illuminate\Http\Exceptions\HttpResponseException(
+                response()->json([
+                    'success' => false,
+                    'message' => 'Membership is already cancelled.',
+                ], 422)
+            );
         }
 
         $hasPendingPayment = $membership->schedules()
@@ -59,7 +73,6 @@ class MembershipApplicationService
             );
         }
 
-        // Cancel both membership and its schedules
         $membership->update(['status_id' => Status::CANCELLED]);
         $membership->schedules()->update(['status_id' => Status::CANCELLED]);
     }
@@ -67,7 +80,7 @@ class MembershipApplicationService
     private function ensureNoActiveMembership(User $user): void
     {
         $existing = MemberMembership::where('user_id', $user->id)
-            ->whereIn('status_id', [Status::PENDING, Status::ACTIVE])
+            ->whereIn('status_id', [Status::APPROVED, Status::ACTIVE])
             ->first();
 
         if (!$existing) {

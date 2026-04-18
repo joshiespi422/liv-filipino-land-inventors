@@ -24,6 +24,8 @@ class Status extends Model
 
     public const FAILED = 12;
 
+    public const ARCHIVED = 13;
+
     // protected $fillable = [];
 
     // one to many, status has many loans
