@@ -4,6 +4,7 @@ namespace App\Services\Membership;
 
 use App\Exceptions\Membership\MembershipAlreadyExistsException;
 use App\Exceptions\Membership\MembershipCancellationException;
+use App\Exceptions\Membership\MembershipInvalidTermException;
 use App\Models\MemberMembership;
 use App\Models\MembershipSchedule;
 use App\Models\MembershipSetting;
@@ -11,7 +12,6 @@ use App\Models\Status;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
 
 class MembershipApplicationService
 {
@@ -20,7 +20,7 @@ class MembershipApplicationService
         $setting = MembershipSetting::current();
 
         if (!in_array($termMonths, $setting->allowed_term_months)) {
-            throw new InvalidArgumentException("Term of {$termMonths} months is not allowed.");
+            throw new MembershipInvalidTermException($termMonths, $setting->allowed_term_months);
         }
 
         $this->ensureNoActiveMembership($user);
