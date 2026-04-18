@@ -9,19 +9,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-#[Fillable(
+#[Fillable([
     'payable_type',
     'payable_id',
     'payment_method_id',
+    'status_id',
     'payment_date',
     'amount',
     'gateway',
     'gateway_payment_intent_id',
     'gateway_payment_id',
     'gateway_response',
-    'status_id',
-)]
-
+])]
 class Payment extends Model
 {
     /**
@@ -33,6 +32,7 @@ class Payment extends Model
     {
         return [
             'status_id' => 'integer',
+            'amount' => 'integer',
             'payment_date' => 'date',
             'gateway_response' => 'array',
         ];

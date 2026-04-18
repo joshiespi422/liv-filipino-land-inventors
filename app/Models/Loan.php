@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Loan extends Model
 {
@@ -42,9 +43,25 @@ class Loan extends Model
         return $this->hasMany(LoanSchedule::class);
     }
 
-    // one to many, loan has many payments
-    public function loanPayments(): HasMany
+    public function payments(): HasManyThrough
     {
-        return $this->hasMany(LoanPayment::class);
+        return $this->hasManyThrough(
+            Payment::class,
+            LoanSchedule::class,
+            'loan_id',
+            'payable_id',
+        )->where('payments.payable_type', LoanSchedule::class);
+    }
+
+    // called by LoanSchedule::onPaymentSuccess after each paid schedule
+    public function tryFinish(): void
+    {
+        $hasUnpaid = $this->loanSchedules()
+            ->where('status_id', '!=', Status::PAID)
+            ->exists();
+
+        if (!$hasUnpaid) {
+            $this->update(['status_id' => Status::FINISHED]);
+        }
     }
 }
