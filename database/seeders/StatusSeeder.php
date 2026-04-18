@@ -26,6 +26,7 @@ class StatusSeeder extends Seeder
             ['id' => 10, 'name' => 'pending_for_member'],
             ['id' => 11, 'name' => 'success'],
             ['id' => 12, 'name' => 'failed'],
+            ['id' => 13, 'name' => 'archived'],
         ]);
 
     }
