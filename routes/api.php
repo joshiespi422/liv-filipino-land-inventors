@@ -58,7 +58,7 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('role.api:' . UserType::BASIC . ',' . UserType::MEMBER)
         ->group(function () {
             Route::get('/', [ProfileController::class, 'show']);
-            Route::post('update', [ProfileController::class, 'update']);
+            Route::put('update', [ProfileController::class, 'update']);
             Route::patch('change-password', [ProfileController::class, 'changePassword']);
             Route::post('avatar', [ProfileController::class, 'updateAvatar']);
         });
