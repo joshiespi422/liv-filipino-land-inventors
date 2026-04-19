@@ -70,14 +70,18 @@ const highlightPhoto = computed(() => {
 });
 
 const gridPhotos = computed(() => {
-    if (!highlightPhoto.value) return [];
+    if (!highlightPhoto.value) {
+        return [];
+    }
 
     return allPhotos.value.filter(photo => photo.id !== highlightPhoto.value!.id).slice(0, 4);
 });
 
 // --- HELPER METHODS ---
 const getImageUrl = (path?: string) => {
-    if (!path) return '/assets/placeholder.jpg';
+    if (!path) {
+        return '/assets/placeholder.jpg';
+    }
 
     return (path.startsWith('http') || path.startsWith('/')) ? path : `/storage/${path}`;
 };
@@ -93,10 +97,14 @@ const isPhotoModalOpen = ref(false);
 
 const toggleModal = (type: 'video' | 'photo', show: boolean) => {
 
-    if (type === 'video') isVideoModalOpen.value = show;
+    if (type === 'video') {
+        isVideoModalOpen.value = show;
+    }
 
-    if (type === 'photo') isPhotoModalOpen.value = show;
-    
+    if (type === 'photo') {
+        isPhotoModalOpen.value = show;
+    }
+
     document.body.style.overflow = show ? 'hidden' : '';
 };
 
@@ -225,7 +233,7 @@ onUnmounted(() => {
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <div v-if="highlightPhoto" class="relative w-full aspect-4/3 md:aspect-video lg:aspect-auto lg:h-full group overflow-hidden rounded-2xl shadow-lg cursor-pointer" @click="toggleModal('photo', true)">
                     <img :src="getImageUrl(highlightPhoto.media_path)" @error="handleImageError" alt="Highlight" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                    <div class="absolute top-4 left-0 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-4 sm:px-6 py-1.5 sm:py-2 rounded-r-full text-base sm:text-lg md:text-xl font-bold uppercase shadow-md">
+                    <div class="absolute top-4 left-0 bg-linear-to-r from-yellow-500 to-yellow-600 text-white px-4 sm:px-6 py-1.5 sm:py-2 rounded-r-full text-base sm:text-lg md:text-xl font-bold uppercase shadow-md">
                         HIGHLIGHTS
                     </div>
                 </div>
@@ -247,7 +255,7 @@ onUnmounted(() => {
         <teleport to="body">
             
             <transition enter-active-class="transition ease-out duration-300" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition ease-in duration-200" leave-from-class="opacity-100" leave-to-class="opacity-0">
-                <div v-if="isVideoModalOpen" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div v-if="isVideoModalOpen" class="fixed inset-0 z-100 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                     <div class="fixed inset-0 bg-black/80 transition-opacity backdrop-blur-sm" @click="toggleModal('video', false)"></div>
                     
                     <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-6 md:p-8">
@@ -284,7 +292,7 @@ onUnmounted(() => {
             </transition>
 
             <transition enter-active-class="transition ease-out duration-300" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition ease-in duration-200" leave-from-class="opacity-100" leave-to-class="opacity-0">
-                <div v-if="isPhotoModalOpen" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div v-if="isPhotoModalOpen" class="fixed inset-0 z-100 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                     <div class="fixed inset-0 bg-black/80 transition-opacity backdrop-blur-sm" @click="toggleModal('photo', false)"></div>
                     
                     <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-6 md:p-8">

@@ -25,7 +25,9 @@ const isModalOpen = ref(false);
 
 
 const missionData = computed(() => {
-    if (!props.aboutMissions) return null;
+    if (!props.aboutMissions) {
+        return null;
+    }
     
     return props.aboutMissions.find((m) => m.column_position === 2) || null;
 });
@@ -33,7 +35,9 @@ const missionData = computed(() => {
 // Parse the JSON string into a clean array
 // Parse the JSON string into a clean array
 const missionList = computed(() => {
-    if (!missionData.value || !missionData.value.content_list) return [];
+    if (!missionData.value || !missionData.value.content_list) {
+        return [];
+    }
 
     const rawList = missionData.value.content_list; // Changed to const
     let list: string[] = [];
@@ -41,7 +45,9 @@ const missionList = computed(() => {
     try {
         list = JSON.parse(rawList);
         
-        if (!Array.isArray(list)) list = rawList.split('\n');
+        if (!Array.isArray(list)) {
+            list = rawList.split('\n');
+        }
     } catch { 
         list = rawList.split('\n');
     }
@@ -57,7 +63,9 @@ const previewMissions = computed(() => missionList.value.slice(0, 4));
 
 // --- ASSET HELPERS ---
 const getImageUrl = (path?: string, fallback: string = '') => {
-    if (!path) return fallback;
+    if (!path) {
+        return fallback;
+    }
     
     return path.startsWith('http') ? path : `/storage/${path}`;
 };

@@ -7,8 +7,11 @@ const props = defineProps<HeroProps>();
 // FIXED: Added safety checks for the image path to prevent broken URLs
 const bgImage = computed(() => {
     const path = props.sectionData?.image_path;
-    if (!path) return '/assets/bg1.jpg';
-    
+
+    if (!path) {
+        return '/assets/bg1.jpg';
+    }
+
     return (path.startsWith('http') || path.startsWith('/')) ? path : `/storage/${path}`;
 });
 

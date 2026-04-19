@@ -250,7 +250,7 @@ onUnmounted(() => {
             leave-from-class="opacity-100"
             leave-to-class="opacity-0"
         >
-            <div v-if="isJoinModalOpen" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
+            <div v-if="isJoinModalOpen" class="fixed inset-0 z-9999 flex items-center justify-center p-4 sm:p-6">
                 <div 
                     class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
                     @click="closeJoinModal"
