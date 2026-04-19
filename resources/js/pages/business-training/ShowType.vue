@@ -9,17 +9,21 @@ import {
   CardContent,
 } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { InfoIcon, ArrowLeft, PlusIcon } from 'lucide-vue-next';
+import { InfoIcon, ArrowLeftIcon, PlusIcon, PencilIcon } from 'lucide-vue-next';
 import FormDialog from '@/components/FormDialog.vue';
 import DetailsDialog from '@/components/DetailsDialog.vue';
 import ModuleBuilder from '@/components/ModuleBuilder.vue';
 import ModuleViewer from '@/components/ModuleViewer.vue';
 import { businessTrainingCategoryFields } from '@/features/business-training/fields';
+import { mapModulesToForm } from '@/features/business-training/mappers';
 import { Button } from '@/components/ui/button';
 import businessTraining from '@/routes/business-training';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { toast } from 'vue-sonner';
-import type { BusinessTrainingTypeDetail } from '@/types';
+import type {
+  BusinessTrainingTypeDetail,
+  BusinessTrainingCategory,
+} from '@/types';
 
 defineOptions({
   layout: [],
@@ -47,20 +51,24 @@ const http = useHttp();
 const isFormOpen = ref(false);
 // state for details
 const isDetailsOpen = ref(false);
-const isLoading = ref(false);
+const isLoading = ref(false); // reuse in edit
 const activeCategory = ref<any>(null);
 const activeModules = ref<any[]>([]);
+// state for edit
+const isEditOpen = ref(false);
+const editCategory = ref<any>(null);
 
-const openCategoryModal = async (categorySlug: string) => {
+const openCategoryModal = async (category: BusinessTrainingCategory) => {
   isLoading.value = true;
   isDetailsOpen.value = true;
 
   http
-    .get(businessTraining.modules.show.url({ slug: categorySlug }))
+    .get(businessTraining.modules.show.url({ slug: category.slug }))
     .then((response: any) => {
       const data = response.data || response;
 
       activeCategory.value = data.category;
+      console.log(activeCategory.value);
       activeModules.value = data.modules;
       isLoading.value = false;
     })
@@ -68,6 +76,26 @@ const openCategoryModal = async (categorySlug: string) => {
       console.error('Failed to load modules:', error);
       isLoading.value = false;
     });
+};
+
+const openEditModal = async (category: BusinessTrainingCategory) => {
+  isLoading.value = true;
+  isEditOpen.value = true;
+
+  try {
+    const res: any = await http.get(
+      businessTraining.modules.show.url({ slug: category.slug }),
+    );
+    const data = res.data || res;
+    editCategory.value = {
+      ...data.category,
+      modules: mapModulesToForm(data.modules),
+    };
+  } catch (e) {
+    console.error(e);
+  } finally {
+    isLoading.value = false;
+  }
 };
 </script>
 
@@ -90,7 +118,7 @@ const openCategoryModal = async (categorySlug: string) => {
           @click="router.visit(businessTraining.index())"
           ]
         >
-          <ArrowLeft /> Back to Types
+          <ArrowLeftIcon /> Back to Types
         </Button>
       </div>
 
@@ -108,7 +136,7 @@ const openCategoryModal = async (categorySlug: string) => {
           v-for="category in type.categories"
           :key="category.id"
           class="flex cursor-pointer flex-col transition-all hover:border-primary hover:shadow-md"
-          @click="openCategoryModal(category.slug)"
+          @click="openCategoryModal(category)"
         >
           <CardHeader>
             <CardTitle>{{ category.name }}</CardTitle>
@@ -116,8 +144,18 @@ const openCategoryModal = async (categorySlug: string) => {
               {{ category.description }}
             </CardDescription>
           </CardHeader>
-          <CardContent class="mt-auto pt-4">
+          <CardContent class="mt-auto space-y-2 pt-4">
             <Button variant="secondary" class="w-full"> View Modules </Button>
+            <div class="flex justify-end">
+              <Button
+                v-if="can_mutate"
+                size="icon"
+                variant="outline"
+                @click.stop="openEditModal(category)"
+              >
+                <PencilIcon class="h-4 w-4 text-blue-500" />
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
@@ -148,6 +186,30 @@ const openCategoryModal = async (categorySlug: string) => {
         </template>
       </DetailsDialog>
 
+      <!-- EDIT FORM -->
+      <FormDialog
+        v-model:open="isEditOpen"
+        title="Edit Training Category & Modules"
+        :description="`Update ${editCategory?.name}`"
+        show-default
+        :fields="businessTrainingCategoryFields"
+        :endpoint="
+          businessTraining.categories.update({ slug: editCategory?.slug })
+        "
+        method="patch"
+        :extraData="{
+          modules: editCategory?.modules ?? [],
+        }"
+        @success="
+          toast.success('Updated training category & modules successfully!')
+        "
+      >
+        <template #default="{ form }">
+          <ModuleBuilder v-model="form.modules" :errors="form.errors" />
+        </template>
+      </FormDialog>
+
+      <!-- CREATE FORM -->
       <FormDialog
         v-model:open="isFormOpen"
         title="Create Training Category & Modules"

@@ -104,6 +104,46 @@ class BusinessTrainingController extends Controller
         return back();
     }
 
+    public function updateCategory(Request $request, BusinessTrainingCategory $category)
+    {
+        abort_unless($this->canMutate(), 403);
+
+        $validated = $request->validate([
+            'name' => ['required', 'string'],
+            'description' => ['required', 'string'],
+            'modules' => ['required', 'array', 'size:6'],
+        ]);
+
+        DB::transaction(function () use ($validated, $category) {
+
+            // UPDATE CATEGORY
+            $category->update([
+                'name' => $validated['name'],
+                'slug' => Str::slug($validated['name']),
+                'description' => $validated['description'],
+            ]);
+
+            // UPDATE MODULES
+            foreach ($validated['modules'] as $index => $moduleData) {
+
+                $moduleNumber = $index + 1;
+
+                $training = BusinessTraining::where(
+                    'business_training_category_id',
+                    $category->id
+                )->where('module', $moduleNumber)->first();
+
+                if ($training) {
+                    $training->update([
+                        'content' => $this->buildModuleContent($moduleNumber, $moduleData),
+                    ]);
+                }
+            }
+        });
+
+        return back();
+    }
+
     private function buildModuleContent(int $module, array $data): array
     {
         return match ($module) {

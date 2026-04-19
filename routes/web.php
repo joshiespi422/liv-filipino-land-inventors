@@ -50,6 +50,9 @@ Route::middleware([
 
         Route::get('/business-training/categories/{category:slug}/modules', [BusinessTrainingController::class, 'getCategoryModules'])
             ->name('business-training.modules.show');
+
+        Route::patch('/business-training/categories/{category:slug}', [BusinessTrainingController::class, 'updateCategory'])
+            ->name('business-training.categories.update');
     });
 
     // Loan Assistance Domain
