@@ -51,15 +51,21 @@ const startTimer = () => {
     countdown.value = 300;
     clearInterval(timerId);
     timerId = setInterval(() => {
-        if (countdown.value > 0) countdown.value--;
-        else clearInterval(timerId);
+
+        if (countdown.value > 0) {
+            countdown.value--;
+        }else {
+            clearInterval(timerId);
+        }
+
     }, 1000);
 };
 
 const formattedTime = computed(() => {
     const m = String(Math.floor(countdown.value / 60)).padStart(2, '0');
     const s = String(countdown.value % 60).padStart(2, '0');
-    return `${m}:${s}`;
+    {
+        return `${m}:${s}`;}
 });
 
 // 4. 6-Box OTP Logic
@@ -76,6 +82,7 @@ const handleOtpInput = (event: Event, index: number) => {
             otpRefs.value[index + 1]?.focus();
         });
     }
+    
     form.otp = otpDigits.value.join('');
     form.clearErrors('otp'); 
 };
@@ -125,18 +132,25 @@ const registerNow = async () => {
 
         if (!response.ok) {
             if (data.errors) {
-                if (data.errors.full_name) form.setError('full_name', data.errors.full_name[0]);
-                if (data.errors.mobile_number) form.setError('mobile_number', data.errors.mobile_number[0]);
+
+                if (data.errors.full_name) {
+                    form.setError('full_name', data.errors.full_name[0]);
+                }
+
+                if (data.errors.mobile_number) {
+                    form.setError('mobile_number', data.errors.mobile_number[0]);
+                }
             } else {
                 form.setError('mobile_number', data.message || 'Failed to send OTP.');
             }
+
             return;
         }
         
         currentStep.value = 2;
         startTimer();
         nextTick(() => otpRefs.value[0]?.focus());
-    } catch (error) {
+    } catch {
         form.setError('mobile_number', 'An unexpected error occurred. Please try again.');
     } finally {
         isLoading.value = false;
@@ -163,12 +177,13 @@ const verifyOtp = async () => {
 
         if (!response.ok) {
             form.setError('otp', data.message || 'Invalid or expired OTP.');
+
             return;
         }
         
         form.verification_token = data.verification_token; 
         currentStep.value = 3;
-    } catch (error) {
+    } catch {
         form.setError('otp', 'An unexpected error occurred. Please try again.');
     } finally {
         isLoading.value = false;
@@ -193,6 +208,7 @@ const resendOtp = async () => {
 
         if (!response.ok) {
             globalError.value = data.message || 'Failed to resend OTP.';
+            
             return;
         }
 
@@ -200,7 +216,7 @@ const resendOtp = async () => {
         otpDigits.value = ['', '', '', '', '', ''];
         form.otp = '';
         nextTick(() => otpRefs.value[0]?.focus());
-    } catch (error) {
+    } catch {
         globalError.value = 'An unexpected error occurred while resending the OTP.';
     } finally {
         isLoading.value = false;
@@ -234,13 +250,14 @@ const createAccount = async () => {
             } else {
                 globalError.value = data.message || 'Failed to create account.';
             }
+            
             return;
         }
 
         // The backend logged us in successfully in the background, now show Step 4!
         currentStep.value = 4;
         
-    } catch (error) {
+    } catch {
         globalError.value = 'An unexpected error occurred while creating your account.';
     } finally {
         isLoading.value = false;
