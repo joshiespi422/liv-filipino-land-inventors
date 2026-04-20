@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
@@ -37,7 +38,9 @@ const props = defineProps<{
   method?: 'post' | 'put' | 'patch';
   forceFormData?: boolean;
   extraData?: Record<string, any>;
+  initialValues?: Record<string, any>;
   showDefault?: boolean;
+  loading?: boolean;
   columns?: 1 | 2;
 }>();
 
@@ -46,6 +49,7 @@ const emit = defineEmits(['update:open', 'success']);
 // build initial form dynamically
 const initialData = {
   ...Object.fromEntries(props.fields.map((f) => [f.name, ''])),
+  ...(props.initialValues ?? {}),
   ...(props.extraData ?? {}),
 };
 
@@ -57,19 +61,44 @@ const form = useForm(initialData);
 //   () => props.open,
 //   (val) => {
 //     if (val) {
+//       form.defaults({
+//         ...Object.fromEntries(props.fields.map((f) => [f.name, ''])),
+//         ...(props.initialValues ?? {}),
+//         ...(props.extraData ?? {}),
+//       });
+
 //       form.reset();
 //       form.clearErrors();
 //     }
-//   },
+//   }
 // );
 
+// reset when initialValues changes
+watch(
+  () => props.initialValues,
+  (newValues) => {
+    if (!newValues) return;
+    form.defaults({
+      ...Object.fromEntries(props.fields.map((f) => [f.name, ''])),
+      ...newValues,
+      ...(props.extraData ?? {}),
+    });
+    form.reset();
+  },
+  { deep: true },
+);
+
 // validation
-const isValid = computed(() =>
-  props.fields.every((f) => {
+const isValid = computed(() => {
+  // Check if all required fields are filled
+  const requiredFieldsFilled = props.fields.every((f) => {
     if (!f.required) return true;
     return !!form[f.name];
-  }),
-);
+  });
+  // Check if the form has been modified
+  const hasChanges = form.isDirty;
+  return requiredFieldsFilled && hasChanges;
+});
 
 // submit
 const handleSubmit = () => {
@@ -117,8 +146,14 @@ const handleSubmit = () => {
           {{ description || '' }}
         </DialogDescription>
       </DialogHeader>
+      <div v-if="loading" class="grid grid-cols-2 gap-3.5">
+        <div v-for="i in 6" :key="i" class="space-y-1.5">
+          <Skeleton class="h-5 w-24" />
+          <Skeleton class="h-6 w-full" />
+        </div>
+      </div>
 
-      <div class="flex-1 overflow-y-auto px-2 py-0">
+      <div v-else class="flex-1 overflow-y-auto px-2 py-0">
         <!-- CUSTOM TOP -->
         <slot name="top" :form="form" />
 
@@ -155,6 +190,7 @@ const handleSubmit = () => {
             <Textarea
               v-else-if="field.type === 'textarea'"
               v-model="form[field.name]"
+              :placeholder="field.placeholder"
             />
 
             <!-- NUMBER -->
