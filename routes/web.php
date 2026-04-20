@@ -53,6 +53,9 @@ Route::middleware([
 
         Route::patch('/business-training/categories/{category:slug}', [BusinessTrainingController::class, 'updateCategory'])
             ->name('business-training.categories.update');
+
+        Route::delete('/business-training/categories/{category:slug}', [BusinessTrainingController::class, 'destroyCategory'])
+            ->name('business-training.categories.destroy');
     });
 
     // Loan Assistance Domain

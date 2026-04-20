@@ -44,6 +44,7 @@ const emit = defineEmits(['update:open', 'confirm', 'cancel']);
         <!-- Cancel -->
         <Button
           variant="outline"
+          :disabled="loading"
           @click="
             emit('cancel');
             emit('update:open', false);

@@ -139,6 +139,15 @@ class BusinessTrainingController extends Controller
         return back();
     }
 
+    public function destroyCategory(BusinessTrainingCategory $category)
+    {
+        abort_unless($this->canMutate(), 403 , 'This action is unauthorized');
+
+        $category->delete();
+
+        return back();
+    }
+
     private function buildModuleContent(int $module, array $data): array
     {
         return match ($module) {

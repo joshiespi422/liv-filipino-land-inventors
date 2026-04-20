@@ -9,9 +9,16 @@ import {
   CardContent,
 } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { InfoIcon, ArrowLeftIcon, PlusIcon, PencilIcon } from 'lucide-vue-next';
+import {
+  InfoIcon,
+  ArrowLeftIcon,
+  PlusIcon,
+  PencilIcon,
+  Trash2Icon,
+} from 'lucide-vue-next';
 import FormDialog from '@/components/FormDialog.vue';
 import DetailsDialog from '@/components/DetailsDialog.vue';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import ModuleBuilder from '@/components/ModuleBuilder.vue';
 import ModuleViewer from '@/components/ModuleViewer.vue';
 import { businessTrainingCategoryFields } from '@/features/business-training/fields';
@@ -23,6 +30,7 @@ import { toast } from 'vue-sonner';
 import type {
   BusinessTrainingTypeDetail,
   BusinessTrainingCategory,
+  ApiResponse,
 } from '@/types';
 
 defineOptions({
@@ -56,26 +64,28 @@ const activeCategory = ref<any>(null);
 const activeModules = ref<any[]>([]);
 // state for edit
 const isEditOpen = ref(false);
-const editCategory = ref<any>(null);
+const editingCategory = ref<any>(null);
+// state for delete
+const isDeleteOpen = ref(false);
+const deletingCategory = ref<any>(null);
+const isDeleting = ref(false);
 
 const openCategoryModal = async (category: BusinessTrainingCategory) => {
   isLoading.value = true;
   isDetailsOpen.value = true;
 
-  http
-    .get(businessTraining.modules.show.url({ slug: category.slug }))
-    .then((response: any) => {
-      const data = response.data || response;
-
-      activeCategory.value = data.category;
-      console.log(activeCategory.value);
-      activeModules.value = data.modules;
-      isLoading.value = false;
-    })
-    .catch((error) => {
-      console.error('Failed to load modules:', error);
-      isLoading.value = false;
-    });
+  try {
+    const res = (await http.get(
+      businessTraining.modules.show.url({ slug: category.slug }),
+    )) as ApiResponse<any>;
+    const data = res.data || res;
+    activeCategory.value = data.category;
+    activeModules.value = data.modules;
+  } catch (e) {
+    console.error(e);
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 const openEditModal = async (category: BusinessTrainingCategory) => {
@@ -83,11 +93,11 @@ const openEditModal = async (category: BusinessTrainingCategory) => {
   isEditOpen.value = true;
 
   try {
-    const res: any = await http.get(
+    const res = (await http.get(
       businessTraining.modules.show.url({ slug: category.slug }),
-    );
+    )) as ApiResponse<any>;
     const data = res.data || res;
-    editCategory.value = {
+    editingCategory.value = {
       ...data.category,
       modules: mapModulesToForm(data.modules),
     };
@@ -96,6 +106,33 @@ const openEditModal = async (category: BusinessTrainingCategory) => {
   } finally {
     isLoading.value = false;
   }
+};
+
+const openDeleteModal = (category: BusinessTrainingCategory) => {
+  deletingCategory.value = category;
+  isDeleteOpen.value = true;
+};
+
+const handleDelete = () => {
+  if (!deletingCategory.value) return;
+
+  isDeleting.value = true;
+
+  router.delete(
+    businessTraining.categories.destroy({
+      slug: deletingCategory.value.slug,
+    }),
+    {
+      onSuccess: () => {
+        toast.success('Category deleted successfully!');
+        isDeleteOpen.value = false;
+        deletingCategory.value = null;
+      },
+      onFinish: () => {
+        setTimeout(() => (isDeleting.value = false), 500);
+      },
+    },
+  );
 };
 </script>
 
@@ -146,7 +183,7 @@ const openEditModal = async (category: BusinessTrainingCategory) => {
           </CardHeader>
           <CardContent class="mt-auto space-y-2 pt-4">
             <Button variant="secondary" class="w-full"> View Modules </Button>
-            <div class="flex justify-end">
+            <div class="flex justify-end gap-2">
               <Button
                 v-if="can_mutate"
                 size="icon"
@@ -154,6 +191,15 @@ const openEditModal = async (category: BusinessTrainingCategory) => {
                 @click.stop="openEditModal(category)"
               >
                 <PencilIcon class="h-4 w-4 text-blue-500" />
+              </Button>
+
+              <Button
+                v-if="can_mutate"
+                size="icon"
+                variant="outline"
+                @click.stop="openDeleteModal(category)"
+              >
+                <Trash2Icon class="h-4 w-4 text-red-500" />
               </Button>
             </div>
           </CardContent>
@@ -188,23 +234,23 @@ const openEditModal = async (category: BusinessTrainingCategory) => {
 
       <!-- EDIT FORM -->
       <FormDialog
-        v-if="editCategory"
+        v-if="editingCategory"
         v-model:open="isEditOpen"
         title="Edit Training Category & Modules"
-        :description="`Update ${editCategory.name}`"
+        :description="`Update ${editingCategory.name}`"
         show-default
         :loading="isLoading"
         :fields="businessTrainingCategoryFields"
         :endpoint="
-          businessTraining.categories.update({ slug: editCategory.slug })
+          businessTraining.categories.update({ slug: editingCategory.slug })
         "
         method="patch"
         :initialValues="{
-          name: editCategory.name,
-          description: editCategory.description,
+          name: editingCategory.name,
+          description: editingCategory.description,
         }"
         :extraData="{
-          modules: editCategory.modules ?? [],
+          modules: editingCategory.modules ?? [],
         }"
         @success="
           toast.success('Updated training category & modules successfully!')
@@ -247,6 +293,18 @@ const openEditModal = async (category: BusinessTrainingCategory) => {
           <ModuleBuilder v-model="form.modules" :errors="form.errors" />
         </template>
       </FormDialog>
+
+      <!-- CONFIRM DELETE -->
+      <ConfirmDialog
+        v-model:open="isDeleteOpen"
+        variant="destructive"
+        :loading="isDeleting"
+        title="Delete Category"
+        :description="`Are you sure you want to delete '${deletingCategory?.name}'? This will also remove all its modules. This action cannot be undone.`"
+        :confirmText="isDeleting ? 'Deleting...' : 'Delete'"
+        cancelText="Cancel"
+        @confirm="handleDelete"
+      />
     </div>
   </AppLayout>
 </template>
