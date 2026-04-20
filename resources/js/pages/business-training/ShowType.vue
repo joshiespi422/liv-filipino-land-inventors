@@ -188,17 +188,23 @@ const openEditModal = async (category: BusinessTrainingCategory) => {
 
       <!-- EDIT FORM -->
       <FormDialog
+        v-if="editCategory"
         v-model:open="isEditOpen"
         title="Edit Training Category & Modules"
-        :description="`Update ${editCategory?.name}`"
+        :description="`Update ${editCategory.name}`"
         show-default
+        :loading="isLoading"
         :fields="businessTrainingCategoryFields"
         :endpoint="
-          businessTraining.categories.update({ slug: editCategory?.slug })
+          businessTraining.categories.update({ slug: editCategory.slug })
         "
         method="patch"
+        :initialValues="{
+          name: editCategory.name,
+          description: editCategory.description,
+        }"
         :extraData="{
-          modules: editCategory?.modules ?? [],
+          modules: editCategory.modules ?? [],
         }"
         @success="
           toast.success('Updated training category & modules successfully!')

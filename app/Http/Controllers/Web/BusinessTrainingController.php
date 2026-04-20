@@ -104,15 +104,10 @@ class BusinessTrainingController extends Controller
         return back();
     }
 
-    public function updateCategory(Request $request, BusinessTrainingCategory $category)
+    public function updateCategory(StoreCategoryRequest $request, BusinessTrainingCategory $category)
     {
-        abort_unless($this->canMutate(), 403);
-
-        $validated = $request->validate([
-            'name' => ['required', 'string'],
-            'description' => ['required', 'string'],
-            'modules' => ['required', 'array', 'size:6'],
-        ]);
+        // Authorization and Validation
+        $validated = $request->validated();
 
         DB::transaction(function () use ($validated, $category) {
 

@@ -26,7 +26,7 @@ export const businessTrainingCategoryFields: FormField[] = [
     required: true,
   },
   {
-    type: 'text',
+    type: 'textarea',
     name: 'description',
     label: 'Category Description',
     placeholder: 'Enter Business training category description',
