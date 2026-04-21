@@ -5,8 +5,6 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-
 class PaymentController extends Controller
 {
     /**
@@ -14,7 +12,7 @@ class PaymentController extends Controller
      */
     public function status(string $paymentIntentId): JsonResponse
     {
-        $payment = Payment::where('	gateway_payment_intent_id ', $paymentIntentId)->first();
+        $payment = Payment::where('gateway_payment_intent_id', $paymentIntentId)->first();
 
         if (!$payment) {
             return response()->json([
@@ -23,9 +21,9 @@ class PaymentController extends Controller
         }
 
         return response()->json([
-            'status' => $payment->status,
+            'status' => $payment->status_id, // or status if you use relation
             'paid_at' => $payment->paid_at,
-            '	gateway_payment_intent_id ' => $payment->gateway_payment_intent_id,
+            'gateway_payment_intent_id' => $payment->gateway_payment_intent_id,
         ]);
     }
 
