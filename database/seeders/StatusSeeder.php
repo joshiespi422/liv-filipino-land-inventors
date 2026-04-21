@@ -27,6 +27,9 @@ class StatusSeeder extends Seeder
             ['id' => 11, 'name' => 'success'],
             ['id' => 12, 'name' => 'failed'],
             ['id' => 13, 'name' => 'archived'],
+
+            // For intellectual property schedules
+            ['id' => 14, 'name' => 'waiting_for_payment'],
         ]);
 
     }
