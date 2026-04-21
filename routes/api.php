@@ -7,6 +7,7 @@ use App\Http\Controllers\API\BusinessTraining\TrainingController;
 use App\Http\Controllers\API\BusinessTraining\TypeController;
 use App\Http\Controllers\API\Loan\LoanController;
 use App\Http\Controllers\API\Membership\MembershipController;
+use App\Http\Controllers\API\Payment\PaymentMethodController;
 use App\Http\Controllers\API\Payment\PaymentWebhookController;
 use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\API\Settings\ProfileController;
@@ -85,6 +86,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('{loan}', [LoanController::class, 'show']);
             Route::post('{loan}/pay', [LoanController::class, 'pay']);
         });
+
+    Route::get('/payment-methods', [PaymentMethodController::class, 'index'])->middleware('role.api:' . UserType::BASIC . ',' . UserType::MEMBER);
 
     Route::prefix('memberships')
         ->middleware('role.api:' . UserType::BASIC . ',' . UserType::MEMBER)
