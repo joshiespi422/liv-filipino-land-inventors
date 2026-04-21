@@ -157,23 +157,25 @@ class LoanPaymentService
 
     private function resolveGatewayMethodId($gateway, PaymentMethod $paymentMethod, array $data): string
     {
-        if ($paymentMethod->isClientSide()) {
-            return $data['gateway_payment_method_id']
-                ?? throw LoanGatewayException::missingClientSideMethodId();
-        }
-
+        // ✅ ALWAYS create payment method from backend
         $method = $gateway->createPaymentMethod($paymentMethod->gateway_type);
 
-        return data_get($method, 'data.id')
-            ?? throw LoanGatewayException::failedToCreatePaymentMethod(
+        $methodId = data_get($method, 'data.id');
+
+        if (!$methodId) {
+            throw LoanGatewayException::failedToCreatePaymentMethod(
                 data_get($method, 'errors')
             );
+        }
+
+        return $methodId;
     }
 
     private function hasPendingPayment(LoanSchedule $schedule): bool
     {
         return $schedule->payments()
             ->where('status_id', Status::PENDING)
+            ->where('created_at', '>', now()->subMinutes(1))
             ->exists();
     }
 }

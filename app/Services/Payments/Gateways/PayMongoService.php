@@ -116,15 +116,11 @@ class PayMongoService implements PaymentGatewayInterface
         return [
             'type' => $type,
             'redirect_url' => data_get($nextAction, 'redirect.url'),
-
-            // consume_qr → image lives under next_action.code.image_url
-            // use test_url in sandbox, redirect.url in production
             'qr_code_url' => match ($type) {
                 'consume_qr' => data_get($nextAction, 'code.image_url')
                 ?? data_get($nextAction, 'code.test_url'),
                 default => null,
             },
-
             'status' => data_get($attributes, 'status'),
         ];
     }
