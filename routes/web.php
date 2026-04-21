@@ -48,6 +48,9 @@ Route::middleware([
         Route::patch('/business-training/types/{type:slug}', [BusinessTrainingController::class, 'updateType'])
             ->name('business-training.types.update');
 
+        Route::delete('/business-training/types/{type:slug}', [BusinessTrainingController::class, 'destroyType'])
+            ->name('business-training.types.destroy');
+
         Route::post('/business-training/types/{type:slug}/categories', [BusinessTrainingController::class, 'storeCategory'])
             ->name('business-training.categories.store');
 

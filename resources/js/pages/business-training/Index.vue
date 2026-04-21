@@ -3,6 +3,7 @@ import { Head, router, useHttp } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { PlusIcon, PencilIcon, Trash2Icon } from 'lucide-vue-next';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import { businessTrainingTypeFields } from '@/features/business-training/fields';
 import FormDialog from '@/components/FormDialog.vue';
 import { Button } from '@/components/ui/button';
@@ -30,7 +31,11 @@ defineProps<{
 const isFormOpen = ref(false);
 // state for edit
 const isEditOpen = ref(false);
-const editingType = ref<any>(null);
+const editingType = ref<BusinessTrainingType | null>(null);
+// state for delete
+const isDeleteOpen = ref(false);
+const deletingType = ref<BusinessTrainingType | null>(null);
+const isDeleting = ref(false);
 
 const navigateToType = (slug: string) => {
   router.visit(businessTraining.types.show(slug));
@@ -39,6 +44,33 @@ const navigateToType = (slug: string) => {
 const openEditModal = (type: BusinessTrainingType) => {
   isEditOpen.value = true;
   editingType.value = type;
+};
+
+const openDeleteModal = (type: any) => {
+  deletingType.value = type;
+  isDeleteOpen.value = true;
+};
+
+const handleDelete = () => {
+  if (!deletingType.value) return;
+
+  isDeleting.value = true;
+
+  router.delete(
+    businessTraining.types.destroy({
+      slug: deletingType.value.slug,
+    }),
+    {
+      onSuccess: () => {
+        toast.success('Training type deleted successfully!');
+        isDeleteOpen.value = false;
+        deletingType.value = null;
+      },
+      onFinish: () => {
+        setTimeout(() => (isDeleting.value = false), 500);
+      },
+    },
+  );
 };
 </script>
 
@@ -97,14 +129,14 @@ const openEditModal = (type: BusinessTrainingType) => {
               <PencilIcon class="h-4 w-4 text-blue-500" />
             </Button>
 
-            <!-- <Button
+            <Button
               v-if="can_mutate"
               size="icon"
               variant="outline"
               @click.stop="openDeleteModal(type)"
             >
               <Trash2Icon class="h-4 w-4 text-red-500" />
-            </Button> -->
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -149,6 +181,18 @@ const openEditModal = (type: BusinessTrainingType) => {
       :fields="businessTrainingTypeFields"
       :endpoint="businessTraining.types.store.url()"
       @success="toast.success('Training type created successfully!')"
+    />
+
+    <!-- confirm delete -->
+    <ConfirmDialog
+      v-model:open="isDeleteOpen"
+      variant="destructive"
+      :loading="isDeleting"
+      title="Delete Training Type"
+      :description="`Are you sure you want to delete '${deletingType?.name}'? This will remove all categories and modules.`"
+      :confirmText="isDeleting ? 'Deleting...' : 'Delete'"
+      cancelText="Cancel"
+      @confirm="handleDelete"
     />
   </div>
 </template>
