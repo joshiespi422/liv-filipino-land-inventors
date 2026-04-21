@@ -5,18 +5,31 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class IntellectualProperty extends Model
 {
     protected $fillable = [
         'user_id',
         'status_id',
-        'payment_id',
+        'amount',
+        'term_months',
         'creation_type',
         'form_type',
+        'priority_details',
         'title',
         'description',
         'applicability',
+        'activated_at',
+        'expires_at',
+    ];
+
+    protected $casts = [
+        'status_id' => 'integer',
+        'amount' => 'integer',
+        'term_months' => 'integer',
+        'activated_at' => 'date',
+        'expires_at' => 'date',
     ];
 
     // one to many, intellectual property has one user
@@ -32,9 +45,9 @@ class IntellectualProperty extends Model
     }
 
     // one to many, intellectual property has one payment
-    public function payment(): BelongsTo
+    public function payments(): MorphMany
     {
-        return $this->belongsTo(Payment::class);
+        return $this->morphMany(Payment::class, 'payable');
     }
 
     // one to many, intellectual property has many claims
@@ -47,5 +60,30 @@ class IntellectualProperty extends Model
     public function documents(): HasMany
     {
         return $this->hasMany(IntellectualPropertyDocument::class);
+    }
+
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(IntellectualPropertySchedule::class);
+    }
+
+    public function settings(): HasMany
+    {
+        return $this->hasMany(IntellectualPropertySetting::class);
+    }
+
+    public function tryActivate(): void
+    {
+        $hasUnpaid = $this->schedules()
+            ->where('status_id', '!=', Status::PAID)
+            ->exists();
+
+        if (!$hasUnpaid) {
+            $this->update([
+                'status_id' => Status::ACTIVE,
+                'activated_at' => now(),
+                'expires_at' => now()->addYear(),
+            ]);
+        }
     }
 }
