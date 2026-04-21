@@ -45,4 +45,10 @@ class Status extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    // one to many, status has many intellectual properties
+    public function intellectualProperties(): HasMany
+    {
+        return $this->hasMany(IntellectualProperty::class);
+    }
 }

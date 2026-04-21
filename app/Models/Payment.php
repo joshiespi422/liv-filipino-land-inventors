@@ -62,4 +62,9 @@ class Payment extends Model
     {
         return $this->hasMany(PaymentGatewayLog::class);
     }
+
+    public function intellectualProperties(): HasMany
+    {
+        return $this->hasMany(IntellectualProperty::class);
+    }
 }
