@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -14,13 +13,17 @@ return new class extends Migration
         Schema::create('intellectual_properties', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('status_id')->constrained();
-            $table->foreignId('payment_id')->nullable()->constrained();
+            $table->foreignId('status_id')->default(5)->constrained();
+            $table->unsignedBigInteger('amount')->nullable();
+            $table->unsignedInteger('term_months')->nullable();
             $table->enum('creation_type', ['business_idea', 'invention']);
             $table->enum('form_type', ['payment', 'grant']);
+            $table->string('priority_details')->nullable();
             $table->string('title');
             $table->text('description');
             $table->text('applicability');
+            $table->timestamp('activated_at')->nullable();
+            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });
     }
