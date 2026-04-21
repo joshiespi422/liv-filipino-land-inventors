@@ -75,6 +75,23 @@ class BusinessTrainingController extends Controller
         return back();
     }
 
+    public function updateType(StoreTypeRequest $request, BusinessTrainingType $type)
+    {
+        // Authorization and Validation
+        $validated = $request->validated();
+        
+        $validated['slug'] = Str::slug($validated['name']);
+
+        if ($request->hasFile('icon')) {
+            $path = $request->file('icon')->store('business-training-icons', 'public');
+            $validated['icon'] = $path;
+        }
+
+        $type->update($validated);
+
+        return back();
+    }
+
     public function storeCategory(StoreCategoryRequest $request, BusinessTrainingType $type)
     {
         // Authorization and Validation

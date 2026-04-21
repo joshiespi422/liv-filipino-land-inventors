@@ -45,6 +45,9 @@ Route::middleware([
         Route::get('/business-training/types/{type:slug}', [BusinessTrainingController::class, 'showType'])
             ->name('business-training.types.show');
 
+        Route::patch('/business-training/types/{type:slug}', [BusinessTrainingController::class, 'updateType'])
+            ->name('business-training.types.update');
+
         Route::post('/business-training/types/{type:slug}/categories', [BusinessTrainingController::class, 'storeCategory'])
             ->name('business-training.categories.store');
 

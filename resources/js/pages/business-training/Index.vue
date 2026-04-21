@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, useHttp } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import { PlusIcon } from 'lucide-vue-next';
+import { PlusIcon, PencilIcon, Trash2Icon } from 'lucide-vue-next';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { businessTrainingTypeFields } from '@/features/business-training/fields';
 import FormDialog from '@/components/FormDialog.vue';
+import { Button } from '@/components/ui/button';
 import businessTraining from '@/routes/business-training';
 import { toast } from 'vue-sonner';
-import type { BusinessTrainingType } from '@/types';
+import type { BusinessTrainingType, ApiResponse } from '@/types';
 
 defineOptions({
   layout: {
@@ -25,11 +26,19 @@ defineProps<{
   can_mutate: boolean;
 }>();
 
-// state
+// state for form
 const isFormOpen = ref(false);
+// state for edit
+const isEditOpen = ref(false);
+const editingType = ref<any>(null);
 
 const navigateToType = (slug: string) => {
   router.visit(businessTraining.types.show(slug));
+};
+
+const openEditModal = (type: BusinessTrainingType) => {
+  isEditOpen.value = true;
+  editingType.value = type;
 };
 </script>
 
@@ -77,6 +86,26 @@ const navigateToType = (slug: string) => {
           <div class="flex items-center text-sm text-muted-foreground">
             Explore categories &rarr;
           </div>
+
+          <div class="mt-2 flex justify-end gap-2">
+            <Button
+              v-if="can_mutate"
+              size="icon"
+              variant="outline"
+              @click.stop="openEditModal(type)"
+            >
+              <PencilIcon class="h-4 w-4 text-blue-500" />
+            </Button>
+
+            <!-- <Button
+              v-if="can_mutate"
+              size="icon"
+              variant="outline"
+              @click.stop="openDeleteModal(type)"
+            >
+              <Trash2Icon class="h-4 w-4 text-red-500" />
+            </Button> -->
+          </div>
         </CardContent>
       </Card>
       <Card
@@ -93,6 +122,25 @@ const navigateToType = (slug: string) => {
       </Card>
     </div>
 
+    <!-- edit form -->
+    <FormDialog
+      v-if="editingType"
+      v-model:open="isEditOpen"
+      title="Edit Training Type"
+      :description="`Update ${editingType.name}`"
+      show-default
+      :fields="businessTrainingTypeFields"
+      :endpoint="businessTraining.types.update({ slug: editingType.slug })"
+      method="patch"
+      :initialValues="{
+        name: editingType.name,
+        icon: editingType.icon,
+      }"
+      @success="toast.success('Updated training type successfully!')"
+    >
+    </FormDialog>
+
+    <!-- create form -->
     <FormDialog
       v-model:open="isFormOpen"
       title="Create Training Type"
