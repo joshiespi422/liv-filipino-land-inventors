@@ -5,6 +5,7 @@ use App\Http\Controllers\API\Auth\RegisteredUserController;
 use App\Http\Controllers\API\BusinessTraining\CategoryController;
 use App\Http\Controllers\API\BusinessTraining\TrainingController;
 use App\Http\Controllers\API\BusinessTraining\TypeController;
+use App\Http\Controllers\API\IntellectualProperty\IntellectualPropertyController;
 use App\Http\Controllers\API\Loan\LoanController;
 use App\Http\Controllers\API\Membership\MembershipController;
 use App\Http\Controllers\API\Payment\PaymentMethodController;
@@ -97,5 +98,16 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('apply', [MembershipController::class, 'apply']);
             Route::post('schedules/{schedule}/pay', [MembershipController::class, 'pay']);
             Route::delete('cancel', [MembershipController::class, 'cancel']);
+        });
+
+    // Intellectual Property Routes
+    Route::prefix('intellectual-properties')
+        ->middleware('role.api:' . UserType::BASIC . ',' . UserType::MEMBER)
+        ->group(function () {
+            Route::get('/', [IntellectualPropertyController::class, 'index']);
+            Route::post('/', [IntellectualPropertyController::class, 'store']);
+            Route::get('{intellectualProperty}', [IntellectualPropertyController::class, 'show']);
+            Route::put('{intellectualProperty}', [IntellectualPropertyController::class, 'update']);
+            Route::get('{intellectualProperty}/settings', [IntellectualPropertyController::class, 'settings']);
         });
 });
