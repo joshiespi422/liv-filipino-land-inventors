@@ -111,6 +111,12 @@ class User extends Authenticatable
         return $this->hasOne(Wallet::class);
     }
 
+    // relationship to intellectual properties, one to many
+    public function intellectualProperties(): HasMany
+    {
+        return $this->hasMany(IntellectualProperty::class);
+    }
+
     // checker for service management
     public function managesService($serviceId): bool
     {
