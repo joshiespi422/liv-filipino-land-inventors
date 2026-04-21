@@ -27,4 +27,5 @@ export interface FormField {
   options?: { label: string; value: string | number }[];
   required?: boolean;
   col?: number;
+  accept?: string;
 }

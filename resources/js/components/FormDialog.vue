@@ -113,6 +113,22 @@ const handleSubmit = () => {
     method.toLowerCase() === 'put' || method.toLowerCase() === 'patch';
   const requiresFormData = props.forceFormData || hasFiles;
 
+  // Transform the data before submission
+  form.transform((data) => {
+    const payload = { ...data };
+    // Exclude file fields if the value is still a string (initial path)
+    props.fields.forEach((f) => {
+      if (f.type === 'file' && typeof payload[f.name] === 'string') {
+        delete payload[f.name];
+      }
+    });
+    // Add method spoofing for update requests with files
+    if (isUpdating && hasFiles) {
+      payload._method = method.toUpperCase();
+    }
+    return payload;
+  });
+
   const options = {
     forceFormData: requiresFormData,
     onSuccess: () => {
@@ -124,12 +140,7 @@ const handleSubmit = () => {
 
   // Logic for PUT/PATCH with files (Method Spoofing)
   if (isUpdating && hasFiles) {
-    form
-      .transform((data) => ({
-        ...data,
-        _method: method.toUpperCase(),
-      }))
-      .post(url, options);
+    form.post(url, options);
   } else {
     // Logic for standard POST or PUT/PATCH without files
     form[method as 'post' | 'put' | 'patch'](url, options);
@@ -179,12 +190,22 @@ const handleSubmit = () => {
               :placeholder="field.placeholder"
             />
 
-            <!-- FILE -->
-            <Input
-              v-else-if="field.type === 'file'"
-              type="file"
-              @change="(e: any) => (form[field.name] = e.target.files?.[0])"
-            />
+            <div v-else-if="field.type === 'file'">
+              <!-- FILE -->
+              <Input
+                type="file"
+                :accept="field.accept"
+                @change="(e: any) => (form[field.name] = e.target.files?.[0])"
+              />
+              <!-- display initial values of file -->
+              <a
+                v-if="initialValues && initialValues[field.name]"
+                :href="`/storage/${initialValues[field.name]}`"
+                target="_blank"
+                class="ms-2 text-xs text-blue-500 hover:underline"
+                >previous {{ field.name }}: {{ initialValues[field.name] }}</a
+              >
+            </div>
 
             <!-- TEXTAREA -->
             <Textarea

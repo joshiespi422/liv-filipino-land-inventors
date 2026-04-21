@@ -13,7 +13,7 @@ export const businessTrainingTypeFields: FormField[] = [
     name: 'icon',
     label: 'Icon',
     placeholder: 'Upload icon',
-    required: true,
+    accept: 'image/jpeg, image/png',
   },
 ];
 
