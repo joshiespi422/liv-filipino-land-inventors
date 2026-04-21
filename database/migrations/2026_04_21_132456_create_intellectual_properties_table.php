@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('status_id')->constrained();
-            $table->foreignId('payment_id')->constrained();
+            $table->foreignId('payment_id')->nullable()->constrained();
             $table->enum('creation_type', ['business_idea', 'invention']);
             $table->enum('form_type', ['payment', 'grant']);
             $table->string('title');
