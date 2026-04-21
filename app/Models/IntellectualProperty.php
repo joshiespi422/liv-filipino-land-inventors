@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class IntellectualProperty extends Model
 {
@@ -34,5 +35,17 @@ class IntellectualProperty extends Model
     public function payment(): BelongsTo
     {
         return $this->belongsTo(Payment::class);
+    }
+
+    // one to many, intellectual property has many claims
+    public function claims(): HasMany
+    {
+        return $this->hasMany(IntellectualPropertyClaim::class);
+    }
+
+    // one to many, intellectual property has many documents
+    public function documents(): HasMany
+    {
+        return $this->hasMany(IntellectualPropertyDocument::class);
     }
 }
