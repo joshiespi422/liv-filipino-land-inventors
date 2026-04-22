@@ -102,7 +102,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Intellectual Property Routes
     Route::prefix('intellectual-properties')
-        ->middleware('role.api:' . UserType::BASIC . ',' . UserType::MEMBER)
+        ->middleware('role.api:' . UserType::MEMBER)
         ->group(function () {
             Route::get('/', [IntellectualPropertyController::class, 'index']);
             Route::post('/', [IntellectualPropertyController::class, 'store']);
