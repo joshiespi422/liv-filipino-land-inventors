@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\IntellectualProperty\IntellectualPropertySettingsNotFoundException;
 use Illuminate\Database\Eloquent\Model;
 
 class IntellectualPropertySetting extends Model
@@ -15,4 +16,10 @@ class IntellectualPropertySetting extends Model
         'amount' => 'integer',
         'allowed_term_months' => 'array',
     ];
+
+    public static function current(IntellectualProperty $ip): self
+    {
+        return $ip->settings()->latest()->first()
+            ?? throw new IntellectualPropertySettingsNotFoundException();
+    }
 }
