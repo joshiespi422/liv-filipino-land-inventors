@@ -429,12 +429,12 @@ const createAccount = async () => {
                         
                         <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-8">
                             <p class="text-sm text-gray-700 leading-relaxed">
-                                kindly <strong class="text-blue-800">proceed to your profile to complete</strong> verification and gain full access to our services
+                                kindly <strong class="text-blue-800">proceed to the next step</strong> to complete your application and gain full access to our services.
                             </p>
                         </div>
                         
-                        <Link href="/dashboard" class="block w-full bg-[#033e94] text-white py-3.5 rounded-xl font-bold hover:bg-blue-800 transition-all text-center shadow-md">
-                            Go to Dashboard
+                        <Link href="/join-us" class="block w-full bg-[#033e94] text-white py-3.5 rounded-xl font-bold hover:bg-blue-800 transition-all text-center shadow-md">
+                            Continue to Application
                         </Link>
                     </div>
 

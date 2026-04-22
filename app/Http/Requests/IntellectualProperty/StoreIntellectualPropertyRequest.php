@@ -25,7 +25,6 @@ class StoreIntellectualPropertyRequest extends FormRequest
         return [
             'creation_type' => ['required', 'in:business_idea,invention'],
             'form_type' => ['required', 'in:payment,grant'],
-            'priority_details' => ['nullable', 'string'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'applicability' => ['required', 'string'],

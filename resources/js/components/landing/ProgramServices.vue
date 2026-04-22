@@ -55,8 +55,10 @@ const displayPrograms = computed(() => {
 });
 
 const getImageUrl = (path?: string) => {
-    if (!path) return '/assets/placeholder.jpg';
-    
+    if (!path) {
+        return '/assets/placeholder.jpg';
+    }
+
     return (path.startsWith('http') || path.startsWith('/')) ? path : `/storage/${path}`;
 };
 </script>
@@ -110,7 +112,7 @@ const getImageUrl = (path?: string) => {
                     </template>
 
                     <template #slide="{ slide: program }">
-                        <div class="flex h-[360px] sm:h-[400px] md:h-[420px] cursor-pointer flex-col overflow-hidden rounded-2xl md:rounded-3xl border border-gray-100 bg-white transition-all duration-500 ease-out transform scale-95 shadow-md hover:scale-100 md:hover:scale-105 hover:z-20 hover:ring-4 hover:ring-[#033E94]/30 hover:shadow-2xl mx-1 my-2">
+                        <div class="flex h-90 sm:h-100 md:h-105 cursor-pointer flex-col overflow-hidden rounded-2xl md:rounded-3xl border border-gray-100 bg-white transition-all duration-500 ease-out transform scale-95 shadow-md hover:scale-100 md:hover:scale-105 hover:z-20 hover:ring-4 hover:ring-[#033E94]/30 hover:shadow-2xl mx-1 my-2">
                             
                             <div class="h-40 sm:h-48 md:h-52 w-full overflow-hidden shrink-0">
                                 <img

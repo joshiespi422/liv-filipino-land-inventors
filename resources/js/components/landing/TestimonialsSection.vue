@@ -49,7 +49,10 @@ const displayTestimonials = computed(() => {
 });
 
 const getImageUrl = (path?: string) => {
-    if (!path) return '/assets/marisol.png';
+    if (!path) {
+        return '/assets/marisol.png';
+    }
+    
     return (path.startsWith('http') || path.startsWith('/')) ? path : `/storage/${path}`;
 };
 </script>
@@ -60,7 +63,7 @@ const getImageUrl = (path?: string) => {
         <div class="relative">
             <img src="/assets/gallery.jpg" alt="Gallery background" class="w-full h-32 sm:h-48 md:h-56 object-cover">
             <div class="absolute inset-0 flex items-center justify-center text-center bg-black/30">
-                <h1 class="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold drop-shadow-md text-white tracking-widest mt-[-20px] sm:mt-[-30px]">
+                <h1 class="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold drop-shadow-md text-white tracking-widest -mt-5 sm:-mt-7.5">
                     TESTIMONIALS
                 </h1>
             </div>
@@ -105,7 +108,7 @@ const getImageUrl = (path?: string) => {
                                     :src="getImageUrl(item.image_path)" 
                                     :alt="item.name"
                                 >
-                                <div class="text-[4rem] sm:text-[5rem] md:text-[6rem] font-black text-[#D70328] mt-[-5px] sm:mt-[-15px] rotate-180 leading-[0.7] opacity-90">
+                                <div class="text-[4rem] sm:text-[5rem] md:text-[6rem] font-black text-[#D70328] -mt-1.25 sm:-mt-3.75 rotate-180 leading-[0.7] opacity-90">
                                     "
                                 </div>
                             </div>
