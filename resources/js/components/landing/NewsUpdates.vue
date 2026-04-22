@@ -66,26 +66,37 @@ const featured = computed(() => {
 });
 
 const newsList = computed(() => {
-    if (!featured.value) return [];
+    if (!featured.value) {
+        return [];
+    }
+
     return displayNews.value.filter(n => n.id !== featured.value!.id);
 });
 
 // --- HELPER METHODS ---
 const formatDate = (val?: string) => {
-    if (!val) return '';
+    if (!val) {
+        return '';
+    }
+
     const dateOnly = val.trim().split(' ')[0];
     const regex = /^\d{4}-\d{2}-\d{2}$/;
     
     if (regex.test(dateOnly)) {
         
         const date = new Date(dateOnly);
+
         return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
     }
+
     return val;
 };
 
 const getImageUrl = (path?: string) => {
-    if (!path) return '/assets/n1.jpg'; 
+    if (!path) {
+        return '/assets/n1.jpg';
+    }
+     
     return (path.startsWith('http') || path.startsWith('/')) ? path : `/storage/${path}`;
 };
 
