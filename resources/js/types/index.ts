@@ -4,6 +4,7 @@ export * from './ui';
 export * from './loan';
 export * from './dashboard';
 export * from './business-training';
+export * from './intellectual-property';
 
 export type ApiResponse<T> = {
   data: T;
