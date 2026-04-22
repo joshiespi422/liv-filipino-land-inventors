@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\IntellectualProperty\StoreIntellectualPropertyRequest;
 use App\Http\Requests\IntellectualProperty\UpdateIntellectualPropertyRequest;
 use App\Http\Resources\Api\IntellectualProperty\ApiIntellectualPropertyResource;
+use App\Http\Resources\Api\IntellectualProperty\ApiIntellectualPropertyScheduleResource;
 use App\Models\IntellectualProperty;
+use App\Models\IntellectualPropertySchedule;
+use App\Services\IntellectualProperty\IntellectualPropertyPaymentService;
 use App\Services\IntellectualProperty\IntellectualPropertyService;
 use DomainException;
 use Illuminate\Http\Request;
@@ -19,6 +22,7 @@ class IntellectualPropertyController extends Controller
      */
     public function __construct(
         private readonly IntellectualPropertyService $intellectualPropertyService,
+        private readonly IntellectualPropertyPaymentService $paymentService
     ) {
     }
 
@@ -114,10 +118,73 @@ class IntellectualPropertyController extends Controller
         //
     }
 
+    public function applyPayment(Request $request, IntellectualProperty $intellectualProperty)
+    {
+        $validated = $request->validate([
+            'term_months' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $intellectualProperty = $this->paymentService->applyPayment(
+            ip: $intellectualProperty,
+            user: $request->user(),
+            termMonths: $validated['term_months'],
+        );
+
+        $intellectualProperty->load([
+            'status',
+            'schedules',
+            'documents',
+            'settings',
+            'payments'
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment applied successfully.',
+            'data' => new ApiIntellectualPropertyResource($intellectualProperty),
+        ]);
+    }
+
+    public function pay(Request $request, IntellectualPropertySchedule $schedule)
+    {
+        abort_if(
+            $schedule->intellectualProperty->user_id !== $request->user()->id,
+            403,
+            'Unauthorized'
+        );
+
+        $validated = $request->validate([
+            'payment_method_id' => ['required', 'integer', 'exists:payment_methods,id'],
+        ]);
+
+        $result = $this->paymentService->initiate(
+            schedule: $schedule,
+            paymentMethodId: $validated['payment_method_id'],
+        );
+
+        $schedule->load([
+            'status',
+            'payments.status',
+            'payments.paymentMethod',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment initiated.',
+            'data' => new ApiIntellectualPropertyScheduleResource($schedule),
+            'next_action' => $result['next_action'],
+        ]);
+    }
+
     public function settings(IntellectualProperty $intellectualProperty): JsonResponse
     {
         return response()->json(
             $this->intellectualPropertyService->getSettings($intellectualProperty)
+        );
+
+        $result = $this->paymentService->initiate(
+            schedule: $schedule,
+            paymentMethodId: $validated['payment_method_id'],
         );
     }
 
