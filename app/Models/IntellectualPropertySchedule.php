@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Contracts\Payable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-class IntellectualPropertySchedule extends Model
+class IntellectualPropertySchedule extends Model implements Payable
 {
     protected $fillable = [
         'intellectual_property_id',
