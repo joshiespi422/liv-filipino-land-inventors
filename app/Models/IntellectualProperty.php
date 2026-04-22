@@ -16,7 +16,6 @@ class IntellectualProperty extends Model
         'term_months',
         'creation_type',
         'form_type',
-        'priority_details',
         'title',
         'description',
         'applicability',

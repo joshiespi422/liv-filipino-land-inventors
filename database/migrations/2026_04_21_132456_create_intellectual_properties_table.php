@@ -18,7 +18,6 @@ return new class extends Migration {
             $table->unsignedInteger('term_months')->nullable();
             $table->enum('creation_type', ['business_idea', 'invention']);
             $table->enum('form_type', ['payment', 'grant']);
-            $table->string('priority_details')->nullable();
             $table->string('title');
             $table->text('description');
             $table->text('applicability');

@@ -67,7 +67,6 @@ class IntellectualPropertyService
             $application = IntellectualProperty::create([
                 'user_id' => $user->id,
                 'creation_type' => $data['creation_type'],
-                'priority_details' => $data['priority_details'] ?? null,
                 'title' => $data['title'],
                 'description' => $data['description'],
                 'applicability' => $data['applicability'],

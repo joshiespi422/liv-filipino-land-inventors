@@ -14,7 +14,6 @@ class ApiIntellectualPropertyResource extends JsonApiResource
     public $attributes = [
         'creation_type',
         'form_type',
-        'priority_details',
         'title',
         'description',
         'applicability',
@@ -33,7 +32,6 @@ class ApiIntellectualPropertyResource extends JsonApiResource
         return [
             'creation_type' => $this->creation_type,
             'form_type' => $this->form_type,
-            'priority_details' => $this->priority_details,
             'title' => $this->title,
             'description' => $this->description,
             'applicability' => $this->applicability,
