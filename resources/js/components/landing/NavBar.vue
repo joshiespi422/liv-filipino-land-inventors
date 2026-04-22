@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { home, logout, login } from '@/routes';
+import { logout, login } from '@/routes';
 import type { NavItem, NavProps } from '@/types/landing/nav-bar';
 import JoinUs from './JoinUs.vue';
 const props = defineProps<NavProps>();
@@ -132,7 +132,7 @@ onUnmounted(() => {
                 <div class="hidden sm:flex items-center gap-2">
                     <template v-if="user">
                         <Link 
-                            :href="home()"
+                            href="/dashboard"
                             class="rounded-xl px-4 py-2 text-sm font-medium text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all"
                         >
                             Dashboard
@@ -222,19 +222,39 @@ onUnmounted(() => {
                     </div>
 
                     <div class="mt-4 flex flex-col gap-2 md:gap-3 sm:hidden">
-                        <Link 
-                            :href="login()"
-                            class="w-full rounded-xl md:rounded-2xl border border-gray-300 dark:border-white/20 px-4 py-3 md:py-4 text-center text-sm md:text-base font-bold text-gray-700 dark:text-white active:scale-[0.98] transition-transform"
-                        >
-                            Log in
-                        </Link>
-                        
-                        <button 
-                            @click="openJoinModal"
-                            class="w-full rounded-xl md:rounded-2xl bg-[#033e94] dark:bg-white px-4 py-3 md:py-4 text-center text-sm md:text-base font-bold text-white dark:text-[#033e94] shadow-lg active:scale-[0.98] transition-transform cursor-pointer block focus:outline-none"
-                        >
-                            Join us
-                        </button>
+                        <template v-if="user">
+                            <Link 
+                                href="/dashboard"
+                                class="w-full rounded-xl md:rounded-2xl bg-[#033e94] dark:bg-white px-4 py-3 md:py-4 text-center text-sm md:text-base font-bold text-white dark:text-[#033e94] shadow-lg active:scale-[0.98] transition-transform block"
+                            >
+                                Dashboard
+                            </Link>
+                            
+                            <Link 
+                                :href="logout()" 
+                                method="post" 
+                                as="button"
+                                class="w-full rounded-xl md:rounded-2xl border border-gray-300 dark:border-white/20 px-4 py-3 md:py-4 text-center text-sm md:text-base font-bold text-gray-700 dark:text-white active:scale-[0.98] transition-transform block"
+                            >
+                                Log Out
+                            </Link>
+                        </template>
+
+                        <template v-else>
+                            <Link 
+                                :href="login()"
+                                class="w-full rounded-xl md:rounded-2xl border border-gray-300 dark:border-white/20 px-4 py-3 md:py-4 text-center text-sm md:text-base font-bold text-gray-700 dark:text-white active:scale-[0.98] transition-transform block"
+                            >
+                                Log in
+                            </Link>
+                            
+                            <button 
+                                @click="openJoinModal"
+                                class="w-full rounded-xl md:rounded-2xl bg-[#033e94] dark:bg-white px-4 py-3 md:py-4 text-center text-sm md:text-base font-bold text-white dark:text-[#033e94] shadow-lg active:scale-[0.98] transition-transform cursor-pointer block focus:outline-none"
+                            >
+                                Join us
+                            </button>
+                        </template>
                     </div>
                 </div>
             </transition>
