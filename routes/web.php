@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\Auth\RegistrationController; 
 use Laravel\Fortify\Features;
 use App\Models\UserType;
+use Inertia\Inertia;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\BusinessTrainingController;
 use App\Http\Controllers\Web\LoanAssistanceController;
@@ -22,6 +23,16 @@ Route::middleware('guest')->group(function () {
     });
 });
 
+Route::middleware([
+    'auth', 
+    'role:' . UserType::BASIC
+])->group(function () {
+
+    Route::get('/join-us', function () {
+        return Inertia::render('landing/JoinUs'); 
+    })->name('join-us');
+
+});
 Route::middleware([
     'auth', 
     'role:' . UserType::SUPER_ADMIN . ',' . UserType::ADMIN
