@@ -109,5 +109,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('{intellectualProperty}', [IntellectualPropertyController::class, 'show']);
             Route::put('{intellectualProperty}', [IntellectualPropertyController::class, 'update']);
             Route::get('{intellectualProperty}/settings', [IntellectualPropertyController::class, 'settings']);
+            Route::post('{intellectualProperty}/apply/payment', [IntellectualPropertyController::class, 'applyPayment']);
+            Route::post('schedules/{schedule}/pay', [IntellectualPropertyController::class, 'pay']);
         });
 });
