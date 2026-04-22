@@ -30,6 +30,8 @@ class StatusSeeder extends Seeder
 
             // For intellectual property schedules
             ['id' => 14, 'name' => 'waiting_for_payment'],
+            ['id' => 15, 'name' => 'registered'],
+            ['id' => 16, 'name' => 'expired'],
         ]);
 
     }
