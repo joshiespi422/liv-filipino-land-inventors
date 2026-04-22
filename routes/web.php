@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\BusinessTrainingController;
 use App\Http\Controllers\Web\LoanAssistanceController;
 use App\Http\Controllers\Web\LoanScheduleController;
+use App\Http\Controllers\Web\IntellectualPropertyController;
 
 Route::inertia('/', 'Home', [
     'canRegister' => Features::enabled(Features::registration()),
@@ -74,6 +75,13 @@ Route::middleware([
 
         Route::get('/loan-assistance/{loan}/schedule', [LoanScheduleController::class, 'index'])
             ->name('loan-assistance.schedule.index');
+    });
+
+    // Intellectual Property Assistance Domain
+    Route::middleware(['service_access:intellectual-property-assistance'])->group(function () {
+        Route::get('/intellectual-property', [IntellectualPropertyController::class, 'index'])
+            ->name('intellectual-property.index');
+
     });
 
 });
