@@ -90,8 +90,8 @@ Route::middleware([
 
     // Intellectual Property Assistance Domain
     Route::middleware(['service_access:intellectual-property-assistance'])->group(function () {
-        Route::get('/intellectual-property', [IntellectualPropertyController::class, 'index'])
-            ->name('intellectual-property.index');
+        Route::get('/intellectual-property-assistance', [IntellectualPropertyController::class, 'index'])
+            ->name('intellectual-property-assistance.index');
 
     });
 

@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import DataTable from '@/components/DataTable.vue';
-import intellectualProperty from '@/routes/intellectual-property';
+import intellectualPropertyAssistance from '@/routes/intellectual-property-assistance';
 import { getIPColumns } from '@/features/intellectual-property/columns';
 import { toast } from 'vue-sonner';
 import type {
@@ -23,14 +23,14 @@ defineOptions({
     breadcrumbs: [
       {
         title: 'Intellectual Property',
-        href: intellectualProperty.index(),
+        href: intellectualPropertyAssistance.index(),
       },
     ],
   },
 });
 
 const props = defineProps<{
-  intellectualProperties: {
+  intellectual_properties: {
     data: IntellectualProperty[];
   };
   can_mutate: boolean;
@@ -58,7 +58,7 @@ const columns = getIPColumns({
 
   <div class="flex h-full flex-1 flex-col gap-6 p-6">
     <div
-      class="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+      class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
     >
       <div>
         <h1 class="text-2xl font-bold tracking-tight">Intellectual Property</h1>
@@ -86,7 +86,7 @@ const columns = getIPColumns({
 
     <DataTable
       :columns="columns"
-      :data="intellectualProperties.data"
+      :data="intellectual_properties.data"
       search-placeholder="Search intellectual property..."
     />
   </div>

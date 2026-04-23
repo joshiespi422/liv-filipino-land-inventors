@@ -71,14 +71,6 @@ export const getIPColumns = ({
     },
   },
   {
-    accessorKey: 'start_date_display',
-    header: 'Start Date',
-  },
-  {
-    accessorKey: 'end_date_display',
-    header: 'End Date',
-  },
-  {
     id: 'actions',
     header: () => h('div', { class: 'text-center' }, 'Actions'),
     cell: ({ row }) => {
