@@ -1,14 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { Head, router, useHttp, useForm } from '@inertiajs/vue3';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   InfoIcon,
   ArrowLeftIcon,
@@ -16,17 +7,26 @@ import {
   PencilIcon,
   Trash2Icon,
 } from 'lucide-vue-next';
-import FormDialog from '@/components/FormDialog.vue';
-import DetailsDialog from '@/components/DetailsDialog.vue';
+import { ref } from 'vue';
+import { toast } from 'vue-sonner';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
+import DetailsDialog from '@/components/DetailsDialog.vue';
+import FormDialog from '@/components/FormDialog.vue';
 import ModuleBuilder from '@/components/ModuleBuilder.vue';
 import ModuleViewer from '@/components/ModuleViewer.vue';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
 import { businessTrainingCategoryFields } from '@/features/business-training/fields';
 import { mapModulesToForm } from '@/features/business-training/mappers';
-import { Button } from '@/components/ui/button';
-import businessTraining from '@/routes/business-training';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { toast } from 'vue-sonner';
+import businessTraining from '@/routes/business-training';
 import type {
   BusinessTrainingTypeDetail,
   BusinessTrainingCategory,
@@ -114,8 +114,10 @@ const openDeleteModal = (category: BusinessTrainingCategory) => {
 };
 
 const handleDelete = () => {
-  if (!deletingCategory.value) return;
-
+  if (!deletingCategory.value) {
+    return;
+  }
+  
   isDeleting.value = true;
 
   router.delete(

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { HeroProps } from '@/types/landing/home-section';
+import type { HeroProps } from '@/types/landing/index';
 
 const props = defineProps<HeroProps>();
 
@@ -15,7 +15,6 @@ const bgImage = computed(() => {
     return (path.startsWith('http') || path.startsWith('/')) ? path : `/storage/${path}`;
 });
 
-// Store default fallback texts
 const defaultTitle = 'FILIPINO INVENTORS SOCIETY MULTI-PURPOSE COOPERATIVE';
 const defaultShortTitle = 'FISMPC';
 const defaultContent = `Welcome to the Filipino Inventors Society Multi-Purpose Cooperative (FISMPC)! We are a dynamic community of visionary inventors, innovators, scientists, and entrepreneurs working together to transform Filipino ingenuity into engines of inclusive national development. Since our founding in 2011, FISMPC has become a recognized platform for innovation commercialization, bridging the gap between creative ideas and real-world solutions. 

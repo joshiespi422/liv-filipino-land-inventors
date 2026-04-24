@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { PlusIcon } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import {
   NumberField,
   NumberFieldContent,
@@ -10,8 +11,7 @@ import {
   NumberFieldIncrement,
   NumberFieldInput,
 } from '@/components/ui/number-field';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { PlusIcon } from 'lucide-vue-next';
+import { Textarea } from '@/components/ui/textarea';
 
 const props = defineProps<{
   modelValue: any[];
@@ -29,7 +29,10 @@ const modules = computed({
 const getError = (path: string) => props.errors?.[path];
 
 const pushItem = (list: any[], max: number, payload: any) => {
-  if (list.length >= max) return;
+  if (list.length >= max) {
+    return;
+  }
+
   list.push(payload);
 };
 

@@ -2,7 +2,7 @@
 import { Link, usePage } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { logout, login } from '@/routes';
-import type { NavItem, NavProps } from '@/types/landing/nav-bar';
+import type { NavItem, NavProps } from '@/types/landing/index';
 import JoinUs from './JoinUs.vue';
 const props = defineProps<NavProps>();
 

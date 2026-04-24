@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
+import { ArrowLeft } from 'lucide-vue-next';
+import DataTable from '@/components/DataTable.vue';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { scheduleColumns } from '@/features/loan-assistance/columns';
+import AppLayout from '@/layouts/AppLayout.vue';
 import loanAssistance from '@/routes/loan-assistance';
 import loanSchedule from '@/routes/loan-assistance/schedule';
-import AppLayout from '@/layouts/AppLayout.vue';
-import DataTable from '@/components/DataTable.vue';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-vue-next';
-import { scheduleColumns } from '@/features/loan-assistance/columns';
 import type { LoanSchedule, LoanAssistance } from '@/types';
 
 defineOptions({

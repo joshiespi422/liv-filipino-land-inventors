@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Head, router, useHttp } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { toast } from 'vue-sonner';
+import DataTable from '@/components/DataTable.vue';
 import {
   Select,
   SelectContent,
@@ -8,10 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import DataTable from '@/components/DataTable.vue';
-import intellectualPropertyAssistance from '@/routes/intellectual-property-assistance';
 import { getIPColumns } from '@/features/intellectual-property/columns';
-import { toast } from 'vue-sonner';
+import intellectualPropertyAssistance from '@/routes/intellectual-property-assistance';
 import type {
   IntellectualProperty,
   IntellectualPropertyStatus,

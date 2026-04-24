@@ -1,19 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted } from 'vue';
+import type { SectionContent, Mission } from '@/types/landing/index';
 
-// Define expected prop structures based on your Blade file
-interface SectionContent {
-    title?: string;
-    content?: string;
-    icon_path?: string;
-}
 
-interface Mission {
-    column_position: number;
-    title?: string;
-    icon?: string;
-    content_list?: string;
-}
 
 const props = defineProps<{
     aboutIntro?: SectionContent;
@@ -32,14 +21,12 @@ const missionData = computed(() => {
     return props.aboutMissions.find((m) => m.column_position === 2) || null;
 });
 
-// Parse the JSON string into a clean array
-// Parse the JSON string into a clean array
 const missionList = computed(() => {
     if (!missionData.value || !missionData.value.content_list) {
         return [];
     }
 
-    const rawList = missionData.value.content_list; // Changed to const
+    const rawList = missionData.value.content_list; 
     let list: string[] = [];
 
     try {
@@ -52,7 +39,6 @@ const missionList = computed(() => {
         list = rawList.split('\n');
     }
 
-    // CLEANUP: Remove empty lines
     return list
         .map((item) => (typeof item === 'string' ? item.trim() : ''))
         .filter((item) => item !== null && item !== '');
@@ -73,12 +59,12 @@ const getImageUrl = (path?: string, fallback: string = '') => {
 // --- MODAL METHODS ---
 const openMissionModal = () => {
     isModalOpen.value = true;
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
 };
 
 const closeMissionModal = () => {
     isModalOpen.value = false;
-    document.body.style.overflow = ''; // Restore background scrolling
+    document.body.style.overflow = ''; 
 };
 
 onUnmounted(() => {

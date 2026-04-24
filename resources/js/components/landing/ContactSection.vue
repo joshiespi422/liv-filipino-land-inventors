@@ -1,25 +1,14 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import type { ContactInfo } from '@/types/landing/index';
 
-// --- INTERFACES ---
-interface ContactInfo {
-    phone?: string;
-    email?: string;
-    address?: string;
-    facebook_link?: string | null;
-    youtube_link?: string | null;
-    instagram_link?: string | null;
-    twitter_link?: string | null;
-    tiktok_link?: string | null;
-}
 
 // --- PROPS ---
 const props = defineProps<{
     info?: ContactInfo | null;
 }>();
 
-// --- SAMPLE DATA (Shown when backend is empty/no table exists) ---
 const sampleContactInfo: ContactInfo = {
     phone: ' (02) 1234-5678.',
     email: 'info@fisinventorscoop.org',
@@ -32,7 +21,6 @@ const sampleContactInfo: ContactInfo = {
 };
 
 // --- COMPUTED DATA ---
-// If Inertia passes null (no database table yet), fallback to sampleContactInfo
 const displayInfo = computed(() => {
     return props.info ? props.info : sampleContactInfo;
 });

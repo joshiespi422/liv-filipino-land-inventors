@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { Head, router, useHttp } from '@inertiajs/vue3';
-import { ref } from 'vue';
 import { PlusIcon, PencilIcon, Trash2Icon } from 'lucide-vue-next';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { ref } from 'vue';
+import { toast } from 'vue-sonner';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
-import { businessTrainingTypeFields } from '@/features/business-training/fields';
 import FormDialog from '@/components/FormDialog.vue';
 import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { businessTrainingTypeFields } from '@/features/business-training/fields';
 import businessTraining from '@/routes/business-training';
-import { toast } from 'vue-sonner';
 import type { BusinessTrainingType, ApiResponse } from '@/types';
 
 defineOptions({
@@ -52,8 +52,10 @@ const openDeleteModal = (type: any) => {
 };
 
 const handleDelete = () => {
-  if (!deletingType.value) return;
-
+  if (!deletingType.value) {
+    return;
+  }
+  
   isDeleting.value = true;
 
   router.delete(
