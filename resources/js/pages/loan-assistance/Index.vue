@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useDebounceFn } from '@vueuse/core';
+import { CreditCard, Calendar, Percent } from 'lucide-vue-next';
+import { computed, ref, watch } from 'vue';
+import { toast } from 'vue-sonner';
+import DataTable from '@/components/DataTable.vue';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -16,15 +14,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+import { getAssistanceColumns } from '@/features/loan-assistance/columns';
 import loanAssistance from '@/routes/loan-assistance';
 import loanSchedule from '@/routes/loan-assistance/schedule';
-import { CreditCard, Calendar, Percent } from 'lucide-vue-next';
-import DataTable from '@/components/DataTable.vue';
-import { computed, ref, watch } from 'vue';
-import { useDebounceFn } from '@vueuse/core';
-import { getAssistanceColumns } from '@/features/loan-assistance/columns';
 import type { GlobalSetting, LoanAssistance, LoanStatus } from '@/types';
-import { toast } from 'vue-sonner';
 
 defineOptions({
   layout: {
@@ -51,7 +52,9 @@ const props = defineProps<{
 const selectedStatus = ref(props.filters.status || 'pending');
 
 const displayStats = computed(() => {
-  if (!props.global_settings) return [];
+  if (!props.global_settings) {
+    return [];
+  }
 
   return [
     {
@@ -112,7 +115,9 @@ const declineLoan = (id: number) => openConfirm(id, 'decline');
 
 const isClosing = ref(false);
 const handleLoanAction = () => {
-  if (!selectedLoanId.value || !actionType.value) return;
+  if (!selectedLoanId.value || !actionType.value) {
+    return;
+  }
 
   form.action = actionType.value;
   isClosing.value = true;

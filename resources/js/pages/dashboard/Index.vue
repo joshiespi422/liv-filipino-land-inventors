@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { Head, router, useHttp, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
-import dashboard from '@/routes/dashboard';
+import { toast } from 'vue-sonner';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import DataTable from '@/components/DataTable.vue';
 import DetailsDialog from '@/components/DetailsDialog.vue';
-import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import { getPendingUserColumns } from '@/features/dashboard/columns';
 import { getUserDetails } from '@/features/dashboard/details';
+import dashboard from '@/routes/dashboard';
 import type { PendingUser, PendingUserDetail, ApiResponse } from '@/types';
-import { toast } from 'vue-sonner';
 
 defineOptions({
   layout: {
@@ -68,7 +68,9 @@ const approveUser = (id: number) => openConfirm(id, 'approve');
 const declineUser = (id: number) => openConfirm(id, 'decline');
 
 const handleUserAction = () => {
-  if (!selectedUserId.value || !actionType.value) return;
+  if (!selectedUserId.value || !actionType.value) {
+    return;
+  }
 
   form.action = actionType.value;
 
