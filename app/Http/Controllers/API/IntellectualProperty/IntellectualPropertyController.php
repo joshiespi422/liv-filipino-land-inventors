@@ -181,11 +181,6 @@ class IntellectualPropertyController extends Controller
         return response()->json(
             $this->intellectualPropertyService->getSettings($intellectualProperty)
         );
-
-        $result = $this->paymentService->initiate(
-            schedule: $schedule,
-            paymentMethodId: $validated['payment_method_id'],
-        );
     }
 
     /**
