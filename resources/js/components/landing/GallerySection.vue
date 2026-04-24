@@ -1,23 +1,14 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted } from 'vue';
 import BaseCarousel from '@/components/BaseCarousel.vue';
+import type { GalleryItem } from '@/types/landing/index';
 
-// --- INTERFACES ---
-interface GalleryItem {
-    id: number | string;
-    type: 'video' | 'photo';
-    is_highlight?: boolean;
-    media_path?: string;
-    title?: string;
-    subtitle?: string;
-    description?: string;
-}
+
 
 const props = defineProps<{
     items?: GalleryItem[];
 }>();
 
-// --- SAMPLE DATA (Fallback if backend is empty) ---
 const sampleItems: GalleryItem[] = [
     // Videos
     {

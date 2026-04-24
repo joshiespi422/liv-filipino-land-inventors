@@ -1,14 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import BaseCarousel from '@/components/BaseCarousel.vue';
-
-// --- INTERFACES ---
-interface Testimonial {
-    image_path?: string;
-    name?: string;
-    role?: string;
-    body?: string;
-}
+import type { Testimonial } from '@/types/landing/index';
 
 const props = defineProps<{
     testimonials?: Testimonial[];
