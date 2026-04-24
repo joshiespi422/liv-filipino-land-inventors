@@ -157,7 +157,6 @@ class LoanPaymentService
 
     private function resolveGatewayMethodId($gateway, PaymentMethod $paymentMethod, array $data): string
     {
-        // ✅ ALWAYS create payment method from backend
         $method = $gateway->createPaymentMethod($paymentMethod->gateway_type);
 
         $methodId = data_get($method, 'data.id');
