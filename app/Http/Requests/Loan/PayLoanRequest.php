@@ -28,7 +28,7 @@ class PayLoanRequest extends FormRequest
             'payment_method_id' => ['required', 'exists:payment_methods,id'],
             'amount' => ['required', 'numeric', 'gt:0'],
 
-            'gateway' => ['required', 'string', 'in:paymongo'],
+            'gateway' => ['required', 'string', 'in:paymongo,wallet,cash'],
 
             'gateway_payment_method_id' => [
                 'required_if:payment_method_id,' . PaymentMethod::CARD,

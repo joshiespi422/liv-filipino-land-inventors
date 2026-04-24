@@ -25,7 +25,7 @@ class LoanPaymentService
         return DB::transaction(function () use ($loan, $data, $paymentMethod) {
             $this->checkLoanStatus($loan, $data['loan_schedule_id']);
             $schedule = $this->lockAndValidateSchedule($loan, $data['loan_schedule_id']);
-            $payment = $this->createPendingPayment($schedule, $data);
+            $payment = $this->createPendingPayment($schedule, $data, $paymentMethod);
 
             if ($paymentMethod->isOffline()) {
                 return $this->settleOffline($payment);
@@ -100,15 +100,15 @@ class LoanPaymentService
         }
     }
 
-    private function createPendingPayment(LoanSchedule $schedule, array $data): Payment
+    private function createPendingPayment(LoanSchedule $schedule, array $data, PaymentMethod $paymentMethod): Payment
     {
         $this->validateAmount($schedule, (float) $data['amount']);
 
         return $schedule->payments()->create([
             'payment_method_id' => $data['payment_method_id'],
             'payment_date' => now(),
-            'amount' => (int) round((float) $data['amount'] * 100), // store in cents
-            'gateway' => $data['gateway'] ?? 'paymongo',
+            'amount' => (int) round((float) $data['amount'] * 100),
+            'gateway' => PaymentGatewayFactory::resolveGateway($paymentMethod), // ← derive it
             'status_id' => Status::PENDING,
         ]);
     }
