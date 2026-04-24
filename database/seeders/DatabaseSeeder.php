@@ -56,7 +56,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
-            DiminishingLoanSeeder::class
+            DiminishingLoanSeeder::class,
+            IntellectualPropertySeeder::class
         ]);
 
         User::factory()->count(5)->create([

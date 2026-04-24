@@ -42,10 +42,10 @@ export const getIPColumns = ({
     accessorKey: 'creation_type',
     header: 'Creation Type',
     cell: ({ row }) => {
-      const type = row.getValue('creation_type') as string;
+      const type = row.original.creation_type;
       const formattedType = type?.replaceAll('_', ' ');
 
-      return h('div', { class: 'capitalize' }, () => formattedType || '-');
+      return h('div', { class: 'capitalize' }, formattedType || '-');
     },
   },
   {
@@ -56,7 +56,7 @@ export const getIPColumns = ({
     accessorKey: 'status_name',
     header: () => h('div', { class: 'text-center' }, 'Status'),
     cell: ({ row }) => {
-      const status = row.getValue('status_name') as string;
+      const status = row.original.status_name;
       const badgeClass =
         STATUS_STYLES[status] ?? 'bg-gray-400 hover:bg-gray-500';
       const formattedStatus = status?.replaceAll('_', ' ');
