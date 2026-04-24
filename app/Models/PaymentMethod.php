@@ -18,6 +18,7 @@ class PaymentMethod extends Model
     public const BILLEASE = 5;
     public const GRAB_PAY = 6;
     public const DOB = 7;
+    public const WALLET = 8;
 
     public const CLIENT_SIDE_METHODS = [
         self::CARD,
@@ -25,6 +26,7 @@ class PaymentMethod extends Model
 
     public const OFFLINE_METHODS = [
         self::CASH,
+        self::WALLET,
     ];
 
     public function isOffline(): bool
@@ -35,11 +37,5 @@ class PaymentMethod extends Model
     public function isClientSide(): bool
     {
         return in_array($this->id, self::CLIENT_SIDE_METHODS);
-    }
-
-    // one to many, payment method has many loan payments
-    public function loanPayments(): HasMany
-    {
-        return $this->hasMany(LoanPayment::class);
     }
 }

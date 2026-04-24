@@ -25,10 +25,10 @@ class LoanPaymentService
         return DB::transaction(function () use ($loan, $data, $paymentMethod) {
             $this->checkLoanStatus($loan, $data['loan_schedule_id']);
             $schedule = $this->lockAndValidateSchedule($loan, $data['loan_schedule_id']);
-            $payment = $this->createPendingPayment($schedule, $data);
+            $payment = $this->createPendingPayment($schedule, $data, $paymentMethod);
 
             if ($paymentMethod->isOffline()) {
-                return $this->settleOffline($payment);
+                return $this->settleOffline($payment, $paymentMethod);
             }
 
             return $this->processGatewayPayment($payment, $paymentMethod, $data);
@@ -100,25 +100,50 @@ class LoanPaymentService
         }
     }
 
-    private function createPendingPayment(LoanSchedule $schedule, array $data): Payment
+    private function createPendingPayment(LoanSchedule $schedule, array $data, PaymentMethod $paymentMethod): Payment
     {
         $this->validateAmount($schedule, (float) $data['amount']);
 
         return $schedule->payments()->create([
             'payment_method_id' => $data['payment_method_id'],
             'payment_date' => now(),
-            'amount' => (int) round((float) $data['amount'] * 100), // store in cents
-            'gateway' => $data['gateway'] ?? 'paymongo',
+            'amount' => (int) round((float) $data['amount'] * 100),
+            'gateway' => PaymentGatewayFactory::resolveGateway($paymentMethod), // ← derive it
             'status_id' => Status::PENDING,
         ]);
     }
 
-    private function settleOffline(Payment $payment): array
+    private function settleOffline(Payment $payment, PaymentMethod $paymentMethod): array
     {
+        if ($paymentMethod->id === PaymentMethod::WALLET) {
+            $this->deductFromWallet($payment);
+        }
+
         $payment->update(['status_id' => Status::SUCCESS]);
         $payment->payable->onPaymentSuccess($payment);
 
         return ['payment' => $payment, 'next_action' => null];
+    }
+
+    private function deductFromWallet(Payment $payment): void
+    {
+        $loan = $payment->payable->loan;
+        $wallet = $loan->user->wallet()->lockForUpdate()->firstOrFail();
+        $amountInPhp = $payment->amount / 100;
+
+        if ($wallet->balance < $amountInPhp) {
+            throw new \DomainException('Insufficient wallet balance.');
+        }
+
+        $wallet->decrement('balance', $amountInPhp);
+
+        $wallet->walletTransactions()->create([
+            'amount' => $amountInPhp,
+            'type' => 'withdrawal',
+            'description' => 'Loan payment',
+            'reference_id' => $payment->id,
+            'reference_type' => Payment::class,
+        ]);
     }
 
     private function processGatewayPayment(Payment $payment, PaymentMethod $paymentMethod, array $data): array
@@ -157,7 +182,6 @@ class LoanPaymentService
 
     private function resolveGatewayMethodId($gateway, PaymentMethod $paymentMethod, array $data): string
     {
-        // ✅ ALWAYS create payment method from backend
         $method = $gateway->createPaymentMethod($paymentMethod->gateway_type);
 
         $methodId = data_get($method, 'data.id');
