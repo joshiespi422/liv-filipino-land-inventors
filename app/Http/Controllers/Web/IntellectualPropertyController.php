@@ -26,11 +26,15 @@ class IntellectualPropertyController extends Controller
         // Validate all filters
         $validated = $request->validate([
             'status' => ['sometimes', 'string', Rule::in(['pending', 'registered', 'rejected', 'expired', 'waiting_for_payment'])],
+            'creation' => ['sometimes', 'string', Rule::in(['business_idea', 'invention'])],
+            'form' => ['sometimes', 'string', Rule::in(['payment', 'grant'])],
         ]);
 
         // Set defaults
         $filters = [
             'status' => $validated['status'] ?? 'pending',
+            'creation' => $validated['creation'] ?? null,
+            'form' => $validated['form'] ?? null,
         ];
 
         // Build and execute query
@@ -53,6 +57,14 @@ class IntellectualPropertyController extends Controller
             'status:id,name',
             'user:id,name',
         ])->whereHas('status', fn($q) => $q->where('name', $filters['status']));
+
+        if (!empty($filters['creation'])) {
+            $query->where('creation_type', $filters['creation']);
+        }
+
+        if (!empty($filters['form'])) {
+            $query->where('form_type', $filters['form']);
+        }
 
         return $query;
     }

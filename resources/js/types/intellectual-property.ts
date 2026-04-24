@@ -12,8 +12,8 @@ export interface IntellectualProperty {
   id: number;
   status_name: IntellectualPropertyStatus;
   user_name: string;
-  creation_type: 'business_idea' | 'invention';
-  form_type: 'payment' | 'grant';
+  creation_type: IntellectualPropertyCreationType;
+  form_type: IntellectualPropertyFormType;
   title: string;
 }
 
@@ -31,3 +31,7 @@ export type IntellectualPropertyStatus =
   | 'rejected'
   | 'expired'
   | 'waiting_for_payment';
+
+export type IntellectualPropertyFormType = 'payment' | 'grant';
+
+export type IntellectualPropertyCreationType = 'business_idea' | 'invention';

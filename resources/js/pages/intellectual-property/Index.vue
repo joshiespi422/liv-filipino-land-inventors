@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, router, useHttp } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { useDebounceFn } from '@vueuse/core';
+import { ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import DataTable from '@/components/DataTable.vue';
 import {
@@ -15,6 +16,8 @@ import intellectualPropertyAssistance from '@/routes/intellectual-property-assis
 import type {
   IntellectualProperty,
   IntellectualPropertyStatus,
+  IntellectualPropertyCreationType,
+  IntellectualPropertyFormType,
   ApiResponse,
 } from '@/types';
 
@@ -36,10 +39,34 @@ const props = defineProps<{
   can_mutate: boolean;
   filters: {
     status: IntellectualPropertyStatus;
+    creation: IntellectualPropertyCreationType;
+    form: IntellectualPropertyFormType;
   };
 }>();
 
 const selectedStatus = ref(props.filters.status || 'pending');
+const selectedCreation = ref(props.filters.creation || null);
+const selectedForm = ref(props.filters.form || null);
+
+// --- Watchers to Update URL ---
+const updateFilters = () => {
+  router.get(
+    intellectualPropertyAssistance.index(),
+    {
+      status: selectedStatus.value,
+      creation: selectedCreation.value || undefined,
+      form: selectedForm.value || undefined,
+    },
+    {
+      preserveScroll: true,
+      replace: true,
+    },
+  );
+};
+
+// Watch for select filter changes (debounced)
+const debouncedUpdate = useDebounceFn(updateFilters, 300);
+watch([selectedStatus, selectedCreation, selectedForm], debouncedUpdate);
 
 const approveIP = (ipId: number) => {};
 const declineIP = (ipId: number) => {};
@@ -67,6 +94,24 @@ const columns = getIPColumns({
         </p>
       </div>
       <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-4">
+        <Select v-model="selectedCreation">
+          <SelectTrigger class="w-full cursor-pointer sm:w-38 sm:shrink-0">
+            <SelectValue placeholder="Filter by..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="business_idea"> Business idea</SelectItem>
+            <SelectItem value="invention"> Invention</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select v-model="selectedForm">
+          <SelectTrigger class="w-full cursor-pointer sm:w-38 sm:shrink-0">
+            <SelectValue placeholder="Filter by..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="grant">Grant</SelectItem>
+            <SelectItem value="payment">Payment</SelectItem>
+          </SelectContent>
+        </Select>
         <Select v-model="selectedStatus">
           <SelectTrigger class="w-full cursor-pointer sm:w-38 sm:shrink-0">
             <SelectValue placeholder="Filter by..." />
