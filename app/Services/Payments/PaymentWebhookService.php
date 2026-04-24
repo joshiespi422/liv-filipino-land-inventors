@@ -52,7 +52,7 @@ class PaymentWebhookService
 
         $payable = $payment->payable;
 
-        // ↓ THIS is the fix — check the contract, not a specific model
+        // check the contract
         if (!$payable instanceof Payable) {
             Log::warning('Payable does not implement Payable contract.', [
                 'payment_id' => $payment->id,
@@ -74,7 +74,7 @@ class PaymentWebhookService
                     'gateway_payment_id' => $gatewayPaymentId,
                 ]);
 
-                // delegates to LoanSchedule or MembershipSchedule automatically
+                // delegates to Payable model
                 $payable->onPaymentSuccess($payment);
 
                 PaymentGatewayLog::create([

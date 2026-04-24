@@ -28,7 +28,7 @@ class LoanPaymentService
             $payment = $this->createPendingPayment($schedule, $data, $paymentMethod);
 
             if ($paymentMethod->isOffline()) {
-                return $this->settleOffline($payment);
+                return $this->settleOffline($payment, $paymentMethod);
             }
 
             return $this->processGatewayPayment($payment, $paymentMethod, $data);
@@ -113,12 +113,37 @@ class LoanPaymentService
         ]);
     }
 
-    private function settleOffline(Payment $payment): array
+    private function settleOffline(Payment $payment, PaymentMethod $paymentMethod): array
     {
+        if ($paymentMethod->id === PaymentMethod::WALLET) {
+            $this->deductFromWallet($payment);
+        }
+
         $payment->update(['status_id' => Status::SUCCESS]);
         $payment->payable->onPaymentSuccess($payment);
 
         return ['payment' => $payment, 'next_action' => null];
+    }
+
+    private function deductFromWallet(Payment $payment): void
+    {
+        $loan = $payment->payable->loan;
+        $wallet = $loan->user->wallet()->lockForUpdate()->firstOrFail();
+        $amountInPhp = $payment->amount / 100;
+
+        if ($wallet->balance < $amountInPhp) {
+            throw new \DomainException('Insufficient wallet balance.');
+        }
+
+        $wallet->decrement('balance', $amountInPhp);
+
+        $wallet->walletTransactions()->create([
+            'amount' => $amountInPhp,
+            'type' => 'withdrawal',
+            'description' => 'Loan payment',
+            'reference_id' => $payment->id,
+            'reference_type' => Payment::class,
+        ]);
     }
 
     private function processGatewayPayment(Payment $payment, PaymentMethod $paymentMethod, array $data): array

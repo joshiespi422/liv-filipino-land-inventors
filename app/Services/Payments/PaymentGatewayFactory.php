@@ -23,6 +23,8 @@ class PaymentGatewayFactory
     {
         return match ($method->id) {
             PaymentMethod::CASH => 'cash',
+            PaymentMethod::WALLET => 'wallet',
+
             PaymentMethod::CARD, PaymentMethod::QR_CODE,
             PaymentMethod::MAYA, PaymentMethod::BILLEASE,
             PaymentMethod::GRAB_PAY, PaymentMethod::DOB => 'paymongo',
