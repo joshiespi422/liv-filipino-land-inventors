@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { Head, router, useHttp } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { toast } from 'vue-sonner';
 import DataTable from '@/components/DataTable.vue';
+import DetailsDialog from '@/components/DetailsDialog.vue';
 import {
   Select,
   SelectContent,
@@ -12,12 +13,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { getIPColumns } from '@/features/intellectual-property/columns';
+import { getIPDetails } from '@/features/intellectual-property/details';
 import intellectualPropertyAssistance from '@/routes/intellectual-property-assistance';
 import type {
   IntellectualProperty,
   IntellectualPropertyStatus,
   IntellectualPropertyCreationType,
   IntellectualPropertyFormType,
+  IntellectualPropertyDetail,
   ApiResponse,
 } from '@/types';
 
@@ -44,6 +47,7 @@ const props = defineProps<{
   };
 }>();
 
+// state for select filters
 const selectedStatus = ref(props.filters.status || 'pending');
 const selectedCreation = ref(props.filters.creation || null);
 const selectedForm = ref(props.filters.form || null);
@@ -68,16 +72,40 @@ const updateFilters = () => {
 const debouncedUpdate = useDebounceFn(updateFilters, 300);
 watch([selectedStatus, selectedCreation, selectedForm], debouncedUpdate);
 
+// state for details
+const selectedIP = ref<IntellectualPropertyDetail | null>(null);
+const isDetailsOpen = ref(false);
+// inertia http
+const http = useHttp();
+
+// fetch intellectual property
+const showIPDetails = async (id: number) => {
+  isDetailsOpen.value = true;
+  selectedIP.value = null;
+
+  try {
+    const response = (await http.get(
+      intellectualPropertyAssistance.show.url(id),
+    )) as ApiResponse<IntellectualPropertyDetail>;
+
+    selectedIP.value = response.data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 const approveIP = (ipId: number) => {};
 const declineIP = (ipId: number) => {};
 
-const viewIPDetails = (ipId: number) => {};
-
 const columns = getIPColumns({
-  viewIPDetails,
+  showIPDetails,
   approveIP,
   declineIP,
 });
+
+const ipDetails = computed(() =>
+  selectedIP.value ? getIPDetails(selectedIP.value) : [],
+);
 </script>
 
 <template>
@@ -135,4 +163,63 @@ const columns = getIPColumns({
       search-placeholder="Search intellectual property..."
     />
   </div>
+
+  <DetailsDialog
+    v-model:open="isDetailsOpen"
+    title="Intellectual Property Details"
+    :loading="http.processing || !selectedIP"
+    :items="ipDetails"
+    show-default
+  >
+    <template #bottom>
+      <div v-if="selectedIP" class="mt-4 space-y-6">
+        <!-- CLAIMS -->
+        <div>
+          <h3 class="mb-1 text-xs text-muted-foreground">Claims</h3>
+
+          <ul v-if="selectedIP.claims.length" class="ml-5 list-disc space-y-1">
+            <li
+              v-for="claim in selectedIP.claims"
+              :key="claim.id"
+              class="text-sm wrap-break-word"
+            >
+              {{ claim.description }}
+            </li>
+          </ul>
+
+          <p v-else class="text-sm text-muted-foreground italic">
+            No claims available
+          </p>
+        </div>
+
+        <!-- DOCUMENTS -->
+        <div>
+          <h3 class="mb-1 text-xs text-muted-foreground">Documents</h3>
+
+          <ul
+            v-if="selectedIP.documents.length"
+            class="ml-5 list-disc space-y-1"
+          >
+            <li
+              v-for="doc in selectedIP.documents"
+              :key="doc.id"
+              class="text-sm wrap-break-word"
+            >
+              <a
+                :href="doc.attachment"
+                target="_blank"
+                class="text-xs wrap-break-word text-blue-500 underline"
+              >
+                {{ doc.attachment.split('/').pop() }}
+              </a>
+            </li>
+          </ul>
+
+          <p v-else class="text-sm text-muted-foreground italic">
+            No documents uploaded
+          </p>
+        </div>
+      </div>
+    </template>
+  </DetailsDialog>
 </template>

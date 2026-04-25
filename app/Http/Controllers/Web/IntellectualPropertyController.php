@@ -11,6 +11,7 @@ use Illuminate\Validation\Rule;
 use App\Models\UserType;
 use App\Models\IntellectualProperty;
 use App\Http\Resources\IntellectualPropertyResource;
+use App\Http\Resources\IntellectualPropertyDetailResource;
 use Inertia\Inertia;
 
 class IntellectualPropertyController extends Controller
@@ -67,5 +68,17 @@ class IntellectualPropertyController extends Controller
         }
 
         return $query;
+    }
+
+    public function show(IntellectualProperty $property)
+    {
+        $property->loadMissing([
+            'status:id,name',
+            'user:id,name',
+            'claims',
+            'documents',
+        ]);
+
+        return IntellectualPropertyDetailResource::make($property);
     }
 }
