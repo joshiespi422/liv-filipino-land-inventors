@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
+import { computed, watch } from 'vue';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -8,18 +9,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   NumberField,
   NumberFieldContent,
@@ -27,6 +18,16 @@ import {
   NumberFieldIncrement,
   NumberFieldInput,
 } from '@/components/ui/number-field';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
+
 import type { FormField } from '@/types';
 
 const props = defineProps<{
@@ -77,7 +78,10 @@ const form = useForm(initialData);
 watch(
   () => props.initialValues,
   (newValues) => {
-    if (!newValues) return;
+    if (!newValues) {
+      return;
+    }
+
     form.defaults({
       ...Object.fromEntries(props.fields.map((f) => [f.name, ''])),
       ...newValues,
@@ -92,11 +96,15 @@ watch(
 const isValid = computed(() => {
   // Check if all required fields are filled
   const requiredFieldsFilled = props.fields.every((f) => {
-    if (!f.required) return true;
-    return !!form[f.name];
+    if (!f.required) {
+      return true;
+    }
+
+      return !!form[f.name];
   });
   // Check if the form has been modified
   const hasChanges = form.isDirty;
+
   return requiredFieldsFilled && hasChanges;
 });
 
@@ -123,9 +131,11 @@ const handleSubmit = () => {
       }
     });
     // Add method spoofing for update requests with files
+
     if (isUpdating && hasFiles) {
       payload._method = method.toUpperCase();
     }
+    
     return payload;
   });
 

@@ -1,4 +1,19 @@
 <script setup lang="ts" generic="TData, TValue">
+import type { ColumnDef } from '@tanstack/vue-table';
+import {
+  FlexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  useVueTable,
+} from '@tanstack/vue-table';
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronsLeftIcon,
+  ChevronsRightIcon,
+} from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -17,21 +32,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { valueUpdater } from '@/components/ui/table/utils';
-import {
-  type ColumnDef,
-  FlexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  useVueTable,
-} from '@tanstack/vue-table';
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronsLeftIcon,
-  ChevronsRightIcon,
-} from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+
+
 
 const props = defineProps<{
   columns: ColumnDef<TData, TValue>[];
@@ -75,12 +77,16 @@ const pageCount = computed(() => table.getPageCount());
 const totalResults = computed(() => table.getFilteredRowModel().rows.length);
 
 const fromResult = computed(() => {
-  if (totalResults.value === 0) return 0;
+  if (totalResults.value === 0) {
+    return 0;
+  }
+
   return pagination.value.pageIndex * pagination.value.pageSize + 1;
 });
 
 const toResult = computed(() => {
   const end = (pagination.value.pageIndex + 1) * pagination.value.pageSize;
+  
   return end > totalResults.value ? totalResults.value : end;
 });
 </script>
