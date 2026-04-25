@@ -21,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
 import { getAssistanceColumns } from '@/features/loan-assistance/columns';
 import loanAssistance from '@/routes/loan-assistance';
 import loanSchedule from '@/routes/loan-assistance/schedule';

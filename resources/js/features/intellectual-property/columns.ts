@@ -22,11 +22,11 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export const getIPColumns = ({
-  viewIPDetails,
+  showIPDetails,
   approveIP,
   declineIP,
 }: {
-  viewIPDetails: (id: number) => void;
+  showIPDetails: (id: number) => void;
   approveIP: (id: number) => void;
   declineIP: (id: number) => void;
 }): ColumnDef<IntellectualProperty>[] => [
@@ -93,7 +93,7 @@ export const getIPColumns = ({
               DropdownMenuItem,
               {
                 class: 'cursor-pointer',
-                onClick: () => viewIPDetails(IntellectualProperty.id),
+                onClick: () => showIPDetails(IntellectualProperty.id),
               },
               () => 'View Intellectual Property Details',
             ),

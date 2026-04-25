@@ -93,6 +93,9 @@ Route::middleware([
         Route::get('/intellectual-property-assistance', [IntellectualPropertyController::class, 'index'])
             ->name('intellectual-property-assistance.index');
 
+        Route::get('/intellectual-property-assistance/{property}', [IntellectualPropertyController::class, 'show'])
+            ->name('intellectual-property-assistance.show');
+
     });
 
 });

@@ -13,7 +13,7 @@ export type ApiResponse<T> = {
 export interface DetailItem {
   label: string;
   value: any;
-  type?: 'text' | 'image';
+  type?: 'text' | 'image' | 'file' | 'html';
   class?: string;
   full?: boolean;
 }

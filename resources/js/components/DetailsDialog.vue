@@ -76,8 +76,28 @@ const emit = defineEmits(['update:open']);
                 </p>
               </template>
 
+              <!-- FILE -->
+              <template v-else-if="item.type === 'file'">
+                <a
+                  v-if="item.value"
+                  :href="item.value"
+                  target="_blank"
+                  class="text-sm wrap-break-word text-blue-500 underline"
+                >
+                  {{ item.value.split('/').pop() || 'View file' }}
+                </a>
+                <p v-else class="text-muted-foreground italic">
+                  No file uploaded
+                </p>
+              </template>
+
+              <!-- HTML -->
+              <template v-else-if="item.type === 'html'">
+                <div v-html="item.value"></div>
+              </template>
+
               <!-- TEXT -->
-              <p v-else :class="['font-semibold', item.class]">
+              <p v-else :class="['font-semibold wrap-break-word', item.class]">
                 {{ item.value }}
               </p>
             </div>

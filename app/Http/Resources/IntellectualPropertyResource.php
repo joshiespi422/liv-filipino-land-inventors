@@ -22,22 +22,6 @@ class IntellectualPropertyResource extends JsonResource
             'creation_type' => $this->creation_type,
             'form_type' => $this->form_type,
             'title' => $this->title,
-            // 'description' => $this->description,
-            // 'applicability' => $this->applicability,
-
-            // 'claims' => $this->whenLoaded('claims', function () {
-            //     return $this->claims->map(fn($claim) => [
-            //         'id' => $claim->id,
-            //         'description' => $claim->description,
-            //     ]);
-            // }),
-
-            // 'documents' => $this->whenLoaded('documents', function () {
-            //     return $this->documents->map(fn($doc) => [
-            //         'id' => $doc->id,
-            //         'attachment' => $doc->attachment ? Storage::url($doc->attachment) : null,
-            //     ]);
-            // }),
         ];
     }
 }
