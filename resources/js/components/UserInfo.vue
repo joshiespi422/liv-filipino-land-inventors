@@ -16,8 +16,10 @@ const props = withDefaults(defineProps<Props>(), {
 const { getInitials } = useInitials();
 
 const avatarSrc = computed(() => {
-  if (!props.user.avatar) return '';
-
+  if (!props.user.avatar) {
+    return '';
+  }
+  
   // If the path is already an external URL or starts with /, return it as is
   if (
     props.user.avatar.startsWith('http') ||
