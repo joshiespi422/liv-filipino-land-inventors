@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rule;
 use App\Models\UserType;
 use App\Models\IntellectualProperty;
+use App\Models\Status;
 use App\Http\Resources\IntellectualPropertyResource;
 use App\Http\Resources\IntellectualPropertyDetailResource;
 use Inertia\Inertia;
@@ -80,5 +81,40 @@ class IntellectualPropertyController extends Controller
         ]);
 
         return IntellectualPropertyDetailResource::make($property);
+    }
+
+    public function updateStatus(IntellectualProperty $property, Request $request)
+    {
+        if (!$this->canMutate()) {
+            abort(403, 'This action is unauthorized');
+        }
+
+        $request->validate([
+            'action' => ['required', Rule::in(['approve', 'decline'])],
+            'amount' => ['required_if:action,approve', 'numeric', 'min:0', 'max:1000000000'],
+        ]);
+
+        $action = $request->input('action');
+
+        if ($action === 'approve' && $property->status_id === Status::PENDING) {
+            if ($property->form_type === 'payment') {
+                $property->update([
+                    'amount' => $request->input('amount'),
+                    'status_id' => Status::WAITING_FOR_PAYMENT,
+                ]);
+            } elseif ($property->form_type === 'grant') {
+                $property->update([
+                    'status_id' => Status::REGISTERED,
+                ]);
+            }
+        }
+
+        if ($action === 'decline' && $property->status_id === Status::PENDING) {
+            $property->update([
+                'status_id' => Status::REJECTED,
+            ]);
+        }
+
+        return back();
     }
 }

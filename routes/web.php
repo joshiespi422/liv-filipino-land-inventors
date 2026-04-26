@@ -96,6 +96,8 @@ Route::middleware([
         Route::get('/intellectual-property-assistance/{property}', [IntellectualPropertyController::class, 'show'])
             ->name('intellectual-property-assistance.show');
 
+        Route::patch('/intellectual-property-assistance/{property}/status', [IntellectualPropertyController::class, 'updateStatus'])
+            ->name('intellectual-property-assistance.update-status');
     });
 
 });
