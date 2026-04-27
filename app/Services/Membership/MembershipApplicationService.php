@@ -10,7 +10,6 @@ use App\Models\MembershipSchedule;
 use App\Models\MembershipSetting;
 use App\Models\Status;
 use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 
 class MembershipApplicationService
@@ -18,12 +17,30 @@ class MembershipApplicationService
     public function apply(User $user, int $termMonths): MemberMembership
     {
         $setting = MembershipSetting::current();
-
         if (!in_array($termMonths, $setting->allowed_term_months)) {
             throw new MembershipInvalidTermException($termMonths, $setting->allowed_term_months);
         }
 
-        $this->ensureNoActiveMembership($user);
+        $existing = MemberMembership::where('user_id', $user->id)
+            ->whereIn('status_id', [Status::APPROVED, Status::ACTIVE])
+            ->with(['schedules'])
+            ->first();
+
+        if ($existing) {
+            if ($existing->status_id === Status::ACTIVE) {
+                throw new MembershipAlreadyExistsException('You already have an active membership.');
+            }
+
+            $hasActivePayment = $existing->schedules->contains(function ($schedule) {
+                return $this->hasPendingPayment($schedule);
+            });
+
+            if ($hasActivePayment) {
+                throw new MembershipAlreadyExistsException('A payment is currently being processed. Please wait a moment.');
+            }
+
+            return $existing;
+        }
 
         return DB::transaction(function () use ($user, $termMonths, $setting) {
             $membership = MemberMembership::create([
@@ -34,9 +51,44 @@ class MembershipApplicationService
             ]);
 
             $this->generateSchedules($membership);
-
-            return $membership;
+            return $membership->load('schedules');
         });
+    }
+
+    /**
+     * Initiates payment. If an old pending payment exists (> 1 min), it cancels it
+     * and allows a new request. If it's < 1 min, it blocks to prevent spam.
+     */
+    public function initiateSchedulePayment(User $user, MembershipSchedule $schedule, int $paymentMethodId)
+    {
+        $schedule->loadMissing('membership');
+        $membership = $schedule->membership;
+
+        if (!$membership) {
+            throw new \Exception('Membership record not found for this schedule.', 404);
+        }
+
+        if ((int) $membership->user_id !== (int) $user->id) {
+            throw new \Exception('Unauthorized', 403);
+        }
+
+        // 1. Check for VERY recent payments (spam protection)
+        if ($this->hasPendingPayment($schedule)) {
+            throw new \Exception('A payment is already pending. Please wait 1 minute before requesting a new link.', 422);
+        }
+
+        // 2. Cleanup: Cancel any STALE pending payments for this schedule
+        // This ensures the user can try again if they backed out of a previous session
+        $schedule->payments()
+            ->where('status_id', Status::PENDING)
+            ->update(['status_id' => Status::CANCELLED]);
+
+        $paymentService = app(\App\Services\Membership\MembershipPaymentService::class);
+
+        return $paymentService->initiate(
+            schedule: $schedule,
+            paymentMethodId: $paymentMethodId,
+        );
     }
 
     public function cancel(User $user): void
@@ -54,14 +106,6 @@ class MembershipApplicationService
             );
         }
 
-        // if ($membership->status_id === Status::CANCELLED) {
-        //     throw new \Illuminate\Http\Exceptions\HttpResponseException(
-        //         response()->json([
-        //             'success' => false,
-        //             'message' => 'Membership is already cancelled.',
-        //         ], 422)
-        //     );
-        // }
         if ($membership->status_id === Status::ACTIVE) {
             throw new \Illuminate\Http\Exceptions\HttpResponseException(
                 response()->json([
@@ -71,11 +115,11 @@ class MembershipApplicationService
             );
         }
 
-        $hasPendingPayment = $membership->schedules()
-            ->whereHas('payments', fn($q) => $q->where('status_id', Status::PENDING))
-            ->exists();
+        $isProcessing = $membership->schedules->contains(function ($schedule) {
+            return $this->hasPendingPayment($schedule);
+        });
 
-        if ($hasPendingPayment) {
+        if ($isProcessing) {
             throw new MembershipCancellationException(
                 'Cannot cancel while a payment is being processed.'
             );
@@ -89,6 +133,14 @@ class MembershipApplicationService
                 ->whereNotIn('status_id', [Status::PAID])
                 ->update(['status_id' => Status::CANCELLED]);
         });
+    }
+
+    public function hasPendingPayment(MembershipSchedule $schedule): bool
+    {
+        return $schedule->payments()
+            ->where('status_id', Status::PENDING)
+            ->where('created_at', '>', now()->subMinutes(1))
+            ->exists();
     }
 
     private function ensureNoActiveMembership(User $user): void
@@ -105,16 +157,14 @@ class MembershipApplicationService
             throw new MembershipAlreadyExistsException('You already have an active membership.');
         }
 
-        // PENDING — check if all payments failed (stuck), auto-cancel so they can re-apply
-        $hasNonFailedPayment = $existing->schedules()
-            ->whereHas('payments', fn($q) => $q->whereNotIn('status_id', [Status::FAILED]))
-            ->exists();
+        $hasFreshPayment = $existing->schedules->contains(function ($schedule) {
+            return $this->hasPendingPayment($schedule);
+        });
 
-        if ($hasNonFailedPayment) {
-            throw new MembershipAlreadyExistsException('You already have a pending membership.');
+        if ($hasFreshPayment) {
+            throw new MembershipAlreadyExistsException('You already have a pending membership with a payment in progress.');
         }
 
-        // Cancel both membership and its schedules
         $existing->update(['status_id' => Status::CANCELLED]);
         $existing->schedules()->update(['status_id' => Status::CANCELLED]);
     }
@@ -133,9 +183,7 @@ class MembershipApplicationService
                 'member_membership_id' => $membership->id,
                 'status_id' => Status::UNPAID,
                 'installment_no' => $i,
-                'amount' => $i === $months
-                    ? $installment + $remainder
-                    : $installment,
+                'amount' => $i === $months ? $installment + $remainder : $installment,
                 'due_date' => now()->addMonths($i)->toDateString(),
                 'created_at' => now(),
                 'updated_at' => now(),

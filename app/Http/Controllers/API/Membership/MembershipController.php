@@ -21,7 +21,7 @@ class MembershipController extends Controller
      */
     public function __construct(
         private readonly MembershipService $membershipService,
-        private readonly MembershipApplicationService $applicationService,
+        private readonly MembershipApplicationService $applicationService, // This is your service
         private readonly MembershipPaymentService $paymentService,
     ) {
     }
@@ -29,7 +29,11 @@ class MembershipController extends Controller
     public function index(Request $request): ApiMembershipResource|JsonResponse
     {
         $membership = MemberMembership::where('user_id', $request->user()->id)
-            ->whereIn('status_id', [Status::PENDING, Status::ACTIVE])
+            ->whereIn('status_id', [
+                Status::PENDING,
+                Status::ACTIVE,
+                Status::APPROVED
+            ])
             ->with([
                 'status',
                 'schedules' => fn($q) => $q->orderBy('installment_no'),
@@ -43,7 +47,7 @@ class MembershipController extends Controller
         if (!$membership) {
             return response()->json([
                 'success' => false,
-                'message' => 'No active or pending membership found.',
+                'message' => 'No active, pending, or approved membership found.',
             ], 404);
         }
 
@@ -81,33 +85,37 @@ class MembershipController extends Controller
     // POST /memberships/schedules/{schedule}/pay
     public function pay(Request $request, MembershipSchedule $schedule): JsonResponse
     {
-        abort_if(
-            $schedule->membership->user_id !== $request->user()->id,
-            403,
-            'Unauthorized'
-        );
-
         $validated = $request->validate([
             'payment_method_id' => ['required', 'integer', 'exists:payment_methods,id'],
         ]);
 
-        $result = $this->paymentService->initiate(
-            schedule: $schedule,
-            paymentMethodId: $validated['payment_method_id'],
-        );
+        try {
+            // FIX: Changed $this->membershipApplicationService to $this->applicationService
+            $result = $this->applicationService->initiateSchedulePayment(
+                user: $request->user(),
+                schedule: $schedule,
+                paymentMethodId: $validated['payment_method_id']
+            );
 
-        $schedule->load([
-            'status',
-            'payments.status',
-            'payments.paymentMethod',
-        ]);
+            $schedule->load([
+                'status',
+                'payments.status',
+                'payments.paymentMethod',
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Payment initiated.',
-            'data' => new ApiMembershipScheduleResource($schedule),
-            'next_action' => $result['next_action'],
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment initiated.',
+                'data' => new ApiMembershipScheduleResource($schedule),
+                'next_action' => $result['next_action'] ?? null,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], $e->getCode() === 403 ? 403 : 422);
+        }
     }
 
     public function cancel(Request $request): JsonResponse
