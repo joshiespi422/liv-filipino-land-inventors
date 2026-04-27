@@ -27,8 +27,8 @@ export const getIPColumns = ({
   declineIP,
 }: {
   showIPDetails: (id: number) => void;
-  approveIP: (id: number) => void;
-  declineIP: (id: number) => void;
+  approveIP: (ip: IntellectualProperty) => void;
+  declineIP: (ip: IntellectualProperty) => void;
 }): ColumnDef<IntellectualProperty>[] => [
   {
     accessorKey: 'user_name',
@@ -104,7 +104,7 @@ export const getIPColumns = ({
                     DropdownMenuItem,
                     {
                       class: 'cursor-pointer text-blue-500 focus:text-blue-600',
-                      onClick: () => approveIP(IntellectualProperty.id),
+                      onClick: () => approveIP(IntellectualProperty),
                     },
                     () => 'Approve Intellectual Property',
                   ),
@@ -112,7 +112,7 @@ export const getIPColumns = ({
                     DropdownMenuItem,
                     {
                       class: 'cursor-pointer text-rose-500 focus:text-rose-600',
-                      onClick: () => declineIP(IntellectualProperty.id),
+                      onClick: () => declineIP(IntellectualProperty),
                     },
                     () => 'Decline Intellectual Property',
                   ),

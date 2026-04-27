@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { Head, router, useHttp } from '@inertiajs/vue3';
+import { Head, router, useHttp, useForm } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
 import { ref, watch, computed } from 'vue';
 import { toast } from 'vue-sonner';
 import DataTable from '@/components/DataTable.vue';
 import DetailsDialog from '@/components/DetailsDialog.vue';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
+import FormDialog from '@/components/FormDialog.vue';
 import {
   Select,
   SelectContent,
@@ -94,8 +96,55 @@ const showIPDetails = async (id: number) => {
   }
 };
 
-const approveIP = (ipId: number) => {};
-const declineIP = (ipId: number) => {};
+// state for manage
+const isConfirmOpen = ref(false);
+const selectedIPId = ref<number | null>(null);
+const actionType = ref<'approve' | 'decline' | null>(null);
+// state for approve (payment type)
+const isApproveOpen = ref(false);
+
+const form = useForm({
+  action: '' as 'approve' | 'decline',
+});
+
+const openConfirm = (
+  ip: IntellectualProperty,
+  action: 'approve' | 'decline',
+) => {
+  selectedIPId.value = ip.id;
+  actionType.value = action;
+  if (action === 'approve' && ip.form_type === 'payment') {
+    isApproveOpen.value = true;
+  } else {
+    isConfirmOpen.value = true;
+  }
+};
+
+const approveIP = (ip: IntellectualProperty) => openConfirm(ip, 'approve');
+const declineIP = (ip: IntellectualProperty) => openConfirm(ip, 'decline');
+
+const handleIPAction = () => {
+  if (!selectedIPId.value || !actionType.value) {
+    return;
+  }
+
+  form.action = actionType.value;
+
+  form.patch(
+    intellectualPropertyAssistance.updateStatus.url(selectedIPId.value),
+    {
+      preserveScroll: true,
+
+      onSuccess: () => {
+        isConfirmOpen.value = false;
+        form.reset();
+        toast.success(
+          `Intellectual Property has been ${actionType.value}d successfully!`,
+        );
+      },
+    },
+  );
+};
 
 const columns = getIPColumns({
   showIPDetails,
@@ -222,4 +271,42 @@ const ipDetails = computed(() =>
       </div>
     </template>
   </DetailsDialog>
+
+  <!-- approve & decline -->
+  <ConfirmDialog
+    v-model:open="isConfirmOpen"
+    :title="
+      actionType === 'approve'
+        ? 'Approve Intellectual Property'
+        : 'Decline Intellectual Property'
+    "
+    :description="`Are you sure you want to ${actionType} this intellectual property?`"
+    :confirmText="actionType === 'approve' ? 'Approve' : 'Decline'"
+    :variant="actionType === 'approve' ? 'default' : 'destructive'"
+    :loading="form.processing"
+    @confirm="handleIPAction"
+  />
+
+  <!-- approve ip with payment type -->
+  <FormDialog
+    v-if="selectedIPId && actionType === 'approve'"
+    v-model:open="isApproveOpen"
+    title="Approve Intellectual Property"
+    description="Please enter the amount for payment to approve this intellectual property."
+    show-default
+    method="patch"
+    :initialValues="{
+      action: 'approve',
+    }"
+    :fields="[
+      {
+        name: 'amount',
+        label: 'Amount',
+        type: 'money',
+        required: true,
+      },
+    ]"
+    :endpoint="intellectualPropertyAssistance.updateStatus.url(selectedIPId)"
+    @success="toast.success('Training type created successfully!')"
+  />
 </template>

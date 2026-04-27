@@ -91,7 +91,14 @@ class IntellectualPropertyController extends Controller
 
         $request->validate([
             'action' => ['required', Rule::in(['approve', 'decline'])],
-            'amount' => ['required_if:action,approve', 'numeric', 'min:0', 'max:1000000000'],
+            'amount' => [
+                Rule::requiredIf(function () use ($request, $property) {
+                    return $request->input('action') === 'approve' && $property->form_type === 'payment';
+                }), 
+                'numeric', 
+                'min:1', 
+                'max:1000000000'
+            ],
         ]);
 
         $action = $request->input('action');
