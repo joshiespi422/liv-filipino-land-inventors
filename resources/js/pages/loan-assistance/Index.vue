@@ -5,6 +5,7 @@ import { CreditCard, Calendar, Percent } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import DataTable from '@/components/DataTable.vue';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
@@ -214,35 +215,16 @@ const columns = getAssistanceColumns({
       search-placeholder="Search borrowers or status..."
     />
 
-    <Dialog v-model:open="isConfirmOpen">
-      <DialogContent class="max-w-md">
-        <DialogHeader>
-          <DialogTitle>
-            {{ actionType === 'approve' ? 'Approve Loan' : 'Decline Loan' }}
-          </DialogTitle>
-          <DialogDescription>
-            Are you sure you want to
-            <span class="font-semibold">
-              {{ actionType }}
-            </span>
-            this loan?
-          </DialogDescription>
-        </DialogHeader>
-
-        <div class="mt-4 flex justify-end gap-2">
-          <Button variant="outline" @click="isConfirmOpen = false">
-            Cancel
-          </Button>
-
-          <Button
-            :variant="actionType === 'approve' ? 'default' : 'destructive'"
-            :disabled="form.processing || isClosing"
-            @click="handleLoanAction"
-          >
-            {{ form.processing || isClosing ? 'Processing...' : 'Confirm' }}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+    <!-- CONFIRM DIALOG -->
+    <ConfirmDialog
+      v-model:open="isConfirmOpen"
+      :loading="form.processing"
+      :title="actionType === 'approve' ? 'Approve Loan' : 'Decline Loan'"
+      :description="`Are you sure you want to ${actionType} this loan?`"
+      :confirmText="actionType === 'approve' ? 'Approve' : 'Decline'"
+      :variant="actionType === 'approve' ? 'default' : 'destructive'"
+      cancelText="Cancel"
+      @confirm="handleLoanAction"
+    />
   </div>
 </template>
