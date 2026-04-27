@@ -13,6 +13,7 @@ use App\Models\IntellectualProperty;
 use App\Models\Status;
 use App\Http\Resources\IntellectualPropertyResource;
 use App\Http\Resources\IntellectualPropertyDetailResource;
+use App\Http\Requests\IntellectualProperty\UpdateStatusRequest;
 use Inertia\Inertia;
 
 class IntellectualPropertyController extends Controller
@@ -83,30 +84,16 @@ class IntellectualPropertyController extends Controller
         return IntellectualPropertyDetailResource::make($property);
     }
 
-    public function updateStatus(IntellectualProperty $property, Request $request)
+    public function updateStatus(UpdateStatusRequest $request, IntellectualProperty $property,)
     {
-        if (!$this->canMutate()) {
-            abort(403, 'This action is unauthorized');
-        }
-
-        $request->validate([
-            'action' => ['required', Rule::in(['approve', 'decline'])],
-            'amount' => [
-                Rule::requiredIf(function () use ($request, $property) {
-                    return $request->input('action') === 'approve' && $property->form_type === 'payment';
-                }), 
-                'numeric', 
-                'min:1', 
-                'max:1000000000'
-            ],
-        ]);
-
-        $action = $request->input('action');
+        // Authorization and Validation
+        $action = $request->validated('action');
+        $amount = $request->validated('amount');
 
         if ($action === 'approve' && $property->status_id === Status::PENDING) {
             if ($property->form_type === 'payment') {
                 $property->update([
-                    'amount' => $request->input('amount'),
+                    'amount' => $amount,
                     'status_id' => Status::WAITING_FOR_PAYMENT,
                 ]);
             } elseif ($property->form_type === 'grant') {
