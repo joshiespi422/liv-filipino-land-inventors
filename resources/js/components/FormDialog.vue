@@ -27,7 +27,6 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
-
 import type { FormField } from '@/types';
 
 const props = defineProps<{
@@ -78,9 +77,7 @@ const form = useForm(initialData);
 watch(
   () => props.initialValues,
   (newValues) => {
-    if (!newValues) {
-      return;
-    }
+    if (!newValues) return;
 
     form.defaults({
       ...Object.fromEntries(props.fields.map((f) => [f.name, ''])),
@@ -96,11 +93,9 @@ watch(
 const isValid = computed(() => {
   // Check if all required fields are filled
   const requiredFieldsFilled = props.fields.every((f) => {
-    if (!f.required) {
-      return true;
-    }
+    if (!f.required) return true;
 
-      return !!form[f.name];
+    return !!form[f.name];
   });
   // Check if the form has been modified
   const hasChanges = form.isDirty;
@@ -135,7 +130,7 @@ const handleSubmit = () => {
     if (isUpdating && hasFiles) {
       payload._method = method.toUpperCase();
     }
-    
+
     return payload;
   });
 
@@ -225,10 +220,24 @@ const handleSubmit = () => {
             />
 
             <!-- NUMBER -->
-            <NumberField v-else-if="field.type === 'number'">
+            <NumberField
+              v-else-if="field.type === 'number' || field.type === 'money'"
+              v-model="form[field.name]"
+              class="py-0.5"
+              :format-options="
+                field.type === 'money'
+                  ? {
+                      style: 'currency',
+                      currency: 'PHP',
+                      currencyDisplay: 'code',
+                      currencySign: 'standard',
+                    }
+                  : undefined
+              "
+            >
               <NumberFieldContent>
                 <NumberFieldDecrement />
-                <NumberFieldInput v-model="form[field.name]" />
+                <NumberFieldInput :placeholder="field.placeholder" />
                 <NumberFieldIncrement />
               </NumberFieldContent>
             </NumberField>

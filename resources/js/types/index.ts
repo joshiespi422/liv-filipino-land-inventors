@@ -18,7 +18,13 @@ export interface DetailItem {
   full?: boolean;
 }
 
-export type FormFieldType = 'text' | 'textarea' | 'number' | 'select' | 'file';
+export type FormFieldType =
+  | 'text'
+  | 'textarea'
+  | 'number'
+  | 'select'
+  | 'file'
+  | 'money';
 
 export interface FormField {
   type: FormFieldType;
