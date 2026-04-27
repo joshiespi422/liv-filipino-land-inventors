@@ -9,7 +9,10 @@ const props = defineProps<{
 
 // --- INFINITE LOOP CLONES ---
 const infiniteItems = computed(() => {
-    if (!props.items || props.items.length === 0) return [];
+    if (!props.items || props.items.length === 0) {
+        return [];
+    }
+
     return [
         ...props.items,
         ...props.items,
@@ -30,17 +33,31 @@ const startX = ref(0);
 const scrollLeft = ref(0);
 
 const getSingleSetWidth = () => {
-    if (!sliderRef.value || props.items.length === 0) return 0;
+    if (!sliderRef.value || props.items.length === 0) {
+        return 0;
+    }
+
     const children = sliderRef.value.children;
-    if (children.length < props.items.length) return 0;
+
+    if (children.length < props.items.length) {
+        return 0;
+    }
+
     const firstItem = children[0] as HTMLElement;
     const secondSetFirstItem = children[props.items.length] as HTMLElement;
+
     return secondSetFirstItem.offsetLeft - firstItem.offsetLeft;
 };
 
 const jumpTo = async (position: number) => {
-    if (!sliderRef.value) return;
+    if (!sliderRef.value) {
+        return;
+    }
+    
+    if (isJumping.value) {
     isJumping.value = true;
+    }
+
     await nextTick(); 
     const container = sliderRef.value;
     container.style.scrollBehavior = 'auto';
@@ -48,16 +65,26 @@ const jumpTo = async (position: number) => {
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
             isJumping.value = false;
-            if (container) container.style.scrollBehavior = '';
+            
+            if (container) {
+                container.style.scrollBehavior = '';
+            }
         });
     });
 };
 
 const checkInfiniteBounds = () => {
-    if (!sliderRef.value || isDragging.value) return;
+    if (!sliderRef.value || isDragging.value) {
+        return;
+    }
+    
     const container = sliderRef.value;
     const setWidth = getSingleSetWidth();
-    if (setWidth === 0) return;
+    
+    if (setWidth === 0) {
+        return;
+    }
+
     if (container.scrollLeft < setWidth * 1.5) {
         jumpTo(container.scrollLeft + setWidth);
     } else if (container.scrollLeft >= setWidth * 3.5) {
@@ -66,9 +93,17 @@ const checkInfiniteBounds = () => {
 };
 
 const handleScroll = () => {
-    if (isDragging.value) return;
-    if (scrollTimeout) clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(() => { checkInfiniteBounds(); }, 150);
+    if (isDragging.value) {
+        return;
+    }
+
+    if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+    }
+    
+    scrollTimeout = setTimeout(() => { 
+        checkInfiniteBounds(); 
+    }, 150);
 };
 
 const scrollNext = () => {
@@ -88,16 +123,27 @@ const scrollPrev = () => {
 const startAutoplay = () => {
     if (props.autoplayDelay && props.items.length > 1) {
         autoplayTimer = setInterval(() => {
-            if (!isDragging.value) scrollNext();
+            if (!isDragging.value) {
+                scrollNext();
+            }
         }, props.autoplayDelay);
     }
 };
 
-const stopAutoplay = () => { if (autoplayTimer) clearInterval(autoplayTimer); };
-const resetAutoplay = () => { stopAutoplay(); startAutoplay(); };
+const stopAutoplay = () => { 
+    if (autoplayTimer) {
+    clearInterval(autoplayTimer); 
+}
+};
+const resetAutoplay = () => { 
+    stopAutoplay(); startAutoplay(); 
+};
 
 const dragStart = (e: MouseEvent) => {
-    if (!sliderRef.value) return;
+    if (!sliderRef.value) {
+        return;
+    }
+
     isDragging.value = true;
     startX.value = e.pageX - sliderRef.value.offsetLeft;
     scrollLeft.value = sliderRef.value.scrollLeft;
@@ -105,14 +151,20 @@ const dragStart = (e: MouseEvent) => {
 };
 
 const dragStop = () => {
-    if (!isDragging.value) return;
+    if (!isDragging.value) {
+        return;
+    }
+
     isDragging.value = false;
     startAutoplay(); 
     setTimeout(checkInfiniteBounds, 150);
 };
 
 const dragMove = (e: MouseEvent) => {
-    if (!isDragging.value || !sliderRef.value) return;
+    if (!isDragging.value || !sliderRef.value) {
+        return;
+    }
+
     e.preventDefault();
     const x = e.pageX - sliderRef.value.offsetLeft;
     const walk = (x - startX.value) * 1.5; 
@@ -121,16 +173,25 @@ const dragMove = (e: MouseEvent) => {
 
 const initCarousel = async () => {
     await nextTick();
+
     if (sliderRef.value && props.items.length > 0) {
-        setTimeout(() => { jumpTo(getSingleSetWidth() * 2); }, 100);
+        setTimeout(() => { 
+            jumpTo(getSingleSetWidth() * 2); 
+        }, 100);
     }
 };
 
 const handleResize = () => {
-    if (scrollTimeout) clearTimeout(scrollTimeout);
+    if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+    }
+
     scrollTimeout = setTimeout(() => {
         const setWidth = getSingleSetWidth();
-        if (setWidth > 0) jumpTo(setWidth * 2);
+
+        if (setWidth > 0) {
+            jumpTo(setWidth * 2);
+        }
     }, 200);
 };
 
@@ -139,7 +200,12 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-    stopAutoplay(); if (scrollTimeout) clearTimeout(scrollTimeout); window.removeEventListener('resize', handleResize);
+    stopAutoplay(); 
+    
+    if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+        window.removeEventListener('resize', handleResize);
+    }
 });
 </script>
 

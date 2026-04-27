@@ -258,7 +258,7 @@ const moduleTitles: Record<number, string> = {
                   style: 'currency',
                   currency: 'PHP',
                   currencyDisplay: 'code',
-                  currencySign: 'accounting',
+                  currencySign: 'standard',
                 }"
               >
                 <NumberFieldContent>
@@ -287,7 +287,7 @@ const moduleTitles: Record<number, string> = {
                   style: 'currency',
                   currency: 'PHP',
                   currencyDisplay: 'code',
-                  currencySign: 'accounting',
+                  currencySign: 'standard',
                 }"
               >
                 <NumberFieldContent>
@@ -336,7 +336,7 @@ const moduleTitles: Record<number, string> = {
                 style: 'currency',
                 currency: 'PHP',
                 currencyDisplay: 'code',
-                currencySign: 'accounting',
+                currencySign: 'standard',
               }"
             >
               <NumberFieldContent>
@@ -363,7 +363,7 @@ const moduleTitles: Record<number, string> = {
                 style: 'currency',
                 currency: 'PHP',
                 currencyDisplay: 'code',
-                currencySign: 'accounting',
+                currencySign: 'standard',
               }"
             >
               <NumberFieldContent>

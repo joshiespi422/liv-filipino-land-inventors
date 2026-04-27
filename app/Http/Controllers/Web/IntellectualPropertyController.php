@@ -10,8 +10,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rule;
 use App\Models\UserType;
 use App\Models\IntellectualProperty;
+use App\Models\Status;
 use App\Http\Resources\IntellectualPropertyResource;
 use App\Http\Resources\IntellectualPropertyDetailResource;
+use App\Http\Requests\IntellectualProperty\UpdateStatusRequest;
 use Inertia\Inertia;
 
 class IntellectualPropertyController extends Controller
@@ -80,5 +82,33 @@ class IntellectualPropertyController extends Controller
         ]);
 
         return IntellectualPropertyDetailResource::make($property);
+    }
+
+    public function updateStatus(UpdateStatusRequest $request, IntellectualProperty $property,)
+    {
+        // Authorization and Validation
+        $action = $request->validated('action');
+        $amount = $request->validated('amount');
+
+        if ($action === 'approve' && $property->status_id === Status::PENDING) {
+            if ($property->form_type === 'payment') {
+                $property->update([
+                    'amount' => $amount,
+                    'status_id' => Status::WAITING_FOR_PAYMENT,
+                ]);
+            } elseif ($property->form_type === 'grant') {
+                $property->update([
+                    'status_id' => Status::REGISTERED,
+                ]);
+            }
+        }
+
+        if ($action === 'decline' && $property->status_id === Status::PENDING) {
+            $property->update([
+                'status_id' => Status::REJECTED,
+            ]);
+        }
+
+        return back();
     }
 }

@@ -42,6 +42,7 @@ export function useCurrentUrl(): UseCurrentUrlReturn {
                     urlToCompare.startsWith(`${path}?`)
                 );
             }
+            
             return urlToCompare.split(/[?#]/)[0] === path;
         };
 
