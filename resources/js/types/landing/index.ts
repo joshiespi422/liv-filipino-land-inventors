@@ -19,7 +19,15 @@ export interface NavProps {
         icon_path?: string; 
     };
 }
-
+export interface TutorialItem {
+    id: number | string;
+    type: 'video' | 'photo';
+    is_highlight?: boolean;
+    media_path?: string;
+    title?: string;
+    subtitle?: string;
+    description?: string;
+}
 export interface ContactInfo {
     phone?: string;
     email?: string;

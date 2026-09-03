@@ -48,6 +48,7 @@ const activeModal = ref<'join' | 'shop' | null>(null);
 const navItems: NavItem[] = [
   { id: 'home', label: 'Home' },
   { id: 'about', label: 'About Us' },
+  { id: 'mobile-tutorial', label: 'Mobile App Tutorial' },
   { id: 'program-services', label: 'Program & Services' },
   { id: 'strategic-plans', label: 'Strategic Plans 2026-2027' },
   { id: 'testimonials', label: 'Testimonials' },
@@ -67,11 +68,9 @@ const scrollTo = (id: string) => {
   const element = document.getElementById(id);
 
   if (element) {
-    // Already on the home page -> Scroll smoothly right away
     element.scrollIntoView({ behavior: 'smooth' });
     window.history.pushState(null, '', `#${id}`);
   } else {
-    // On another route (e.g. /dashboard) -> Save target and navigate to home
     sessionStorage.setItem('scrollToSection', id);
     router.visit(home.url());
   }
@@ -109,13 +108,11 @@ onMounted(() => {
 
   window.addEventListener('scroll', handleScroll);
 
-  // Check if we arrived from another page with a pending scroll target
   const pendingSection = sessionStorage.getItem('scrollToSection');
 
   if (pendingSection) {
     sessionStorage.removeItem('scrollToSection');
 
-    // Use a slight timeout to ensure the DOM is fully rendered after page load
     setTimeout(() => {
       const element = document.getElementById(pendingSection);
       
