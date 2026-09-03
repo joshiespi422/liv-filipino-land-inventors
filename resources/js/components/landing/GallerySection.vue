@@ -10,7 +10,6 @@ const props = defineProps<{
 }>();
 
 const sampleItems: GalleryItem[] = [
-    // Videos
     {
         id: 'v1',
         type: 'video',
@@ -48,7 +47,6 @@ const sampleItems: GalleryItem[] = [
     { id: 'p5', type: 'photo', media_path: '/assets/pp1.jpg' },
 ];
 
-// --- COMPUTED DATA & FILTERING ---
 const displayItems = computed(() => {
     return (props.items && props.items.length > 0) ? props.items : sampleItems;
 });
@@ -67,6 +65,7 @@ const gridPhotos = computed(() => {
 
     return allPhotos.value.filter(photo => photo.id !== highlightPhoto.value!.id).slice(0, 4);
 });
+// --- COMPUTED DATA & FILTERING ---
 
 // --- HELPER METHODS ---
 const getImageUrl = (path?: string) => {
