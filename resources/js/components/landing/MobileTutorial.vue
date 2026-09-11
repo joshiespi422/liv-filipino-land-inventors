@@ -7,18 +7,16 @@ const props = defineProps<{
     items?: TutorialItem[];
 }>();
 
-// --- STATE ---
 const searchQuery = ref('');
 const isVideoModalOpen = ref(false);
 const activeVideoUrl = ref<string | null>(null);
 
-// --- TEMPORARY MOCK DATA ---
 const sampleItems: TutorialItem[] = [
     {
         id: 'v1',
         type: 'video',
         title: 'Platform Overview',
-        subtitle: 'Step 1',
+        // subtitle: 'Step 1',
         description: 'A complete overview of the application and its core features.',
         media_path: 'https://img.youtube.com/vi/LCy5-39r_g0/maxresdefault.jpg',
         youtube_url: 'https://www.youtube.com/embed/LCy5-39r_g0'
@@ -27,7 +25,7 @@ const sampleItems: TutorialItem[] = [
         id: 'v2',
         type: 'video',
         title: 'Account Setup',
-        subtitle: 'Step 2',
+        // subtitle: 'Step 2',
         description: 'Learn how to properly configure your account and settings.',
         media_path: 'https://img.youtube.com/vi/NiKkZ3mZKyY/maxresdefault.jpg',
         youtube_url: 'https://www.youtube.com/embed/NiKkZ3mZKyY'
@@ -36,7 +34,7 @@ const sampleItems: TutorialItem[] = [
         id: 'v3',
         type: 'video',
         title: 'Navigation & Tools',
-        subtitle: 'Step 3',
+        // subtitle: 'Step 3',
         description: 'Explore the different tools available on the dashboard.',
         media_path: 'https://img.youtube.com/vi/AuEK4Yrc4kQ/hqdefault.jpg', 
         youtube_url: 'https://www.youtube.com/embed/AuEK4Yrc4kQ'
@@ -52,6 +50,7 @@ const processedItems = computed(() => {
         items = items.filter(item => {
             const titleMatch = item.title?.toLowerCase().includes(query) ?? false;
             const descMatch = item.description?.toLowerCase().includes(query) ?? false;
+
             return titleMatch || descMatch;
         });
     }
@@ -68,8 +67,11 @@ const handleImageError = (event: Event) => {
 };
 
 const openVideoModal = (url?: string) => {
-    if (!url) return;
+    if (!url) {
+        return;
+    }
     // Add parameters to autoplay and hide YouTube UI/related videos as much as possible
+    
     activeVideoUrl.value = url + '?autoplay=1&modestbranding=1&rel=0&showinfo=0';
     isVideoModalOpen.value = true;
     document.body.style.overflow = 'hidden';

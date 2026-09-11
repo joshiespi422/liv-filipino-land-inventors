@@ -27,6 +27,7 @@ export interface TutorialItem {
     title?: string;
     subtitle?: string;
     description?: string;
+    youtube_url?: string;
 }
 export interface ContactInfo {
     phone?: string;
