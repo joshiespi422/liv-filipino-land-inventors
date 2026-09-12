@@ -102,8 +102,7 @@ onUnmounted(() => {
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-4 sm:px-6 md:px-12 lg:px-20 mt-6 md:mt-8">
             <form class="w-full md:w-auto" @submit.prevent>
                 <div class="flex items-center rounded-full overflow-hidden shadow-sm border border-gray-300 bg-white focus-within:ring-2 focus-within:ring-[#033E94]/50 transition-shadow">
-                    <!-- Added v-model to bind the search text directly -->
-                    <input type="search" v-model="searchQuery" id="search" class="w-full md:w-72 lg:w-80 px-5 py-2.5 text-sm focus:outline-none border-none" placeholder="Search gallery..." />
+                    <input type="search" v-model="searchQuery" id="search" class="w-full md:w-72 lg:w-80 px-5 py-2.5 text-sm focus:outline-none dark:text-gray-800 border-none" placeholder="Search gallery..." />
                     <button type="button" class="flex items-center gap-2 px-5 py-2.5 bg-[#033E94] hover:bg-blue-800 text-white font-medium transition-colors">
                         <svg class="w-4 h-4 sm:w-5 sm:h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
@@ -127,7 +126,6 @@ onUnmounted(() => {
                     </button>
                 </div>
                 <div class="flex-1 max-w-48">
-                    <!-- Added v-model to dynamically sort -->
                     <select v-model="sortBy" id="sort" class="w-full rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm shadow-sm outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white cursor-pointer hover:border-gray-400 transition-colors">
                         <option value="date">Sort by Date</option>
                         <option value="name">Sort by Name</option>
