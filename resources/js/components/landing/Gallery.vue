@@ -38,7 +38,8 @@ const displayItems = computed(() => {
     }
     
     // Sort
-    let sorted = [...items];
+    const sorted = [...items];
+
     if (sortBy.value === 'name') {
         sorted.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
     } 
@@ -57,7 +58,10 @@ const highlightPhoto = computed(() => {
 });
 
 const gridPhotos = computed(() => {
-    if (!highlightPhoto.value) return [];
+    if (!highlightPhoto.value) {
+return [];
+}
+
     return allPhotos.value.filter(photo => photo.id !== highlightPhoto.value!.id).slice(0, 4);
 });
 
@@ -66,8 +70,14 @@ const isVideoModalOpen = ref(false);
 const isPhotoModalOpen = ref(false);
 
 const toggleModal = (type: 'video' | 'photo', show: boolean) => {
-    if (type === 'video') isVideoModalOpen.value = show;
-    if (type === 'photo') isPhotoModalOpen.value = show;
+    if (type === 'video') {
+isVideoModalOpen.value = show;
+}
+
+    if (type === 'photo') {
+isPhotoModalOpen.value = show;
+}
+
     document.body.style.overflow = show ? 'hidden' : '';
 };
 
