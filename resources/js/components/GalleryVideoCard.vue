@@ -9,7 +9,10 @@ defineProps<{
 defineEmits(['play']);
 
 const getImageUrl = (path?: string) => {
-    if (!path) return '/assets/placeholder.jpg';
+    if (!path) {
+return '/assets/placeholder.jpg';
+}
+
     return (path.startsWith('http') || path.startsWith('/')) ? path : `/storage/${path}`;
 };
 
