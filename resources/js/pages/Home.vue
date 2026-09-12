@@ -5,7 +5,8 @@
 import AboutSection from '@/components/landing/AboutSection.vue';
 import ContactSection from '@/components/landing/ContactSection.vue';
 import Footer from '@/components/landing/Footer.vue';
-import GallerySection from '@/components/landing/GallerySection.vue';
+import Gallery from '@/components/landing/Gallery.vue';
+// import GallerySection from '@/components/landing/GallerySection.vue';
 import HomeSection from '@/components/landing/HomeSection.vue';
 import MobileTutorial from '@/components/landing/MobileTutorial.vue';
 import NavBar from '@/components/landing/NavBar.vue';
@@ -34,7 +35,7 @@ withDefaults(
     <StrategicPlans />
     <TestimonialsSection />
     <NewsUpdates />
-    <GallerySection />
+    <Gallery />
     <ContactSection />
     <Footer />
     </main>

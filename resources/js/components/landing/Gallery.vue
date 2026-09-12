@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted } from 'vue';
 import BaseCarousel from '@/components/BaseCarousel.vue';
-import GalleryVideoCard from './GalleryVideoCard.vue';
-import GalleryPhotoCard from './GalleryPhotoCard.vue';
+import GalleryPhotoCard from '@/components/GalleryPhotoCard.vue';
+import GalleryVideoCard from '@/components/GalleryVideoCard.vue';
 import type { GalleryItem } from '@/types/landing/index';
 
 const props = defineProps<{
