@@ -4,14 +4,15 @@ import type { GalleryItem } from '@/types/landing/index';
 defineProps<{
     video: GalleryItem;
     isCompact?: boolean;
+    isList?: boolean; 
 }>();
 
 defineEmits(['play']);
 
 const getImageUrl = (path?: string) => {
     if (!path) {
-return '/assets/placeholder.jpg';
-}
+        return '/assets/placeholder.jpg';
+    }
 
     return (path.startsWith('http') || path.startsWith('/')) ? path : `/storage/${path}`;
 };
@@ -23,7 +24,28 @@ const handleImageError = (event: Event) => {
 </script>
 
 <template>
-    <div :class="isCompact ? 
+    <!-- LIST VIEW (Horizontal Row) -->
+    <div v-if="isList" 
+         @click.prevent="$emit('play', video)"
+         class="bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden border border-gray-200 flex flex-row p-3 sm:p-4 gap-4 items-center group cursor-pointer w-full">
+        
+        <div class="relative w-28 sm:w-48 shrink-0 aspect-video rounded-lg overflow-hidden bg-gray-100">
+            <img class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" :src="getImageUrl(video.media_path)" @error="handleImageError" :alt="video.title" />
+            <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition"></div>
+            <img class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 object-contain opacity-90 drop-shadow-lg group-hover:scale-110 transition duration-300" src="/assets/video.png" alt="Play" />
+        </div>
+        
+        <div class="flex-1 min-w-0 flex flex-col justify-center">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1 sm:mb-2">
+                <h4 class="font-bold text-[#033E94] text-base sm:text-lg truncate pr-2">{{ video.title }}</h4>
+                <span class="text-xs sm:text-sm font-medium text-gray-500 shrink-0">{{ video.subtitle }}</span>
+            </div>
+            <p class="text-xs sm:text-sm text-gray-600 line-clamp-1 sm:line-clamp-2 pr-4">{{ video.description }}</p>
+        </div>
+    </div>
+
+    <!-- COMPACT & DEFAULT VIEWS (Vertical Cards) -->
+    <div v-else :class="isCompact ? 
         'bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden border border-gray-100 flex flex-col group h-full' : 
         'bg-white rounded-2xl md:rounded-3xl shadow-md hover:shadow-xl transform transition duration-300 hover:-translate-y-1 p-4 sm:p-5 h-full border border-gray-100 flex flex-col w-full'">
         

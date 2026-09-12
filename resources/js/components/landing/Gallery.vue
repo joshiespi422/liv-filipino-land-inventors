@@ -20,9 +20,10 @@ const sampleItems: GalleryItem[] = [
     { id: 'p5', type: 'photo', media_path: '/assets/pp1.jpg', title: 'Community Outreach' },
 ];
 
-// --- SEARCH & SORT STATE ---
+// --- SEARCH, SORT & VIEW STATE ---
 const searchQuery = ref('');
 const sortBy = ref('date');
+const viewLayout = ref<'list' | 'grid'>('grid'); // Tracks which view is active
 
 const displayItems = computed(() => {
     let items = (props.items && props.items.length > 0) ? props.items : sampleItems;
@@ -59,8 +60,8 @@ const highlightPhoto = computed(() => {
 
 const gridPhotos = computed(() => {
     if (!highlightPhoto.value) {
-return [];
-}
+        return [];
+    }
 
     return allPhotos.value.filter(photo => photo.id !== highlightPhoto.value!.id).slice(0, 4);
 });
@@ -71,12 +72,12 @@ const isPhotoModalOpen = ref(false);
 
 const toggleModal = (type: 'video' | 'photo', show: boolean) => {
     if (type === 'video') {
-isVideoModalOpen.value = show;
-}
+        isVideoModalOpen.value = show;
+    }
 
     if (type === 'photo') {
-isPhotoModalOpen.value = show;
-}
+        isPhotoModalOpen.value = show;
+    }
 
     document.body.style.overflow = show ? 'hidden' : '';
 };
@@ -114,12 +115,31 @@ onUnmounted(() => {
 
             <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-center">
                 <div class="flex items-center gap-1 bg-gray-100 rounded-full p-1 shadow-inner shrink-0">
-                    <button class="p-1.5 sm:p-2 rounded-full hover:bg-white hover:shadow-sm transition-all text-gray-700">
+                    <!-- List View Button -->
+                    <button 
+                        @click="viewLayout = 'list'"
+                        :class="[
+                            'p-1.5 sm:p-2 rounded-full transition-all duration-300',
+                            viewLayout === 'list' 
+                                ? 'bg-white shadow-sm text-[#033E94] scale-105' 
+                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/70'
+                        ]"
+                    >
                         <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
-                    <button class="p-1.5 sm:p-2 rounded-full hover:bg-white hover:shadow-sm transition-all text-[#033E94]">
+                    
+                    <!-- Grid View Button -->
+                    <button 
+                        @click="viewLayout = 'grid'"
+                        :class="[
+                            'p-1.5 sm:p-2 rounded-full transition-all duration-300',
+                            viewLayout === 'grid' 
+                                ? 'bg-white shadow-sm text-[#033E94] scale-105' 
+                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/70'
+                        ]"
+                    >
                         <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z" />
                         </svg>
@@ -134,12 +154,16 @@ onUnmounted(() => {
             </div>
         </div>
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 mt-10 md:mt-12">
+        <!-- ================= VIDEOS SECTION ================= -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 mt-10 md:mt-12">
             <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-[#033E94] dark:text-white">Video</h2>
 
             <div class="relative w-full">
                 <div v-if="videos.length > 0">
+                    
+                    <!-- GRID VIEW (Carousel) -->
                     <BaseCarousel 
+                        v-if="viewLayout === 'grid'"
                         :items="videos" 
                         :autoplayDelay="4000"
                         slide-class="w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1.33rem)]"
@@ -158,6 +182,18 @@ onUnmounted(() => {
                             </div>
                         </template>
                     </BaseCarousel>
+
+                    <!-- LIST VIEW (Horizontal Stack like folders) -->
+                    <div v-else class="flex flex-col gap-3">
+                        <GalleryVideoCard 
+                            v-for="video in videos" 
+                            :key="video.id" 
+                            :video="video" 
+                            :isList="true"
+                            @play="toggleModal('video', true)" 
+                        />
+                    </div>
+
                 </div>
 
                 <div v-else class="text-center py-10 md:py-12 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 text-gray-500">
@@ -172,29 +208,44 @@ onUnmounted(() => {
             </div>
         </div>
 
+        <!-- ================= PHOTOS SECTION ================= -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 mt-12 md:mt-16 mb-8">
             <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-[#033E94] dark:text-white">Photo</h2>
 
-            <div v-if="allPhotos.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <div v-if="allPhotos.length > 0">
                 
-                <GalleryPhotoCard 
-                    v-if="highlightPhoto" 
-                    :photo="highlightPhoto" 
-                    variant="highlight" 
-                    @open="toggleModal('photo', true)" 
-                />
-
-                <div v-if="gridPhotos.length > 0" class="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+                <!-- GRID VIEW (Highlight + Small Grid) -->
+                <div v-if="viewLayout === 'grid'" class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     <GalleryPhotoCard 
-                        v-for="photo in gridPhotos" 
+                        v-if="highlightPhoto" 
+                        :photo="highlightPhoto" 
+                        variant="highlight" 
+                        @open="toggleModal('photo', true)" 
+                    />
+
+                    <div v-if="gridPhotos.length > 0" class="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+                        <GalleryPhotoCard 
+                            v-for="photo in gridPhotos" 
+                            :key="photo.id" 
+                            :photo="photo" 
+                            variant="grid"
+                            @open="toggleModal('photo', true)" 
+                        />
+                    </div>
+                </div>
+
+                <!-- LIST VIEW (Horizontal Stack like folders) -->
+                <div v-else class="flex flex-col gap-3">
+                    <GalleryPhotoCard 
+                        v-for="photo in allPhotos.slice(0, 5)" 
                         :key="photo.id" 
                         :photo="photo" 
-                        variant="grid"
+                        variant="list"
                         @open="toggleModal('photo', true)" 
                     />
                 </div>
 
-                <div class="col-span-1 lg:col-span-2 flex justify-center mt-4 sm:mt-6">
+                <div class="flex justify-center mt-4 sm:mt-6">
                     <button @click="toggleModal('photo', true)" class="text-white bg-[#033E94] hover:bg-blue-800 dark:bg-white dark:text-[#033E94] shadow-md font-semibold rounded-xl text-base md:text-lg px-6 md:px-8 py-2.5 transition active:scale-95">
                         View all Photos
                     </button>
@@ -206,8 +257,9 @@ onUnmounted(() => {
             </div>
         </div>
 
+        <!-- ================= MODALS ================= -->
         <teleport to="body">
-            
+            <!-- Your existing modal code goes here (Leave it exactly as it was) -->
             <transition enter-active-class="transition ease-out duration-300" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition ease-in duration-200" leave-from-class="opacity-100" leave-to-class="opacity-0">
                 <div v-if="isVideoModalOpen" class="fixed inset-0 z-100 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                     <div class="fixed inset-0 bg-black/80 transition-opacity backdrop-blur-sm" @click="toggleModal('video', false)"></div>
@@ -247,7 +299,6 @@ onUnmounted(() => {
                     </div>
                 </div>
             </transition>
-
         </teleport>
     </div>
 </template>
