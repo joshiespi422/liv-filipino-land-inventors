@@ -155,7 +155,7 @@ onUnmounted(() => {
         </div>
 
         <!-- ================= VIDEOS SECTION ================= -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 mt-10 md:mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 mt-10 md:mt-12">
             <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-[#033E94] dark:text-white">Video</h2>
 
             <div class="relative w-full">
@@ -259,7 +259,8 @@ onUnmounted(() => {
 
         <!-- ================= MODALS ================= -->
         <teleport to="body">
-            <!-- Your existing modal code goes here (Leave it exactly as it was) -->
+            
+            <!-- VIDEO MODAL -->
             <transition enter-active-class="transition ease-out duration-300" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition ease-in duration-200" leave-from-class="opacity-100" leave-to-class="opacity-0">
                 <div v-if="isVideoModalOpen" class="fixed inset-0 z-100 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                     <div class="fixed inset-0 bg-black/80 transition-opacity backdrop-blur-sm" @click="toggleModal('video', false)"></div>
@@ -269,9 +270,21 @@ onUnmounted(() => {
                                 <h3 class="text-xl sm:text-2xl md:text-3xl font-bold text-[#033E94]">All Videos</h3>
                                 <button @click="toggleModal('video', false)" class="text-gray-400 hover:text-red-500 bg-gray-100 hover:bg-red-50 rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center transition text-xl sm:text-2xl font-bold">&times;</button>
                             </div>
-                            <div class="p-4 sm:p-6 md:p-8 overflow-y-auto grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-8 bg-gray-50 grow">
-                                <GalleryVideoCard v-for="video in videos" :key="video.id" :video="video" :isCompact="true" />
+                            
+                            <!-- Dynamic Layout Container -->
+                            <div :class="[
+                                'p-4 sm:p-6 md:p-8 overflow-y-auto bg-gray-50 grow',
+                                viewLayout === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-8' : 'flex flex-col gap-3'
+                            ]">
+                                <GalleryVideoCard 
+                                    v-for="video in videos" 
+                                    :key="video.id" 
+                                    :video="video" 
+                                    :isCompact="viewLayout === 'grid'" 
+                                    :isList="viewLayout === 'list'" 
+                                />
                             </div>
+                            
                             <div class="bg-white border-t border-gray-100 px-5 sm:px-6 py-3 sm:py-4 flex justify-end shrink-0">
                                 <button @click="toggleModal('video', false)" class="bg-[#033E94] text-white px-6 sm:px-8 py-2 sm:py-2.5 rounded-xl hover:bg-blue-800 font-semibold transition shadow-sm text-sm sm:text-base">Close</button>
                             </div>
@@ -280,6 +293,7 @@ onUnmounted(() => {
                 </div>
             </transition>
 
+            <!-- PHOTO MODAL -->
             <transition enter-active-class="transition ease-out duration-300" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition ease-in duration-200" leave-from-class="opacity-100" leave-to-class="opacity-0">
                 <div v-if="isPhotoModalOpen" class="fixed inset-0 z-100 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                     <div class="fixed inset-0 bg-black/80 transition-opacity backdrop-blur-sm" @click="toggleModal('photo', false)"></div>
@@ -289,9 +303,20 @@ onUnmounted(() => {
                                 <h3 class="text-xl sm:text-2xl md:text-3xl font-bold text-[#033E94]">All Photos</h3>
                                 <button @click="toggleModal('photo', false)" class="text-gray-400 hover:text-red-500 bg-gray-100 hover:bg-red-50 rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center transition text-xl sm:text-2xl font-bold">&times;</button>
                             </div>
-                            <div class="p-4 sm:p-6 md:p-8 overflow-y-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6 bg-gray-50 grow">
-                                <GalleryPhotoCard v-for="photo in allPhotos" :key="photo.id" :photo="photo" variant="modal" />
+                            
+                            <!-- Dynamic Layout Container -->
+                            <div :class="[
+                                'p-4 sm:p-6 md:p-8 overflow-y-auto bg-gray-50 grow',
+                                viewLayout === 'grid' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6' : 'flex flex-col gap-3'
+                            ]">
+                                <GalleryPhotoCard 
+                                    v-for="photo in allPhotos" 
+                                    :key="photo.id" 
+                                    :photo="photo" 
+                                    :variant="viewLayout === 'grid' ? 'modal' : 'list'" 
+                                />
                             </div>
+                            
                             <div class="bg-white border-t border-gray-100 px-5 sm:px-6 py-3 sm:py-4 flex justify-end shrink-0">
                                 <button @click="toggleModal('photo', false)" class="bg-[#033E94] text-white px-6 sm:px-8 py-2 sm:py-2.5 rounded-xl hover:bg-blue-800 font-semibold transition shadow-sm text-sm sm:text-base">Close</button>
                             </div>
