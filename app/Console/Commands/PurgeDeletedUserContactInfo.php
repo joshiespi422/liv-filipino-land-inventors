@@ -16,7 +16,6 @@ class PurgeDeletedUserContactInfo extends Command
     {
         $cutoffDate = Carbon::now()->subDays(30);
 
-        // Fetch soft-deleted users older than 30 days who still have contact info
         $count = User::onlyTrashed()
             ->where('deleted_at', '<=', $cutoffDate)
             ->where(function ($query) {
@@ -26,6 +25,8 @@ class PurgeDeletedUserContactInfo extends Command
             ->update([
                 'email' => null,
                 'phone' => null,
+                'deletion_token' => null,
+                'deletion_verification_request_id' => null,
             ]);
 
         $this->info("Successfully cleared contact info for {$count} user(s).");
