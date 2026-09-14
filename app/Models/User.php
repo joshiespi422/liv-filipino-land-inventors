@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes; // Import SoftDeletes
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use InvalidArgumentException;
@@ -55,7 +56,7 @@ class User extends Authenticatable
     use HasApiTokens;
 
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, SoftDeletes, TwoFactorAuthenticatable; // Added SoftDeletes trait
 
     /**
      * Get the attributes that should be cast.
@@ -74,6 +75,7 @@ class User extends Authenticatable
 
             'is_active' => 'boolean',
             'password' => 'hashed',
+            'deleted_at' => 'datetime', // Cast deleted_at attribute
         ];
     }
 
@@ -188,25 +190,6 @@ class User extends Authenticatable
             ->where('services.is_active', true)
             ->exists();
     }
-
-    // instance method to get active loan setting
-    // public function getActiveLoanSetting()
-    // {
-    //     return $this->loanSettings()
-    //         ->orWhereNull('user_id')
-    //         ->orderByRaw('user_id DESC')
-    //         ->first();
-    // }
-
-    // public function getActiveLoanSetting()
-    // {
-    //     return LoanSetting::where(function ($query) {
-    //         $query->where('user_id', $this->id)
-    //             ->orWhereNull('user_id');
-    //     })
-    //         ->orderByRaw('user_id IS NULL')
-    //         ->first();
-    // }
 
     public function getActiveLoanSetting(): LoanSetting|int
     {

@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -28,7 +29,7 @@ return new class extends Migration {
             $table->enum('valid_id_type', [
                 'National ID',
                 'Passport',
-                "Driver License",
+                'Driver License',
                 'UMID',
                 'SSS ID',
                 'PhilHealth ID',
@@ -46,6 +47,7 @@ return new class extends Migration {
             $table->string('valid_id_number', 20)->unique()->nullable()->after('valid_id_type');
             $table->string('front_valid_id_picture')->nullable()->after('valid_id_number');
             $table->string('back_valid_id_picture')->nullable()->after('front_valid_id_picture');
+            $table->softDeletes()->after('updated_at');
         });
     }
 
@@ -74,6 +76,7 @@ return new class extends Migration {
                 'front_valid_id_picture',
                 'back_valid_id_picture',
             ]);
+            $table->dropSoftDeletes();
         });
     }
 };
