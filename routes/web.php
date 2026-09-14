@@ -27,7 +27,7 @@ use Laravel\Fortify\Features;
 Route::inertia('/', 'Home', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
-
+Route::inertia('/privacy-policy', 'Privacy/Index')->name('privacy');
 Route::get('/join-us', function () {
     return Inertia::render('landing/JoinUs');
 })->name('join-us');

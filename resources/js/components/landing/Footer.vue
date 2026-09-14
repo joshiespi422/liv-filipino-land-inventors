@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
-// Automatically computes the current year for the copyright text
 const currentYear = computed(() => new Date().getFullYear());
 </script>
 
@@ -38,7 +38,7 @@ const currentYear = computed(() => new Date().getFullYear());
                             <li><a href="#news-updates" class="hover:underline transition-all">News & Updates</a></li>
                             <li><a href="#gallery" class="hover:underline transition-all">Gallery</a></li>
                             <li><a href="#contact" class="hover:underline transition-all">Contact Us</a></li>
-                        </ul>
+                            <li><Link href="/privacy-policy" class="hover:underline transition-all">Privacy Policy</Link></li>                        </ul>
                     </div>
                 </div>
             </div>
