@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\Auth;
 
+use App\Exceptions\AccountPendingReactivationException;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Resources\Api\User\ApiProfileResource;
 use App\Models\User;
@@ -30,6 +31,13 @@ class AuthenticatedSessionController extends Controller
                 'token_type' => 'Bearer',
                 'user' => new ApiProfileResource($data['user']),
             ]);
+
+        } catch (AccountPendingReactivationException $e) {
+            return response()->json([
+                'status' => 'pending_reactivation',
+                'phone' => $e->phone,
+                'message' => $e->getMessage(),
+            ], 409);
 
         } catch (ValidationException $e) {
             return response()->json([
@@ -62,7 +70,6 @@ class AuthenticatedSessionController extends Controller
                 'public_key' => ['required', 'string'],
             ]);
 
-            // Find the auth device
             $authDevice = UserAuthDevice::where('device_id', $validated['device_id'])
                 ->where('public_key', $validated['public_key'])
                 ->where('biometric_enabled', true)
@@ -74,20 +81,31 @@ class AuthenticatedSessionController extends Controller
                 ], 401);
             }
 
-            // Get the user associated with the device
-            $user = $authDevice->user;
+            // Fetch the user even if soft-deleted, so we can distinguish
+            // "pending deletion" from "doesn't exist" / "not verified".
+            $user = User::withTrashed()->find($authDevice->user_id);
 
-            // Verify user is active and phone is verified
-            if (! $user || ! $user->phone_verified_at) {
+            if (! $user) {
                 return response()->json([
                     'message' => 'User account is not verified.',
                 ], 403);
             }
 
-            // Update last used timestamp
+            if ($user->trashed()) {
+                return response()->json([
+                    'status' => 'pending_reactivation',
+                    'message' => 'Your account is scheduled for deletion. Please log in with your phone number and password. A verification code will be sent to your phone number to confirm and reactivate your account.',
+                ], 409);
+            }
+
+            if (! $user->phone_verified_at) {
+                return response()->json([
+                    'message' => 'User account is not verified.',
+                ], 403);
+            }
+
             $authDevice->update(['last_used_at' => now()]);
 
-            // Create token
             $token = $user->createToken('biometric-auth-token')->plainTextToken;
 
             return response()->json([

@@ -2,6 +2,7 @@
 
 namespace App\Services\Auth;
 
+use App\Exceptions\AccountPendingReactivationException;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -13,10 +14,11 @@ class AuthenticationService
      * Authenticate a user via phone + password and issue a token.
      *
      * @throws ValidationException
+     * @throws AccountPendingReactivationException
      */
     public function login(LoginRequest $request): array
     {
-        $this->restoreIfWithinGracePeriod(
+        $this->guardAgainstPendingDeletion(
             $request->validated('phone'),
             $request->validated('password'),
         );
@@ -25,7 +27,6 @@ class AuthenticationService
 
         $user = $request->user();
 
-        // Prevent login if phone is not verified
         if (! $user->phone_verified_at) {
             throw new \RuntimeException('Phone number is not verified.', 403);
         }
@@ -39,10 +40,14 @@ class AuthenticationService
     }
 
     /**
-     * Restore a soft-deleted account if it's within its 30-day
-     * grace period and the credentials match.
+     * If the credentials match a soft-deleted account still within its
+     * grace period, interrupt the login. This ONLY detects the state —
+     * it does not send any OTP. The OTP is sent separately, only after
+     * the user explicitly confirms they want to reactivate.
+     *
+     * @throws AccountPendingReactivationException
      */
-    private function restoreIfWithinGracePeriod(string $phone, string $password): void
+    private function guardAgainstPendingDeletion(string $phone, string $password): void
     {
         $normalizedPhone = str_starts_with($phone, '63') ? '0'.substr($phone, 2) : $phone;
 
@@ -52,16 +57,14 @@ class AuthenticationService
             return;
         }
 
-        if ($user->scheduled_deletion_at && $user->scheduled_deletion_at->isFuture()) {
-            $user->restore();
-            $user->update([
-                'deletion_requested_at' => null,
-                'scheduled_deletion_at' => null,
-                'deletion_verification_request_id' => null,
-                'deletion_otp_sent_at' => null,
-                'deletion_token' => null,
-            ]);
+        if (! $user->scheduled_deletion_at || $user->scheduled_deletion_at->isPast()) {
+            return;
         }
+
+        throw new AccountPendingReactivationException(
+            $user->phone,
+            'Your account is scheduled for deletion. Would you like to reactivate it?'
+        );
     }
 
     /**
