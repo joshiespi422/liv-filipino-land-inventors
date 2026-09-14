@@ -20,6 +20,7 @@ use App\Http\Controllers\Web\SuperAdmin\AdminManagementController;
 use App\Http\Controllers\Web\SuperAdmin\CoopMembershipController;
 use App\Http\Controllers\Web\SupportChat\SupportChatController;
 use App\Models\UserType;
+use App\Models\TermsAndCondition;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -31,6 +32,18 @@ Route::inertia('/privacy-policy', 'Privacy/Index')->name('privacy');
 Route::get('/join-us', function () {
     return Inertia::render('landing/JoinUs');
 })->name('join-us');
+// Route::inertia('/terms-and-conditions', 'Terms/Index')->name('terms');
+
+Route::get('/terms-and-conditions', function () {
+    $terms = TermsAndCondition::latest('id')->first();
+    
+    // ADD THIS TEMPORARY DEBUG LINE:
+    // dd($terms);
+    
+    return Inertia::render('Terms/Index', [
+        'terms' => $terms
+    ]);
+});
 
 Route::middleware([
     'auth',

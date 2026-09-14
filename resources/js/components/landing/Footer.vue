@@ -32,7 +32,8 @@ const currentYear = computed(() => new Date().getFullYear());
                             <li><a href="#about" class="hover:underline transition-all">About Us</a></li>
                             <li><a href="#programs" class="hover:underline transition-all">Programs & Services</a></li>
                             <li><a href="#strategic-plans" class="hover:underline transition-all">Strategic Plan 2026-2028</a></li>
-                        </ul>
+                            <li><Link href="/terms-and-conditions" class="hover:underline transition-all">Terms and Conditions</Link></li>                        </ul>
+                        
                         <ul class="space-y-2 text-sm md:text-base font-medium">
                             <li><a href="#testimonials" class="hover:underline transition-all">Testimonials</a></li>
                             <li><a href="#news-updates" class="hover:underline transition-all">News & Updates</a></li>
