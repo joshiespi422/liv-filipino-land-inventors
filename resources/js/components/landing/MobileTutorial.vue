@@ -11,33 +11,95 @@ const searchQuery = ref('');
 const isVideoModalOpen = ref(false);
 const activeVideoUrl = ref<string | null>(null);
 
-const sampleItems: TutorialItem[] = [
+// Updated to use the local files from public/assets/Mobile-Tutorial/
+const sampleItems: any[] = [
     {
-        id: 'v1',
-        type: 'video',
-        title: 'Platform Overview',
-        // subtitle: 'Step 1',
-        description: 'A complete overview of the application and its core features.',
-        media_path: 'https://img.youtube.com/vi/LCy5-39r_g0/maxresdefault.jpg',
-        youtube_url: 'https://www.youtube.com/embed/LCy5-39r_g0'
+        id: 'v1', type: 'video',
+        title: 'How to Download the App',
+        subtitle: 'Step 1',
+        description: 'Learn where and how to securely download the official mobile app.',
+        media_path: '/assets/placeholder.jpg',
+        video_url: '/assets/Mobile-Tutorial/1 How to Download the App.mp4'
     },
     {
-        id: 'v2',
-        type: 'video',
-        title: 'Account Setup',
-        // subtitle: 'Step 2',
-        description: 'Learn how to properly configure your account and settings.',
-        media_path: 'https://img.youtube.com/vi/NiKkZ3mZKyY/maxresdefault.jpg',
-        youtube_url: 'https://www.youtube.com/embed/NiKkZ3mZKyY'
+        id: 'v2', type: 'video',
+        title: 'How to create your fismpc account',
+        subtitle: 'Step 2',
+        description: 'A step-by-step guide to registering and setting up your new account.',
+        media_path: '/assets/placeholder.jpg',
+        video_url: '/assets/Mobile-Tutorial/2 How to create your fismpc account.mp4'
     },
     {
-        id: 'v3',
-        type: 'video',
-        title: 'Navigation & Tools',
-        // subtitle: 'Step 3',
-        description: 'Explore the different tools available on the dashboard.',
-        media_path: 'https://img.youtube.com/vi/AuEK4Yrc4kQ/hqdefault.jpg', 
-        youtube_url: 'https://www.youtube.com/embed/AuEK4Yrc4kQ'
+        id: 'v3', type: 'video',
+        title: 'How to Log In to Your Account',
+        subtitle: 'Step 3',
+        description: 'Securely access your account using your credentials.',
+        media_path: '/assets/placeholder.jpg',
+        video_url: '/assets/Mobile-Tutorial/3 How to Log In to Your Account.mp4'
+    },
+    {
+        id: 'v4', type: 'video',
+        title: 'How to Recover Your Account',
+        subtitle: 'Step 4',
+        description: 'Forgot your password? Learn how to safely recover your access.',
+        media_path: '/assets/placeholder.jpg',
+        video_url: '/assets/Mobile-Tutorial/4 How to Recover Your Account If You Forget Your Password.mp4'
+    },
+    {
+        id: 'v5', type: 'video',
+        title: 'How to Complete Your Profile',
+        subtitle: 'Step 5',
+        description: 'Fill in your necessary details to complete your membership profile.',
+        media_path: '/assets/placeholder.jpg',
+        video_url: '/assets/Mobile-Tutorial/5 How to Complete Your Profile.mp4'
+    },
+    {
+        id: 'v6', type: 'video',
+        title: 'How to Change Your Profile Picture',
+        subtitle: 'Step 6',
+        description: 'Personalize your account by updating your profile picture.',
+        media_path: '/assets/placeholder.jpg',
+        video_url: '/assets/Mobile-Tutorial/6 How to Change Your Profile Picture.mp4'
+    },
+    {
+        id: 'v7', type: 'video',
+        title: 'How to Activate Biometric Authentication',
+        subtitle: 'Step 7',
+        description: 'Enable Face ID or Fingerprint login for faster, secure access.',
+        media_path: '/assets/placeholder.jpg',
+        video_url: '/assets/Mobile-Tutorial/7 How to Activate Biometric Authentication.mp4'
+    },
+    {
+        id: 'v8', type: 'video',
+        title: 'How to Become a Cooperative Member',
+        subtitle: 'Step 8',
+        description: 'Follow the process to officially become a registered cooperative member.',
+        media_path: '/assets/placeholder.jpg',
+        video_url: '/assets/Mobile-Tutorial/8 How to Become a Cooperative Member.mp4'
+    },
+    {
+        id: 'v9', type: 'video',
+        title: 'Access the Cooperative Membership Module',
+        subtitle: 'Step 9',
+        description: 'Navigate the membership module to view your cooperative status.',
+        media_path: '/assets/placeholder.jpg',
+        video_url: '/assets/Mobile-Tutorial/9 How to access the Cooperative Membership Module.mp4'
+    },
+    {
+        id: 'v10', type: 'video',
+        title: 'How to access the Business training',
+        subtitle: 'Step 10',
+        description: 'Find and enroll in available business training courses.',
+        media_path: '/assets/placeholder.jpg',
+        video_url: '/assets/Mobile-Tutorial/10 How to access the Business training.mp4'
+    },
+    {
+        id: 'v11', type: 'video',
+        title: 'How to Access News and Events',
+        subtitle: 'Step 11',
+        description: 'Stay updated with the latest cooperative news and upcoming events.',
+        media_path: '/assets/placeholder.jpg',
+        video_url: '/assets/Mobile-Tutorial/11 How to Access News and Events.mp4'
     }
 ];
 
@@ -70,9 +132,9 @@ const openVideoModal = (url?: string) => {
     if (!url) {
         return;
     }
-    // Add parameters to autoplay and hide YouTube UI/related videos as much as possible
     
-    activeVideoUrl.value = url + '?autoplay=1&modestbranding=1&rel=0&showinfo=0';
+    // We no longer need YouTube parameters, just the direct file path
+    activeVideoUrl.value = url;
     isVideoModalOpen.value = true;
     document.body.style.overflow = 'hidden';
 };
@@ -91,19 +153,19 @@ onUnmounted(() => {
 <template>
     <div id="mobile-tutorial" class="overflow-x-hidden pb-16 bg-white dark:bg-[#0a192f]">
         
- <div class="relative h-64 md:h-80 w-full bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
-    <div class="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 text-center">
-        <span class="text-[#033E94] dark:text-blue-400 font-semibold tracking-wider text-sm uppercase mb-3">
-            Support & Guides
-        </span>
-        <h1 class="text-gray-900 dark:text-white text-3xl md:text-5xl font-bold tracking-tight mb-4">
-            Mobile App Tutorials
-        </h1>
-        <p class="text-gray-500 dark:text-gray-400 text-sm md:text-base max-w-2xl leading-relaxed">
-            Follow our step-by-step tutorials to learn how to use the mobile app, manage your account, access your membership, and get the most out of your experience.
-        </p>
-    </div>
-</div>
+        <div class="relative h-64 md:h-80 w-full bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+            <div class="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 text-center">
+                <span class="text-[#033E94] dark:text-blue-400 font-semibold tracking-wider text-sm uppercase mb-3">
+                    Support & Guides
+                </span>
+                <h1 class="text-gray-900 dark:text-white text-3xl md:text-5xl font-bold tracking-tight mb-4">
+                    Mobile App Tutorials
+                </h1>
+                <p class="text-gray-500 dark:text-gray-400 text-sm md:text-base max-w-2xl leading-relaxed">
+                    Follow our step-by-step tutorials to learn how to use the mobile app, manage your account, access your membership, and get the most out of your experience.
+                </p>
+            </div>
+        </div>
 
         <!-- Search Bar (Minimal) -->
         <div class="max-w-3xl mx-auto px-4 sm:px-6 mt-8 md:mt-12">
@@ -134,16 +196,18 @@ onUnmounted(() => {
                     >                        
                         <template #slide="{ slide: video }">
                             <div class="p-2 h-full w-full">
-                                <div class="bg-white dark:bg-gray-800 rounded-2xl p-3 h-full flex flex-col group cursor-pointer" @click="openVideoModal(video.youtube_url)">
+                                <!-- Notice we swapped video.youtube_url to video.video_url below -->
+                                <div class="bg-white dark:bg-gray-800 rounded-2xl p-3 h-full flex flex-col group cursor-pointer" @click="openVideoModal(video.video_url || video.youtube_url)">
                                     
                                     <!-- Clean Thumbnail -->
                                     <div class="relative block aspect-video overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-900 w-full mb-4">
-                                        <img 
-                                            class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                                            :src="video.media_path" 
-                                            @error="handleImageError" 
-                                            :alt="video.title" 
-                                        />
+                                        <video 
+                                        class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none" 
+                                        :src="`${video.video_url || video.youtube_url}#t=0.1`" 
+                                        preload="metadata"
+                                        muted
+                                        playsinline
+                                    ></video>
                                         <!-- Minimal Play Button Overlay -->
                                         <div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors duration-300">
                                             <div class="w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300">
@@ -186,22 +250,23 @@ onUnmounted(() => {
                     <div class="relative w-full max-w-4xl bg-black rounded-xl overflow-hidden shadow-2xl z-10 ring-1 ring-white/10">
                         
                         <!-- Minimal Close Button -->
-                        <button @click="closeVideoModal" class="absolute -top-10 right-0 text-gray-400 hover:text-white transition-colors flex items-center gap-2 text-sm font-medium">
+                        <button @click="closeVideoModal" class="absolute -top-10 right-0 text-gray-400 hover:text-white transition-colors flex items-center gap-2 text-sm font-medium z-20">
                             Close
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
 
-                        <!-- Video Player -->
-                        <div class="aspect-video w-full bg-black">
-                            <iframe 
+                        <!-- Local Video Player replacing the iframe -->
+                        <div class="aspect-video w-full bg-black flex items-center justify-center">
+                            <video 
                                 v-if="activeVideoUrl"
-                                class="w-full h-full"
-                                :src="activeVideoUrl" 
-                                title="Video player" 
-                                frameborder="0" 
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                allowfullscreen>
-                            </iframe>
+                                class="w-full h-full object-contain"
+                                controls 
+                                autoplay 
+                                controlsList="nodownload"
+                            >
+                                <source :src="activeVideoUrl" type="video/mp4" />
+                                Your browser does not support the video tag.
+                            </video>
                         </div>
                     </div>
                 </div>
