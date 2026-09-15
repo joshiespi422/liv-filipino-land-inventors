@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('wallet_transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('wallet_id')->constrained()->cascadeOnDelete();
-            $table->nullableMorphs('reference'); 
+            $table->nullableMorphs('reference');
             $table->decimal('amount', 15, 2);
-            $table->enum('type', ['deposit', 'withdrawal']);
+            $table->enum('type', ['deposit', 'withdrawal', 'credit', 'debit']);
             $table->string('description')->nullable();
             $table->timestamps();
         });

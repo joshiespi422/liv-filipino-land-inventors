@@ -32,6 +32,8 @@ use App\Http\Controllers\API\Store\ShopProductController;
 use App\Http\Controllers\API\Store\ShopStoreController;
 use App\Http\Controllers\API\SupportChat\SupportChatController;
 use App\Http\Controllers\API\TermsAndConditionController;
+use App\Http\Controllers\API\Transfer\PaymongoTransferWebhookController;
+use App\Http\Controllers\API\Transfer\TransferController;
 use App\Http\Controllers\API\Verification\PhoneVerificationController;
 use App\Http\Controllers\API\Wallet\WalletController;
 use App\Models\UserType;
@@ -66,6 +68,7 @@ Route::middleware('guest')->group(function () {
 Route::get('/payment/status/{paymentIntentId}', [PaymentController::class, 'status']);
 Route::get('/payment/success', [PaymentController::class, 'success']);
 Route::post('/webhooks/{gateway}', PaymentWebhookController::class);
+Route::post('/webhooks/paymongo/transfer', [PaymongoTransferWebhookController::class, 'handle']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
@@ -132,6 +135,9 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('transaction', [WalletController::class, 'transaction']);
             Route::get('presets', [WalletController::class, 'presets']);
             Route::post('recharge', [WalletController::class, 'recharge']);
+
+            Route::post('transfer', [TransferController::class, 'store']);
+            Route::get('transfer/{reference}', [TransferController::class, 'status']);
         });
 
     // Loan Routes
