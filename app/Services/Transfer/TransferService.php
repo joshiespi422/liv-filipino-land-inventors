@@ -19,6 +19,7 @@ class TransferService
     public const CHANNELS = [
         'gcash' => ['name' => 'GCash', 'search' => 'G-Xchange'],
         'maya' => ['name' => 'Maya', 'search' => 'Maya Philippines'],
+        'aub' => ['name' => 'AUB', 'search' => 'Asia United Bank'],
         'bdo' => ['name' => 'BDO Unibank', 'search' => 'BDO Unibank'],
         'bpi' => ['name' => 'BPI', 'search' => 'Bank of the Philippine Islands'],
         'landbank' => ['name' => 'LandBank', 'search' => 'Land Bank of the Philippines'],
