@@ -70,4 +70,26 @@ class Wallet extends Model implements Payable
     {
         return 'wallet';
     }
+
+    public function withdraw(float $amount, Model $reference, string $description): WalletTransaction
+    {
+        $this->decrement('balance', $amount);
+
+        $transaction = $this->walletTransactions()->create([
+            'reference_type' => $reference::class,
+            'reference_id' => $reference->id,
+            'type' => 'withdrawal',
+            'amount' => $amount,
+            'description' => $description,
+        ]);
+
+        broadcast(new WalletBalanceUpdated($this->fresh()));
+
+        return $transaction;
+    }
+
+    public function batchTransfers(): HasMany
+    {
+        return $this->hasMany(BatchTransfer::class);
+    }
 }
