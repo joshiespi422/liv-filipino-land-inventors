@@ -17,8 +17,9 @@ createInertiaApp({
   layout: (name) => {
     switch (true) {
       case name === 'Home':
-      case name === 'Privacy/Index': 
+      case name === 'Privacy/Index':
       case name === 'Terms/Index':
+      case name === 'DeleteAccount':
         return null;
       case name.startsWith('auth/'):
         return AuthLayout;

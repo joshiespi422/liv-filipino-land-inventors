@@ -19,6 +19,7 @@ use App\Http\Controllers\Web\Seller\ShopConversationController as SellerShopConv
 use App\Http\Controllers\Web\SuperAdmin\AdminManagementController;
 use App\Http\Controllers\Web\SuperAdmin\CoopMembershipController;
 use App\Http\Controllers\Web\SupportChat\SupportChatController;
+use App\Http\Controllers\AccountDeletionController;
 use App\Models\UserType;
 use App\Models\TermsAndCondition;
 use Illuminate\Support\Facades\Route;
@@ -32,17 +33,33 @@ Route::inertia('/privacy-policy', 'Privacy/Index')->name('privacy');
 Route::get('/join-us', function () {
     return Inertia::render('landing/JoinUs');
 })->name('join-us');
-// Route::inertia('/terms-and-conditions', 'Terms/Index')->name('terms');
 
 Route::get('/terms-and-conditions', function () {
     $terms = TermsAndCondition::latest('id')->first();
     
-    // ADD THIS TEMPORARY DEBUG LINE:
-    // dd($terms);
-    
     return Inertia::render('Terms/Index', [
         'terms' => $terms
     ]);
+});
+
+// public endpoints for request account deletion
+Route::prefix('delete-account')->name('account-deletion.')->group(function () {
+    Route::get('/', [AccountDeletionController::class, 'edit'])
+        ->name('edit');
+    Route::post('/identify', [AccountDeletionController::class, 'identify'])
+        ->middleware('throttle:6,1')
+        ->name('identify');
+    Route::post('/otp/resend', [AccountDeletionController::class, 'resendOtp'])
+        ->middleware('throttle:6,1')
+        ->name('otp.resend');
+    Route::post('/verify', [AccountDeletionController::class, 'verify'])
+        ->middleware('throttle:10,1')
+        ->name('verify');
+    Route::delete('/', [AccountDeletionController::class, 'destroy'])
+        ->middleware('throttle:6,1')
+        ->name('destroy');
+    Route::post('/cancel', [AccountDeletionController::class, 'cancel'])
+        ->name('cancel');
 });
 
 Route::middleware([
