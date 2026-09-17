@@ -43,7 +43,7 @@ class TransferService
      * may all differ).
      */
     private const ACCOUNT_SUBTAG_BY_GUID = [
-        // 'GUID_STRING_HERE' => 'subtag_number_here',
+        'PH.INSTAPAY.ME' => '02', // proxy value (mobile number or account number)
     ];
 
     public function __construct(protected PaymongoTransferService $paymongo) {}
@@ -269,17 +269,9 @@ class TransferService
     {
         $tags = $this->tlvDecode($payload);
 
-        // Tag 54 = Transaction Amount
         $amount = isset($tags['54']) ? (float) $tags['54'] : null;
-
-        // Tag 59 = Merchant/Account Name
         $accountName = $tags['59'] ?? '';
 
-        // Extract merchant/account info from sub-tags (Merchant Account
-        // Information IDs 26-51). Each of these IDs is reserved for "any
-        // payment operator", so sub-tag numbering is operator-specific —
-        // we identify the operator via its GUID (sub-tag "00") and only
-        // trust a sub-tag we've explicitly mapped for that GUID.
         $accountNumber = '';
         $provider = 'QR Ph';
 
@@ -298,19 +290,42 @@ class TransferService
             }
 
             $provider = $guid;
-
             $accountSubtag = self::ACCOUNT_SUBTAG_BY_GUID[$guid] ?? null;
 
             if ($accountSubtag !== null && isset($subTags[$accountSubtag])) {
                 $accountNumber = $subTags[$accountSubtag];
-                break; // stop at the first recognized MAI block — don't let a later tag overwrite it
+                break;
+            }
+
+            // Unmapped GUID: fall back to picking the sub-tag whose value
+            // looks like a phone number or account number (digits only,
+            // optionally with a leading +, 7-20 chars). This lets unmapped
+            // banks/wallets still resolve instead of hard failing, while we
+            // gather real payloads to add exact mappings.
+            $candidate = null;
+            foreach ($subTags as $subKey => $subVal) {
+                if ($subKey === '00') {
+                    continue;
+                }
+                if (preg_match('/^\+?[0-9]{7,20}$/', $subVal)) {
+                    $candidate = $subVal;
+                    break;
+                }
+            }
+
+            if ($candidate !== null) {
+                Log::info('QR Ph: used heuristic fallback for unmapped GUID', [
+                    'guid' => $guid,
+                    'subtag_keys' => array_keys($subTags), // keys only, no values — avoids logging PII
+                ]);
+                $accountNumber = $candidate;
+                break;
             }
         }
 
-        if (empty($accountNumber) && isset($tags['62'])) {
-            // Check Tag 62 (Additional Data Field)
-            $accountNumber = $this->extractSubTag($tags['62'], '01') ?? '';
-        }
+        // NOTE: removed the tag 62 / sub-tag 01 fallback — that field is
+        // "Bill Number" per the EMVCo spec, not an account number, and
+        // trusting it risked silently misrouting a transfer.
 
         return [
             'provider' => $provider,
