@@ -140,6 +140,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('presets', [WalletController::class, 'presets']);
             Route::post('recharge', [WalletController::class, 'recharge']);
 
+            Route::post('transfer/resolve-qr', [TransferController::class, 'resolveQr']);
             Route::post('transfer', [TransferController::class, 'store']);
             Route::get('transfer/{reference}', [TransferController::class, 'status']);
         });
