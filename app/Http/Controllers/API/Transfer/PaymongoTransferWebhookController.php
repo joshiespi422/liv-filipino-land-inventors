@@ -25,31 +25,33 @@ class PaymongoTransferWebhookController extends Controller
         $payload = $request->json()->all();
         Log::info('PayMongo transfer webhook received', $payload);
 
-        $transferId = $payload['data']['attributes']['data']['id'] ?? null;
-        $status = $payload['data']['attributes']['data']['attributes']['status'] ?? null;
+        // Fallback-friendly payload parsing (covers both nested event data & direct object payloads)
+        $eventData = $payload['data']['attributes']['data'] ?? $payload['data'] ?? [];
+        $transferId = $eventData['id'] ?? null;
+        $status = $eventData['attributes']['status'] ?? $eventData['status'] ?? null;
 
         if (! $transferId || ! $status) {
-            return response('Ignored', 200);
+            return response('Ignored - Missing required attributes', 200);
         }
 
         $batchTransfer = BatchTransfer::where('paymongo_transfer_id', $transferId)->first();
 
         if (! $batchTransfer) {
-            return response('No change', 200);
+            return response('No matching transfer record', 200);
         }
 
         DB::transaction(function () use ($batchTransfer, $status, $payload) {
-            // Lock row inside transaction
+            // Lock transfer record for update to prevent race conditions
             $transfer = BatchTransfer::whereKey($batchTransfer->id)
                 ->lockForUpdate()
                 ->first();
 
+            // Idempotency check: Ignore if status is unchanged
             if (! $transfer || $transfer->status === $status) {
                 return;
             }
 
             $isFailure = in_array($status, ['failed', 'returned'], true);
-            // Protect against double refunds if TransferService already refunded synchronous failures
             $alreadyRefunded = in_array($transfer->status, ['failed', 'returned', 'refunded'], true);
 
             $transfer->update([
@@ -57,11 +59,12 @@ class PaymongoTransferWebhookController extends Controller
                 'raw_response' => array_merge($transfer->raw_response ?? [], ['webhook' => $payload]),
             ]);
 
+            // Refund wallet if transaction failed and hasn't been refunded yet
             if ($isFailure && ! $alreadyRefunded) {
                 $wallet = $transfer->wallet()->lockForUpdate()->first();
 
                 if ($wallet) {
-                    $refund = $transfer->amount + $transfer->fee;
+                    $refund = round((float) $transfer->amount + (float) $transfer->fee, 2);
                     $wallet->increment('balance', $refund);
 
                     $transfer->walletTransaction()->create([
