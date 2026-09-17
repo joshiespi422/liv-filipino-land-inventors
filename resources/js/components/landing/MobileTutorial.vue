@@ -10,6 +10,7 @@ const props = defineProps<{
 const searchQuery = ref('');
 const isVideoModalOpen = ref(false);
 const activeVideoUrl = ref<string | null>(null);
+const videoPlayerRef = ref<HTMLVideoElement | null>(null);
 
 const sampleItems: any[] = [
     {
@@ -121,7 +122,9 @@ const processedItems = computed(() => {
 const videos = computed(() => processedItems.value.filter(item => item.type === 'video'));
 
 const openVideoModal = (url?: string) => {
-    if (!url) return;
+    if (!url) {
+        return;
+    }
     
     activeVideoUrl.value = url;
     isVideoModalOpen.value = true;
@@ -129,9 +132,18 @@ const openVideoModal = (url?: string) => {
 };
 
 const closeVideoModal = () => {
-    activeVideoUrl.value = null;
+    if (videoPlayerRef.value) {
+        videoPlayerRef.value.pause();
+        videoPlayerRef.value.removeAttribute('src');
+        videoPlayerRef.value.load(); 
+    }
+
     isVideoModalOpen.value = false;
     document.body.style.overflow = '';
+    
+    setTimeout(() => {
+        activeVideoUrl.value = null;
+    }, 300);
 };
 
 onUnmounted(() => {
@@ -188,8 +200,9 @@ onUnmounted(() => {
                                     <div class="relative block aspect-video overflow-hidden rounded-xl bg-gray-200 dark:bg-gray-900 w-full mb-4 sm:mb-5">
                                         <video 
                                             class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none" 
-                                            :src="`${video.video_url}#t=0.1`" 
-                                            preload="metadata"
+                                            :src="encodeURI(video.video_url)" 
+                                            :poster="video.media_path"
+                                            preload="none"
                                             muted
                                             playsinline
                                         ></video>
@@ -246,14 +259,18 @@ onUnmounted(() => {
                         </button>
 
                         <div class="aspect-video w-full bg-black flex items-center justify-center">
+                            <!-- Fixed Modal video tag with the videoPlayerRef attached -->
                             <video 
+                                ref="videoPlayerRef"
                                 v-if="activeVideoUrl"
+                                :key="activeVideoUrl"
+                                :src="encodeURI(activeVideoUrl)"
                                 class="w-full h-full object-contain"
                                 controls 
                                 autoplay 
+                                playsinline
                                 controlsList="nodownload"
                             >
-                                <source :src="activeVideoUrl" type="video/mp4" />
                                 Your browser does not support the video tag.
                             </video>
                         </div>
