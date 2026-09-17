@@ -19,34 +19,6 @@ class TransferController extends Controller
         protected WalletService $walletService,
     ) {}
 
-    public function resolveQr(Request $request): JsonResponse
-    {
-        $request->validate([
-            'qr_payload' => [
-                'required',
-                'string',
-                'max:10000',
-            ],
-        ]);
-
-        try {
-            $result = $this->transferService->resolveQr(
-                $request->string('qr_payload')->toString()
-            );
-
-            return response()->json([
-                'success' => true,
-                'message' => 'QR code resolved successfully.',
-                'data' => $result,
-            ]);
-        } catch (DomainException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 422);
-        }
-    }
-
     public function store(TransferRequest $request): JsonResponse
     {
         try {
