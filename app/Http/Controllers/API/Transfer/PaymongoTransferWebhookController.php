@@ -32,38 +32,43 @@ class PaymongoTransferWebhookController extends Controller
             return response('Ignored', 200);
         }
 
-        $exists = BatchTransfer::where('paymongo_transfer_id', $transferId)->exists();
+        $batchTransfer = BatchTransfer::where('paymongo_transfer_id', $transferId)->first();
 
-        if (! $exists) {
+        if (! $batchTransfer) {
             return response('No change', 200);
         }
 
-        DB::transaction(function () use ($transferId, $status) {
-            $batchTransfer = BatchTransfer::where('paymongo_transfer_id', $transferId)
+        DB::transaction(function () use ($batchTransfer, $status, $payload) {
+            // Lock row inside transaction
+            $transfer = BatchTransfer::whereKey($batchTransfer->id)
                 ->lockForUpdate()
                 ->first();
 
-            if (! $batchTransfer || $batchTransfer->status === $status) {
+            if (! $transfer || $transfer->status === $status) {
                 return;
             }
 
             $isFailure = in_array($status, ['failed', 'returned'], true);
-            $alreadyFinal = in_array($batchTransfer->status, ['failed', 'returned', 'refunded'], true);
+            // Protect against double refunds if TransferService already refunded synchronous failures
+            $alreadyRefunded = in_array($transfer->status, ['failed', 'returned', 'refunded'], true);
 
-            $batchTransfer->update(['status' => $status]);
+            $transfer->update([
+                'status' => $status,
+                'raw_response' => array_merge($transfer->raw_response ?? [], ['webhook' => $payload]),
+            ]);
 
-            if ($isFailure && ! $alreadyFinal) {
-                $wallet = $batchTransfer->wallet()->lockForUpdate()->first();
+            if ($isFailure && ! $alreadyRefunded) {
+                $wallet = $transfer->wallet()->lockForUpdate()->first();
 
                 if ($wallet) {
-                    $refund = $batchTransfer->amount + $batchTransfer->fee;
+                    $refund = $transfer->amount + $transfer->fee;
                     $wallet->increment('balance', $refund);
 
-                    $batchTransfer->walletTransaction()->create([
+                    $transfer->walletTransaction()->create([
                         'wallet_id' => $wallet->id,
                         'amount' => $refund,
                         'type' => 'credit',
-                        'description' => "Refund for failed transfer {$batchTransfer->reference_number}",
+                        'description' => "Refund for failed transfer {$transfer->reference_number}",
                     ]);
                 }
             }
