@@ -22,11 +22,22 @@ class TransferRequest extends FormRequest
             'account_number' => ['required', 'string', 'max:50'],
             'purpose' => ['nullable', 'string', 'max:255'],
             'remarks' => ['nullable', 'string', 'max:255'],
-
-            // How the user proved it's really them before this transfer is sent.
             'verification_method' => ['required', Rule::in(['password', 'biometric'])],
-            'password' => ['required_if:verification_method,password', 'string'],
-            'device_id' => ['required_if:verification_method,biometric', 'string'],
+
+            // Allow conditional requirements strictly when strings are non-empty
+            'password' => ['required_if:verification_method,password', 'nullable', 'string'],
+            'device_id' => ['required_if:verification_method,biometric', 'nullable', 'string'],
+        ];
+    }
+
+    /**
+     * Custom messages for validation errors.
+     */
+    public function messages(): array
+    {
+        return [
+            'password.required_if' => 'Password is required for password verification.',
+            'device_id.required_if' => 'Device ID is required for biometric verification.',
         ];
     }
 }
