@@ -69,6 +69,7 @@ class PaymongoTransferWebhookController extends Controller
 
                     $transfer->walletTransaction()->create([
                         'wallet_id' => $wallet->id,
+                        'reference_number' => $transfer->reference_number,
                         'amount' => $refund,
                         'type' => 'credit',
                         'description' => "Refund for failed transfer {$transfer->reference_number}",
