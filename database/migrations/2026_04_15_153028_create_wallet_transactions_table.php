@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('wallet_id')->constrained()->cascadeOnDelete();
             $table->nullableMorphs('reference');
+            $table->string('reference_number')->nullable()->unique();
             $table->decimal('amount', 15, 2);
             $table->enum('type', ['deposit', 'withdrawal', 'credit', 'debit']);
             $table->string('description')->nullable();
