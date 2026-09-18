@@ -99,6 +99,7 @@ class TransferService
 
             $transfer->walletTransaction()->create([
                 'wallet_id' => $wallet->id,
+                'reference_number' => $referenceNumber,
                 'amount' => $totalDeduct,
                 'type' => 'debit',
                 'description' => "Transfer to {$data['account_name']} ({$data['account_number']})",
