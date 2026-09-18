@@ -20,11 +20,10 @@ class TransferRequest extends FormRequest
             'amount' => ['required', 'numeric', 'min:'.TransferService::MIN_TRANSFER],
             'account_name' => ['required', 'string', 'max:255'],
             'account_number' => ['required', 'string', 'max:50'],
+            'destination_bic' => ['nullable', 'string', 'max:20'],
             'purpose' => ['nullable', 'string', 'max:255'],
             'remarks' => ['nullable', 'string', 'max:255'],
             'verification_method' => ['required', Rule::in(['password', 'biometric'])],
-
-            // Allow conditional requirements strictly when strings are non-empty
             'password' => ['required_if:verification_method,password', 'nullable', 'string'],
             'device_id' => ['required_if:verification_method,biometric', 'nullable', 'string'],
         ];

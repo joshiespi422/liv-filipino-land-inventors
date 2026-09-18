@@ -48,7 +48,17 @@ class TransferService
 
         $totalDeduct = round($amount + self::TRANSFER_FEE, 2);
 
-        $bic = $this->paymongo->resolveBic($channel['search']);
+        // Prefer a BIC decoded directly from a scanned QR (QR Ph / InstaPay
+        // generic channel) over the name-based lookup, since PayMongo's
+        // receiving_institutions list has no entry literally named
+        // "InstaPay" and the search-by-name approach can never resolve
+        // the generic channel.
+        $bic = $data['destination_bic'] ?? null;
+
+        if (! $bic) {
+            $bic = $this->paymongo->resolveBic($channel['search']);
+        }
+
         if (! $bic) {
             throw new DomainException("Could not resolve routing details for {$channel['name']}. Please try again later.");
         }
