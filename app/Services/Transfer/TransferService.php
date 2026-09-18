@@ -26,6 +26,7 @@ class TransferService
         'landbank' => ['name' => 'LandBank', 'search' => 'Land Bank of the Philippines', 'provider' => 'instapay'],
         'metrobank' => ['name' => 'Metrobank', 'search' => 'Metropolitan Bank', 'provider' => 'instapay'],
         'unionbank' => ['name' => 'UnionBank', 'search' => 'Union Bank of the Philippines', 'provider' => 'instapay'],
+        'instapay' => ['name' => 'InstaPay Generic', 'search' => 'InstaPay', 'provider' => 'instapay'],
     ];
 
     public function __construct(protected PaymongoTransferService $paymongo) {}
