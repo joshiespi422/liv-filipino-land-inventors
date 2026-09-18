@@ -11,6 +11,7 @@ use App\Services\Wallet\WalletService;
 use DomainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class TransferController extends Controller
 {
@@ -21,8 +22,14 @@ class TransferController extends Controller
 
     public function store(TransferRequest $request): JsonResponse
     {
+        $validated = $request->validated();
+
+        if ($verificationError = $this->verifyTransferAuthorization($request, $validated)) {
+            return $verificationError;
+        }
+
         try {
-            $batchTransfer = $this->transferService->transfer($request->user(), $request->validated());
+            $batchTransfer = $this->transferService->transfer($request->user(), $validated);
             $wallet = $this->walletService->getUserWallet($request->user()->fresh());
 
             return response()->json([
@@ -49,5 +56,36 @@ class TransferController extends Controller
         return response()->json([
             'data' => new ApiBatchTransferResource($batchTransfer),
         ]);
+    }
+
+    private function verifyTransferAuthorization(Request $request, array $validated): ?JsonResponse
+    {
+        $user = $request->user();
+
+        if ($validated['verification_method'] === 'password') {
+            if (! Hash::check($validated['password'], $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'The password you entered is incorrect.',
+                ], 422);
+            }
+
+            return null;
+        }
+
+        // verification_method === 'biometric'
+        $device = $user->authDevices()
+            ->where('device_id', $validated['device_id'])
+            ->where('biometric_enabled', true)
+            ->first();
+
+        if (! $device) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Quick and Secure Login is not enabled on this device.',
+            ], 422);
+        }
+
+        return null;
     }
 }

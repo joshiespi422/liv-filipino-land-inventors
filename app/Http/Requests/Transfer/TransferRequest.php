@@ -22,6 +22,11 @@ class TransferRequest extends FormRequest
             'account_number' => ['required', 'string', 'max:50'],
             'purpose' => ['nullable', 'string', 'max:255'],
             'remarks' => ['nullable', 'string', 'max:255'],
+
+            // How the user proved it's really them before this transfer is sent.
+            'verification_method' => ['required', Rule::in(['password', 'biometric'])],
+            'password' => ['required_if:verification_method,password', 'string'],
+            'device_id' => ['required_if:verification_method,biometric', 'string'],
         ];
     }
 }
