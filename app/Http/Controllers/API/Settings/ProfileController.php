@@ -15,6 +15,7 @@ use App\Models\UserAuthDevice;
 use App\Services\User\ProfileService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
@@ -373,9 +374,21 @@ class ProfileController extends Controller
                 'string',
                 'max:255',
             ],
+
+            'password' => [
+                'required',
+                'string',
+            ],
         ]);
 
         $user = $request->user();
+
+        if (! Hash::check($validated['password'], $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The password you entered is incorrect.',
+            ], 422);
+        }
 
         $device = $user->authDevices()->updateOrCreate(
             [
@@ -441,6 +454,20 @@ class ProfileController extends Controller
                 'success' => false,
                 'message' => 'Unauthorized Access.',
             ], 403);
+        }
+
+        $validated = $request->validate([
+            'password' => [
+                'required',
+                'string',
+            ],
+        ]);
+
+        if (! Hash::check($validated['password'], $request->user()->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The password you entered is incorrect.',
+            ], 422);
         }
 
         $authDevice->delete();
