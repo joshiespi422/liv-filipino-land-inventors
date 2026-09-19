@@ -9,11 +9,13 @@ class TransactionFeeSeeder extends Seeder
 {
     public function run(): void
     {
-        TransactionFee::create([
-            'module' => 'Transfer',
-            'type' => 'PHP',
-            'value' => 10,
-            'minimum_fee' => 50,
-        ]);
+        TransactionFee::updateOrCreate(
+            ['module' => 'Transfer'],
+            [
+                'type' => TransactionFee::TYPE_PHP,
+                'transfer_fee' => 10,
+                'minimum_fee' => 50,
+            ],
+        );
     }
 }

@@ -12,8 +12,8 @@ return new class extends Migration
             $table->id();
             $table->string('module');
             $table->enum('type', ['Percentage', 'PHP']);
-            $table->decimal('value', 10, 4);
-            $table->decimal('minimum_fee', 10, 4)->default(0);
+            $table->decimal('transfer_fee', 10, 4);
+            $table->decimal('minimum_fee', 10, 2)->default(1);
             $table->timestamps();
             $table->unique('module');
         });
