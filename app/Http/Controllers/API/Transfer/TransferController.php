@@ -20,6 +20,26 @@ class TransferController extends Controller
         protected WalletService $walletService,
     ) {}
 
+    public function config(): JsonResponse
+    {
+        $fee = $this->transferService->getFeeConfig();
+
+        return response()->json([
+            'data' => [
+                'min_transfer' => $this->transferService->getMinTransfer(),
+                'fee' => [
+                    'type' => $fee?->type ?? 'PHP',
+                    'transfer_fee' => (float) ($fee?->transfer_fee ?? 0),
+                ],
+                'channels' => $this->transferService->getActiveChannels()->map(fn ($c) => [
+                    'id' => $c->code,
+                    'name' => $c->name,
+                    'category' => $c->category,
+                ])->values(),
+            ],
+        ]);
+    }
+
     public function store(TransferRequest $request): JsonResponse
     {
         $validated = $request->validated();
