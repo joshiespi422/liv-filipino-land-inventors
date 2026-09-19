@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\Transfer;
 
 use App\Http\Controllers\Controller;
 use App\Models\BatchTransfer;
+use App\Models\TransactionChannel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -67,11 +68,20 @@ class PaymongoTransferWebhookController extends Controller
                     $refund = round((float) $transfer->amount + (float) $transfer->fee, 2);
                     $wallet->increment('balance', $refund);
 
+                    $channelName = TransactionChannel::where('code', $transfer->channel)->value('name')
+                        ?? $transfer->channel;
+
+                    // "-RF" keeps the reference unique (wallet_transactions.reference_number is unique)
                     $transfer->walletTransaction()->create([
                         'wallet_id' => $wallet->id,
-                        'reference_number' => $transfer->reference_number,
-                        'amount' => $refund,
+                        'reference_number' => $transfer->reference_number.'-RF',
                         'type' => 'credit',
+                        'amount' => (float) $transfer->amount,
+                        'transfer_fee' => (float) $transfer->fee,
+                        'from_name' => $wallet->user?->name,
+                        'to_account_name' => $transfer->destination_account_name,
+                        'to_account_number' => $transfer->destination_account_number,
+                        'to_provider' => $channelName,
                         'description' => "Refund for failed transfer {$transfer->reference_number}",
                     ]);
                 }
