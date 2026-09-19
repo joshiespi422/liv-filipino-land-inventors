@@ -141,6 +141,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('recharge', [WalletController::class, 'recharge']);
 
             Route::post('transfer', [TransferController::class, 'store']);
+            Route::get('transfer/config', [TransferController::class, 'config']);
             Route::get('transfer/{reference}', [TransferController::class, 'status']);
         });
 
