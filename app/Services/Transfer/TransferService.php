@@ -3,68 +3,141 @@
 namespace App\Services\Transfer;
 
 use App\Models\BatchTransfer;
+use App\Models\TransactionChannel;
+use App\Models\TransactionFee;
 use App\Models\User;
 use App\Models\Wallet;
 use DomainException;
+use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class TransferService
 {
-    public const TRANSFER_FEE = 0.00;
+    public const FEE_MODULE = 'Transfer';
 
-    public const MIN_TRANSFER = 1.00;
-
-    public const CHANNELS = [
-        'gcash' => ['name' => 'GCash', 'search' => 'G-Xchange'],
-        'maya' => ['name' => 'Maya', 'search' => 'Maya Philippines'],
-        'aub' => ['name' => 'AUB', 'search' => 'Asia United Bank'],
-        'bdo' => ['name' => 'BDO Unibank', 'search' => 'BDO Unibank'],
-        'bpi' => ['name' => 'BPI', 'search' => 'Bank of the Philippine Islands'],
-        'landbank' => ['name' => 'LandBank', 'search' => 'Land Bank of the Philippines'],
-        'metrobank' => ['name' => 'Metrobank', 'search' => 'Metropolitan Bank'],
-        'unionbank' => ['name' => 'UnionBank', 'search' => 'Union Bank of the Philippines'],
-    ];
+    // Used only when no row exists in transaction_fees
+    public const FALLBACK_MIN_TRANSFER = 1.00;
 
     public function __construct(protected PaymongoTransferService $paymongo) {}
+
+    /* ---------- Dynamic config ---------- */
+
+    public function getFeeConfig(): ?TransactionFee
+    {
+        return TransactionFee::forModule(self::FEE_MODULE);
+    }
+
+    public function getMinTransfer(): float
+    {
+        $min = (float) ($this->getFeeConfig()?->minimum_fee ?? 0);
+
+        return $min > 0 ? $min : self::FALLBACK_MIN_TRANSFER;
+    }
+
+    public function calculateFee(float $amount): float
+    {
+        return $this->getFeeConfig()?->calculate($amount) ?? 0.00;
+    }
+
+    public function getActiveChannels(): Collection
+    {
+        return TransactionChannel::active()->orderBy('id')->get();
+    }
+
+    public function findActiveChannel(string $code): ?TransactionChannel
+    {
+        return TransactionChannel::active()->where('code', $code)->first();
+    }
+
+    /* ---------- Transfer ---------- */
 
     public function transfer(User $user, array $data): BatchTransfer
     {
         $channelId = $data['channel_id'];
-        $channel = self::CHANNELS[$channelId] ?? null;
+        $channel = $this->findActiveChannel($channelId);
 
         if (! $channel) {
-            throw new DomainException('Unsupported destination channel.');
+            throw new DomainException('Unsupported or inactive destination channel.');
         }
 
         $amount = round((float) $data['amount'], 2);
-        $totalDeduct = round($amount + self::TRANSFER_FEE, 2);
+        $minTransfer = $this->getMinTransfer();
 
-        // Pre-check lock & balance before making outbound API calls
-        $wallet = $user->wallet;
-        if (! $wallet) {
-            throw new DomainException('Wallet not found.');
+        if ($amount < $minTransfer) {
+            throw new DomainException('The minimum transfer amount is ₱'.number_format($minTransfer, 2));
         }
 
-        if ((float) $wallet->balance < $totalDeduct) {
-            throw new DomainException('Insufficient wallet balance.');
-        }
+        $fee = $this->calculateFee($amount);
+        $totalDeduct = round($amount + $fee, 2);
+        $bic = $data['destination_bic'] ?? null;
 
-        $bic = $this->paymongo->resolveBic($channel['search']);
         if (! $bic) {
-            throw new DomainException("Could not resolve routing details for {$channel['name']}. Please try again later.");
+            $bic = $this->paymongo->resolveBic($channel->search ?? $channel->name);
+        }
+
+        if (! $bic) {
+            throw new DomainException("Could not resolve routing details for {$channel->name}. Please try again later.");
         }
 
         $referenceNumber = 'WD-'.Str::upper(Str::random(10));
         $sourceAccount = config('paymongo.source_account');
+        $provider = $channel->provider ?: 'instapay';
 
+        // 1. Lock Wallet and Deduct Funds
+        $batchTransfer = DB::transaction(function () use ($user, $data, $channel, $channelId, $bic, $amount, $fee, $totalDeduct, $sourceAccount, $referenceNumber, $provider) {
+            $wallet = Wallet::where('user_id', $user->id)->lockForUpdate()->first();
+
+            if (! $wallet) {
+                throw new DomainException('Wallet not found.');
+            }
+
+            if ((float) $wallet->balance < $totalDeduct) {
+                throw new DomainException('Insufficient wallet balance.');
+            }
+
+            $wallet->decrement('balance', $totalDeduct);
+
+            $transfer = BatchTransfer::create([
+                'wallet_id' => $wallet->id,
+                'source_account_number' => $sourceAccount['number'] ?? null,
+                'destination_account_number' => $data['account_number'],
+                'destination_account_name' => $data['account_name'],
+                'destination_account_bic' => $bic,
+                'channel' => $channelId,
+                'amount' => $amount,
+                'fee' => $fee,
+                'provider' => $provider,
+                'purpose' => $data['purpose'] ?? null,
+                'remarks' => $data['remarks'] ?? null,
+                'reference_number' => $referenceNumber,
+                'status' => 'pending',
+            ]);
+
+            $transfer->walletTransaction()->create([
+                'wallet_id' => $wallet->id,
+                'reference_number' => $referenceNumber,
+                'type' => 'debit',
+                'amount' => $amount,               // transfer amount only
+                'transfer_fee' => $fee,            // fee charged
+                'from_name' => $user->name,
+                'to_account_name' => $data['account_name'],
+                'to_account_number' => $data['account_number'],
+                'to_provider' => $channel->name,   // use $provider for the raw rail
+            ]);
+
+            return $transfer;
+        });
+
+        // 2. Dispatch PayMongo API (only the amount is sent; the fee stays with you)
         $payload = [
-            'provider' => 'instapay',
+            'provider' => $provider,
             'amount' => (int) round($amount * 100),
             'currency' => 'PHP',
             'purpose' => $data['purpose'] ?? 'Disbursement',
-            'description' => $data['remarks'] ?? "Wallet withdrawal to {$channel['name']}",
+            'description' => $data['remarks'] ?? "Wallet withdrawal to {$channel->name}",
             'reference_number' => $referenceNumber,
             'source_account' => [
                 'number' => $sourceAccount['number'] ?? '',
@@ -82,76 +155,87 @@ class TransferService
             $payload['callback_url'] = $callbackUrl;
         }
 
-        $result = $this->paymongo->createBatchTransfer($payload);
-        $transferData = $result['body']['data']['transfers'][0] ?? null;
+        try {
+            $result = $this->paymongo->createBatchTransfer($payload);
+            $transferData = $result['body']['data']['transfers'][0] ?? null;
 
-        $baseAttributes = [
-            'wallet_id' => $wallet->id,
-            'source_account_number' => $sourceAccount['number'] ?? null,
-            'destination_account_number' => $data['account_number'],
-            'destination_account_name' => $data['account_name'],
-            'destination_account_bic' => $bic,
-            'channel' => $channelId,
-            'amount' => $amount,
-            'fee' => self::TRANSFER_FEE,
-            'provider' => 'instapay',
-            'purpose' => $data['purpose'] ?? null,
-            'remarks' => $data['remarks'] ?? null,
-            'reference_number' => $referenceNumber,
-            'raw_response' => $result['body'] ?? [],
-        ];
+            // Handled HTTP non-200 or payload error response from PayMongo
+            if (! $result['ok'] || ! $transferData) {
+                $errorMessage = $result['body']['errors'][0]['detail'] ?? 'Transfer could not be processed.';
+                $failureCode = $result['body']['errors'][0]['code'] ?? 'api_error';
 
-        // Handle API Failure
-        if (! $result['ok'] || ! $transferData) {
-            $errorMessage = $result['body']['errors'][0]['detail'] ?? 'Transfer could not be processed. Please try again.';
-            $failureCode = $result['body']['errors'][0]['code'] ?? 'api_error';
+                $this->refundTransfer($batchTransfer, $failureCode, $result['body'] ?? []);
 
-            BatchTransfer::create($baseAttributes + [
-                'status' => 'failed',
-                'failure_code' => $failureCode,
-            ]);
-
-            throw new DomainException($errorMessage);
-        }
-
-        // Handle Success inside Transaction
-        return DB::transaction(function () use ($wallet, $totalDeduct, $baseAttributes, $result, $transferData, $channel, $data) {
-            // Actually lock the row for update — wallet->fresh() does NOT lock.
-            $lockedWallet = Wallet::whereKey($wallet->id)->lockForUpdate()->first();
-
-            if (! $lockedWallet || (float) $lockedWallet->balance < $totalDeduct) {
-                $batchTransfer = BatchTransfer::create($baseAttributes + [
-                    'paymongo_batch_id' => $result['body']['data']['id'] ?? null,
-                    'paymongo_transfer_id' => $transferData['id'] ?? null,
-                    'status' => $transferData['status'] ?? 'pending',
-                    'failure_code' => 'wallet_balance_mismatch',
-                ]);
-
-                Log::critical('PayMongo transfer succeeded but wallet balance could not be reconciled.', [
-                    'batch_transfer_id' => $batchTransfer->id,
-                    'wallet_id' => $wallet->id,
-                    'total_deduct' => $totalDeduct,
-                ]);
-
-                return $batchTransfer->fresh();
+                throw new DomainException($errorMessage);
             }
 
-            $batchTransfer = BatchTransfer::create($baseAttributes + [
+            $batchTransfer->update([
                 'paymongo_batch_id' => $result['body']['data']['id'] ?? null,
                 'paymongo_transfer_id' => $transferData['id'] ?? null,
                 'status' => $transferData['status'] ?? 'pending',
-            ]);
-
-            $lockedWallet->decrement('balance', $totalDeduct);
-
-            $batchTransfer->walletTransaction()->create([
-                'wallet_id' => $lockedWallet->id,
-                'amount' => $totalDeduct,
-                'type' => 'debit',
-                'description' => "Transfer to {$channel['name']} ({$data['account_number']})",
+                'raw_response' => $result['body'] ?? [],
             ]);
 
             return $batchTransfer->fresh();
+
+        } catch (Exception $e) {
+            if ($e instanceof DomainException) {
+                throw $e;
+            }
+
+            // Connection or timeout error: DO NOT refund immediately to avoid double spend if processed later.
+            Log::error('Transfer API network error', [
+                'reference' => $referenceNumber,
+                'exception' => $e->getMessage(),
+            ]);
+
+            $batchTransfer->update([
+                'status' => 'processing',
+                'raw_response' => ['system_error' => $e->getMessage()],
+            ]);
+
+            throw new DomainException('Transfer request sent but confirmation is delayed. Check your transaction history shortly.');
+        }
+    }
+
+    public function refundTransfer(BatchTransfer $transfer, string $failureCode, array $rawResponse = []): void
+    {
+        DB::transaction(function () use ($transfer, $failureCode, $rawResponse) {
+            $transfer = BatchTransfer::whereKey($transfer->id)->lockForUpdate()->first();
+
+            if (in_array($transfer->status, ['failed', 'returned', 'refunded'], true)) {
+                return;
+            }
+
+            $wallet = Wallet::whereKey($transfer->wallet_id)->lockForUpdate()->first();
+
+            if ($wallet) {
+                $refundAmount = round((float) $transfer->amount + (float) $transfer->fee, 2);
+                $wallet->increment('balance', $refundAmount);
+
+                $channelName = TransactionChannel::where('code', $transfer->channel)->value('name')
+                    ?? $transfer->channel;
+
+                // "-RF" keeps the reference unique (wallet_transactions.reference_number is unique)
+                $transfer->walletTransaction()->create([
+                    'wallet_id' => $wallet->id,
+                    'reference_number' => $transfer->reference_number.'-RF',
+                    'type' => 'credit',
+                    'amount' => (float) $transfer->amount,
+                    'transfer_fee' => (float) $transfer->fee,
+                    'from_name' => $wallet->user?->name,
+                    'to_account_name' => $transfer->destination_account_name,
+                    'to_account_number' => $transfer->destination_account_number,
+                    'to_provider' => $channelName,
+                    'description' => "Refund: Failed transfer ({$transfer->reference_number})",
+                ]);
+            }
+
+            $transfer->update([
+                'status' => 'failed',
+                'failure_code' => $failureCode,
+                'raw_response' => array_merge($transfer->raw_response ?? [], $rawResponse),
+            ]);
         });
     }
 }

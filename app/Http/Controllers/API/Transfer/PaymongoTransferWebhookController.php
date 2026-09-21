@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\Transfer;
 
 use App\Http\Controllers\Controller;
 use App\Models\BatchTransfer;
+use App\Models\TransactionChannel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -25,45 +26,63 @@ class PaymongoTransferWebhookController extends Controller
         $payload = $request->json()->all();
         Log::info('PayMongo transfer webhook received', $payload);
 
-        $transferId = $payload['data']['attributes']['data']['id'] ?? null;
-        $status = $payload['data']['attributes']['data']['attributes']['status'] ?? null;
+        // Fallback-friendly payload parsing (covers both nested event data & direct object payloads)
+        $eventData = $payload['data']['attributes']['data'] ?? $payload['data'] ?? [];
+        $transferId = $eventData['id'] ?? null;
+        $status = $eventData['attributes']['status'] ?? $eventData['status'] ?? null;
 
         if (! $transferId || ! $status) {
-            return response('Ignored', 200);
+            return response('Ignored - Missing required attributes', 200);
         }
 
-        $exists = BatchTransfer::where('paymongo_transfer_id', $transferId)->exists();
+        $batchTransfer = BatchTransfer::where('paymongo_transfer_id', $transferId)->first();
 
-        if (! $exists) {
-            return response('No change', 200);
+        if (! $batchTransfer) {
+            return response('No matching transfer record', 200);
         }
 
-        DB::transaction(function () use ($transferId, $status) {
-            $batchTransfer = BatchTransfer::where('paymongo_transfer_id', $transferId)
+        DB::transaction(function () use ($batchTransfer, $status, $payload) {
+            // Lock transfer record for update to prevent race conditions
+            $transfer = BatchTransfer::whereKey($batchTransfer->id)
                 ->lockForUpdate()
                 ->first();
 
-            if (! $batchTransfer || $batchTransfer->status === $status) {
+            // Idempotency check: Ignore if status is unchanged
+            if (! $transfer || $transfer->status === $status) {
                 return;
             }
 
             $isFailure = in_array($status, ['failed', 'returned'], true);
-            $alreadyFinal = in_array($batchTransfer->status, ['failed', 'returned', 'refunded'], true);
+            $alreadyRefunded = in_array($transfer->status, ['failed', 'returned', 'refunded'], true);
 
-            $batchTransfer->update(['status' => $status]);
+            $transfer->update([
+                'status' => $status,
+                'raw_response' => array_merge($transfer->raw_response ?? [], ['webhook' => $payload]),
+            ]);
 
-            if ($isFailure && ! $alreadyFinal) {
-                $wallet = $batchTransfer->wallet()->lockForUpdate()->first();
+            // Refund wallet if transaction failed and hasn't been refunded yet
+            if ($isFailure && ! $alreadyRefunded) {
+                $wallet = $transfer->wallet()->lockForUpdate()->first();
 
                 if ($wallet) {
-                    $refund = $batchTransfer->amount + $batchTransfer->fee;
+                    $refund = round((float) $transfer->amount + (float) $transfer->fee, 2);
                     $wallet->increment('balance', $refund);
 
-                    $batchTransfer->walletTransaction()->create([
+                    $channelName = TransactionChannel::where('code', $transfer->channel)->value('name')
+                        ?? $transfer->channel;
+
+                    // "-RF" keeps the reference unique (wallet_transactions.reference_number is unique)
+                    $transfer->walletTransaction()->create([
                         'wallet_id' => $wallet->id,
-                        'amount' => $refund,
+                        'reference_number' => $transfer->reference_number.'-RF',
                         'type' => 'credit',
-                        'description' => "Refund for failed transfer {$batchTransfer->reference_number}",
+                        'amount' => (float) $transfer->amount,
+                        'transfer_fee' => (float) $transfer->fee,
+                        'from_name' => $wallet->user?->name,
+                        'to_account_name' => $transfer->destination_account_name,
+                        'to_account_number' => $transfer->destination_account_number,
+                        'to_provider' => $channelName,
+                        'description' => "Refund for failed transfer {$transfer->reference_number}",
                     ]);
                 }
             }

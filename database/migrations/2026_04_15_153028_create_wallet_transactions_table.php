@@ -15,8 +15,19 @@ return new class extends Migration
             $table->id();
             $table->foreignId('wallet_id')->constrained()->cascadeOnDelete();
             $table->nullableMorphs('reference');
-            $table->decimal('amount', 15, 2);
+            $table->string('reference_number')->nullable()->unique();
             $table->enum('type', ['deposit', 'withdrawal', 'credit', 'debit']);
+
+            // Transfer amount and fee (total deducted = amount + transfer_fee)
+            $table->decimal('amount', 15, 2);
+            $table->decimal('transfer_fee', 15, 2)->default(0);
+
+            // From / To details (used by transfers)
+            $table->string('from_name')->nullable();
+            $table->string('to_account_name')->nullable();
+            $table->string('to_account_number', 50)->nullable();
+            $table->string('to_provider')->nullable();
+
             $table->string('description')->nullable();
             $table->timestamps();
         });
