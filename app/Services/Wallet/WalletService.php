@@ -4,6 +4,7 @@ namespace App\Services\Wallet;
 
 use App\Models\PaymentMethod;
 use App\Models\Status;
+use App\Models\TransactionFee;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Services\Payments\PaymentGatewayFactory;
@@ -14,6 +15,32 @@ use Illuminate\Support\Facades\DB;
 class WalletService
 {
     public const PRESET_AMOUNTS = [10000, 20000, 50000, 100000, 200000, 500000];
+
+    public const FEE_MODULE = 'Load';
+
+    public const LOAD_LABEL = 'Load Wallet';
+
+    // Used only when no row exists in transaction_fees for module "Load"
+    public const FALLBACK_MIN_RECHARGE = 100.00;
+
+    /* ---------- Dynamic config ---------- */
+
+    public function getFeeConfig(): ?TransactionFee
+    {
+        return TransactionFee::forModule(self::FEE_MODULE);
+    }
+
+    public function getMinRecharge(): float
+    {
+        $min = (float) ($this->getFeeConfig()?->minimum_fee ?? 0);
+
+        return $min > 0 ? $min : self::FALLBACK_MIN_RECHARGE;
+    }
+
+    public function calculateFee(float $amount): float
+    {
+        return $this->getFeeConfig()?->calculate($amount) ?? 0.00;
+    }
 
     /**
      * Get or create the user's wallet.
@@ -50,9 +77,21 @@ class WalletService
     public function recharge(User $user, array $data): array
     {
         $wallet = $this->getUserWallet($user);
-        $amount = $data['amount']; // in cents
 
-        return DB::transaction(function () use ($wallet, $data, $amount) {
+        $amount = (float) $data['amount']; // cents — net amount to be credited to the wallet
+        $amountPesos = round($amount / 100, 2);
+
+        $minRecharge = $this->getMinRecharge();
+
+        if ($amountPesos < $minRecharge) {
+            throw new DomainException('The minimum load amount is ₱'.number_format($minRecharge, 2));
+        }
+
+        $fee = $this->calculateFee($amountPesos); // pesos
+        $feeCents = (int) round($fee * 100);
+        $totalChargeCents = (int) round($amount + $feeCents);
+
+        return DB::transaction(function () use ($wallet, $data, $amount, $feeCents, $totalChargeCents) {
             // Clean old failed/cancelled attempts
             $wallet->payments()
                 ->whereIn('status_id', [Status::FAILED, Status::CANCELLED])
@@ -80,7 +119,8 @@ class WalletService
                 $data
             );
 
-            $intentResponse = $service->createPaymentIntent($amount / 100);
+            // Charge amount + fee via the gateway; only $amount ends up credited to the wallet
+            $intentResponse = $service->createPaymentIntent($totalChargeCents / 100);
 
             $intentId = data_get($intentResponse, 'data.id')
                 ?? throw new DomainException('Failed to create payment intent.');
@@ -95,6 +135,7 @@ class WalletService
                 'status_id' => Status::PENDING,
                 'payment_date' => now()->toDateString(),
                 'amount' => $amount,
+                'fee' => $feeCents,
                 'gateway' => $gateway,
                 'gateway_payment_intent_id' => $intentId,
                 'gateway_response' => $attached,
