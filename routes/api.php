@@ -135,6 +135,7 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('role.api:'.UserType::MEMBER)
         ->group(function () {
             Route::get('/', [WalletController::class, 'index']);
+            Route::get('load/config', [WalletController::class, 'config']);
             Route::get('/update', [WalletController::class, 'update']);
             Route::get('transaction', [WalletController::class, 'transaction']);
             Route::get('presets', [WalletController::class, 'presets']);
