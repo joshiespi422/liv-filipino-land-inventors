@@ -2,7 +2,6 @@
 
 namespace App\Services\Wallet;
 
-use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\Status;
 use App\Models\User;
@@ -59,23 +58,37 @@ class WalletService
                 ->whereIn('status_id', [Status::FAILED, Status::CANCELLED])
                 ->update(['status_id' => Status::ARCHIVED]);
 
-            // Block in-flight payment
-            if ($wallet->payments()->where('status_id', Status::PENDING)->exists()) {
-                throw new DomainException('A pending recharge already exists.');
+            // Allow only one recharge request per minute
+            $lastRecharge = $wallet->payments()
+                ->latest('created_at')
+                ->first();
+
+            if ($lastRecharge && $lastRecharge->created_at->gt(now()->subMinute())) {
+                throw new DomainException(
+                    'Please wait 1 minute before requesting another recharge.'
+                );
             }
 
             $method = PaymentMethod::findOrFail($data['payment_method_id']);
+
             $gateway = PaymentGatewayFactory::resolveGateway($method);
             $service = PaymentGatewayFactory::make($gateway);
 
-            $gatewayMethodId = $this->resolveGatewayMethodId($service, $method, $data);
+            $gatewayMethodId = $this->resolveGatewayMethodId(
+                $service,
+                $method,
+                $data
+            );
 
             $intentResponse = $service->createPaymentIntent($amount / 100);
 
             $intentId = data_get($intentResponse, 'data.id')
                 ?? throw new DomainException('Failed to create payment intent.');
 
-            $attached = $service->attach($intentId, $gatewayMethodId);
+            $attached = $service->attach(
+                $intentId,
+                $gatewayMethodId
+            );
 
             $payment = $wallet->payments()->create([
                 'payment_method_id' => $data['payment_method_id'],
