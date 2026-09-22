@@ -86,7 +86,7 @@ class TransferService
         $sourceAccount = config('paymongo.source_account');
         $provider = $channel->provider ?: 'instapay';
 
-        // 1. Lock Wallet and Deduct Funds
+        // 1. Lock Wallet, verify integrity, and Deduct Funds
         $batchTransfer = DB::transaction(function () use ($user, $data, $channel, $channelId, $bic, $amount, $fee, $totalDeduct, $sourceAccount, $referenceNumber, $provider) {
             $wallet = Wallet::where('user_id', $user->id)->lockForUpdate()->first();
 
@@ -94,11 +94,21 @@ class TransferService
                 throw new DomainException('Wallet not found.');
             }
 
+            // Re-check under the lock: the controller's check happened
+            // before this row was locked, so re-verify to close the gap.
+            if ($wallet->isTampered()) {
+                throw new DomainException('Your wallet balance integrity check failed. Transactions are restricted.');
+            }
+
             if ((float) $wallet->balance < $totalDeduct) {
                 throw new DomainException('Insufficient wallet balance.');
             }
 
-            $wallet->decrement('balance', $totalDeduct);
+            // decrement() bypasses Eloquent's saving event, so the signature
+            // would go stale immediately after a legitimate debit. Use
+            // assignment + save() instead so it recalculates correctly.
+            $wallet->balance = (float) $wallet->balance - $totalDeduct;
+            $wallet->save();
 
             $transfer = BatchTransfer::create([
                 'wallet_id' => $wallet->id,
@@ -210,25 +220,36 @@ class TransferService
             $wallet = Wallet::whereKey($transfer->wallet_id)->lockForUpdate()->first();
 
             if ($wallet) {
-                $refundAmount = round((float) $transfer->amount + (float) $transfer->fee, 2);
-                $wallet->increment('balance', $refundAmount);
+                if ($wallet->isTampered()) {
+                    // Don't auto-credit a wallet that's already inconsistent —
+                    // flag for manual review instead of silently re-signing it.
+                    Log::warning('Refund blocked: wallet failed integrity check.', [
+                        'wallet_id' => $wallet->id,
+                        'transfer_reference' => $transfer->reference_number,
+                    ]);
+                } else {
+                    $refundAmount = round((float) $transfer->amount + (float) $transfer->fee, 2);
 
-                $channelName = TransactionChannel::where('code', $transfer->channel)->value('name')
-                    ?? $transfer->channel;
+                    $wallet->balance = (float) $wallet->balance + $refundAmount;
+                    $wallet->save();
 
-                // "-RF" keeps the reference unique (wallet_transactions.reference_number is unique)
-                $transfer->walletTransaction()->create([
-                    'wallet_id' => $wallet->id,
-                    'reference_number' => $transfer->reference_number.'-RF',
-                    'type' => 'credit',
-                    'amount' => (float) $transfer->amount,
-                    'transfer_fee' => (float) $transfer->fee,
-                    'from_name' => $wallet->user?->name,
-                    'to_account_name' => $transfer->destination_account_name,
-                    'to_account_number' => $transfer->destination_account_number,
-                    'to_provider' => $channelName,
-                    'description' => "Refund: Failed transfer ({$transfer->reference_number})",
-                ]);
+                    $channelName = TransactionChannel::where('code', $transfer->channel)->value('name')
+                        ?? $transfer->channel;
+
+                    // "-RF" keeps the reference unique (wallet_transactions.reference_number is unique)
+                    $transfer->walletTransaction()->create([
+                        'wallet_id' => $wallet->id,
+                        'reference_number' => $transfer->reference_number.'-RF',
+                        'type' => 'credit',
+                        'amount' => (float) $transfer->amount,
+                        'transfer_fee' => (float) $transfer->fee,
+                        'from_name' => $wallet->user?->name,
+                        'to_account_name' => $transfer->destination_account_name,
+                        'to_account_number' => $transfer->destination_account_number,
+                        'to_provider' => $channelName,
+                        'description' => "Refund: Failed transfer ({$transfer->reference_number})",
+                    ]);
+                }
             }
 
             $transfer->update([
