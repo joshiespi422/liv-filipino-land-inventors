@@ -21,8 +21,20 @@ class WalletService
      */
     public function getUserWallet(User $user): Wallet
     {
-        // Ensures a wallet exists for the user (firstOrCreate pattern)
-        return $user->wallet ?: $user->wallet()->create(['balance' => 0]);
+        $wallet = Wallet::firstOrCreate(
+            ['user_id' => $user->id],
+            [
+                'balance' => 0.00,
+                'show' => true,
+            ]
+        );
+
+        if ($wallet->wasRecentlyCreated || is_null($wallet->signature)) {
+            $wallet->signature = $wallet->generateSignature();
+            $wallet->save();
+        }
+
+        return $wallet;
     }
 
     /**
