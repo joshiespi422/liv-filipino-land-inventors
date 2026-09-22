@@ -7,9 +7,8 @@ use App\Services\Payments\Gateways\PayMongoService;
 
 class PaymentGatewayFactory
 {
-    /**
-     * Create a new class instance.
-     */
+    public const SUPPORTED_GATEWAYS = ['paymongo'];
+
     public static function make(string $gateway)
     {
         return match ($gateway) {

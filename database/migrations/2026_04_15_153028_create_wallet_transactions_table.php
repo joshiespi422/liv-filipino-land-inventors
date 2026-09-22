@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -31,6 +32,9 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->timestamps();
         });
+
+        DB::statement('ALTER TABLE wallet_transactions ADD CONSTRAINT chk_wallet_txn_amount_nonnegative CHECK (amount >= 0)');
+        DB::statement('ALTER TABLE wallet_transactions ADD CONSTRAINT chk_wallet_txn_fee_nonnegative CHECK (transfer_fee >= 0)');
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace App\Services\Payments\Contracts;
 
+use Illuminate\Http\Request;
+
 interface PaymentGatewayInterface
 {
     public function createPaymentIntent(float $amount, array $options = []): array;
@@ -13,4 +15,6 @@ interface PaymentGatewayInterface
     public function getNextAction(array $response): array;
 
     public function parseWebhook(array $payload): array;
+
+    public function verifyWebhookSignature(Request $request): bool;
 }

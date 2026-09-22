@@ -2,16 +2,14 @@
 
 namespace App\Services\Payments\Gateways;
 
-use App\Models\Status;
 use App\Services\Payments\Contracts\PaymentGatewayInterface;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 class PayMongoService implements PaymentGatewayInterface
 {
-    /**
-     * Create a new class instance.
-     */
     protected string $baseUrl;
+
     protected string $secretKey;
 
     public function __construct()
@@ -23,18 +21,12 @@ class PayMongoService implements PaymentGatewayInterface
     protected function headers(): array
     {
         return [
-            'Authorization' => 'Basic ' . base64_encode($this->secretKey . ':'),
+            'Authorization' => 'Basic '.base64_encode($this->secretKey.':'),
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
         ];
     }
 
-    /**
-     * Create Payment Intent
-     *
-     * @param float $amount Amount in PHP
-     * @return array
-     */
     public function createPaymentIntent(
         float $amount,
         array $options = []
@@ -42,7 +34,13 @@ class PayMongoService implements PaymentGatewayInterface
         $threeDS = $options['three_d_secure'] ?? 'automatic';
         $allowedMethods = ['card', 'paymaya', 'qrph', 'billease', 'grab_pay', 'dob'];
 
-        return Http::withHeaders($this->headers())
+        $headers = $this->headers();
+
+        if (! empty($options['idempotency_key'])) {
+            $headers['Idempotency-Key'] = $options['idempotency_key'];
+        }
+
+        return Http::withHeaders($headers)
             ->post("{$this->baseUrl}/payment_intents", [
                 'data' => [
                     'attributes' => [
@@ -61,12 +59,6 @@ class PayMongoService implements PaymentGatewayInterface
             ->json();
     }
 
-    /**
-     * Create Payment Method
-     *
-     * @param string $type
-     * @return array
-     */
     public function createPaymentMethod(string $type): array
     {
         return Http::withHeaders($this->headers())
@@ -80,13 +72,6 @@ class PayMongoService implements PaymentGatewayInterface
             ->json();
     }
 
-    /**
-     * Attach Payment Method to Intent
-     *
-     * @param string $intentId
-     * @param string $methodId
-     * @return array
-     */
     public function attach(string $intentId, string $methodId): array
     {
         return Http::withHeaders($this->headers())
@@ -94,19 +79,13 @@ class PayMongoService implements PaymentGatewayInterface
                 'data' => [
                     'attributes' => [
                         'payment_method' => $methodId,
-                        'return_url' => config('app.url') . 'api/payment/success',
+                        'return_url' => config('app.url').'api/payment/success',
                     ],
                 ],
             ])
             ->json();
     }
 
-    /**
-     * Extract the next action details from the PayMongo response after attaching a payment method
-     *
-     * @param array $response
-     * @return array{qr_code_url: mixed, redirect_url: mixed, status: mixed, type: mixed}
-     */
     public function getNextAction(array $response): array
     {
         $attributes = data_get($response, 'data.attributes', []);
@@ -125,12 +104,6 @@ class PayMongoService implements PaymentGatewayInterface
         ];
     }
 
-    /**
-     * Parse the webhook payload from PayMongo and return the relevant information
-     *
-     * @param array $payload
-     * @return array{event: mixed, intent_id: null, status_id: null|array{event: string, gateway_payment_id: mixed, intent_id: mixed, status_id: int}}
-     */
     public function parseWebhook(array $payload): array
     {
         $eventType = data_get($payload, 'data.attributes.type');
@@ -141,7 +114,39 @@ class PayMongoService implements PaymentGatewayInterface
             'intent_id' => $attr['payment_intent_id'] ?? null,
             'status' => $attr['status'] ?? null,
             'gateway_payment_id' => data_get($payload, 'data.attributes.data.id'),
+            'amount' => $attr['amount'] ?? null,
             'event' => $eventType,
         ];
+    }
+
+    public function verifyWebhookSignature(Request $request): bool
+    {
+        $secret = config('services.paymongo.webhook_secret');
+        $header = $request->header('Paymongo-Signature');
+
+        if (! $secret || ! $header) {
+            return false;
+        }
+
+        $parts = [];
+        foreach (explode(',', $header) as $pair) {
+            [$key, $value] = array_pad(explode('=', $pair, 2), 2, null);
+            $parts[trim((string) $key)] = $value !== null ? trim($value) : null;
+        }
+
+        if (empty($parts['t'])) {
+            return false;
+        }
+
+        if (abs(time() - (int) $parts['t']) > 300) {
+            return false;
+        }
+
+        $expected = hash_hmac('sha256', "{$parts['t']}.{$request->getContent()}", $secret);
+
+        $liveOrTest = app()->environment('production') ? 'li' : 'te';
+        $given = $parts[$liveOrTest] ?? null;
+
+        return $given && hash_equals($expected, $given);
     }
 }
