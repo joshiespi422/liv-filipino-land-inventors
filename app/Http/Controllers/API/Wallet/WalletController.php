@@ -119,4 +119,19 @@ class WalletController extends Controller
             ], 422);
         }
     }
+
+    public function config(): JsonResponse
+    {
+        $fee = $this->walletService->getFeeConfig();
+
+        return response()->json([
+            'data' => [
+                'min_recharge' => $this->walletService->getMinRecharge(),
+                'fee' => [
+                    'type' => $fee?->type ?? 'PHP',
+                    'fee' => (float) ($fee?->transfer_fee ?? 0),
+                ],
+            ],
+        ]);
+    }
 }
