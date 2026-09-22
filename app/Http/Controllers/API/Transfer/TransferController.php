@@ -43,14 +43,25 @@ class TransferController extends Controller
     public function store(TransferRequest $request): JsonResponse
     {
         $validated = $request->validated();
+        $user = $request->user();
+
+        $wallet = $this->walletService->getUserWallet($user);
+
+        if ($wallet->isTampered()) {
+            return response()->json([
+                'success' => false,
+                'is_tampered' => true,
+                'message' => 'Your wallet balance integrity check failed. Transactions are restricted.',
+            ], 422);
+        }
 
         if ($verificationError = $this->verifyTransferAuthorization($request, $validated)) {
             return $verificationError;
         }
 
         try {
-            $batchTransfer = $this->transferService->transfer($request->user(), $validated);
-            $wallet = $this->walletService->getUserWallet($request->user()->fresh());
+            $batchTransfer = $this->transferService->transfer($user, $validated);
+            $wallet = $this->walletService->getUserWallet($user->fresh());
 
             return response()->json([
                 'success' => true,
