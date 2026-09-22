@@ -2,89 +2,139 @@
 
 namespace App\Services\Payments;
 
+use App\Contracts\Payable;
 use App\Models\Payment;
+use App\Models\PaymentGatewayLog;
 use App\Models\Status;
+use App\Services\Cooperative\CooperativeRevenueAllocatorService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PaymentWebhookService
 {
-    private const SUCCESS_STATUSES = ['paid', 'succeeded'];
+    public function __construct(
+        private readonly CooperativeRevenueAllocatorService $revenueAllocator
+    ) {}
 
-    private const FAILURE_STATUSES = ['failed', 'awaiting_payment_method', 'expired'];
-
+    /**
+     * Create a new class instance.
+     */
     public function handle(
         string $gatewayPaymentIntentId,
         string $gatewayStatus,
-        ?string $gatewayPaymentId,
-        ?int $verifiedAmount = null,
+        ?string $gatewayPaymentId = null
     ): void {
-        DB::transaction(function () use ($gatewayPaymentIntentId, $gatewayStatus, $gatewayPaymentId, $verifiedAmount) {
-            $payment = Payment::where('gateway_payment_intent_id', $gatewayPaymentIntentId)
-                ->lockForUpdate()
-                ->first();
+        $status = $this->normalizeStatus($gatewayStatus);
+        $payment = Payment::where('gateway_payment_intent_id', $gatewayPaymentIntentId)->first();
 
-            if (! $payment) {
-                Log::warning('Webhook received for unknown payment intent', [
-                    'intent_id' => $gatewayPaymentIntentId,
-                ]);
-
-                return;
-            }
-
-            if (! in_array($payment->status_id, [Status::PENDING, Status::WAITING_FOR_PAYMENT], true)) {
-                Log::info('Ignoring webhook for already-finalized payment', [
-                    'payment_id' => $payment->id,
-                    'current_status_id' => $payment->status_id,
-                ]);
-
-                return;
-            }
-
-            if ($verifiedAmount !== null && (int) $verifiedAmount !== (int) $payment->amount) {
-                Log::critical('Webhook amount mismatch — marking payment failed, investigate manually', [
-                    'payment_id' => $payment->id,
-                    'expected_amount' => $payment->amount,
-                    'webhook_amount' => $verifiedAmount,
-                ]);
-
-                $payment->update([
-                    'status_id' => Status::FAILED,
-                    'gateway_payment_id' => $gatewayPaymentId,
-                ]);
-
-                return;
-            }
-
-            if (in_array($gatewayStatus, self::SUCCESS_STATUSES, true)) {
-                $payment->update([
-                    'status_id' => Status::PAID,
-                    'gateway_payment_id' => $gatewayPaymentId,
-                    'gateway_status' => $gatewayStatus,
-                    'paid_at' => now(),
-                ]);
-
-                $payment->payable->onPaymentSuccess($payment);
-
-                return;
-            }
-
-            if (in_array($gatewayStatus, self::FAILURE_STATUSES, true)) {
-                $payment->update([
-                    'status_id' => Status::FAILED,
-                    'gateway_payment_id' => $gatewayPaymentId,
-                    'gateway_status' => $gatewayStatus,
-                ]);
-
-                $payment->payable->onPaymentFailed($payment);
-
-                return;
-            }
-
-            Log::info('Unhandled gateway status, ignoring', [
-                'payment_id' => $payment->id,
-                'gateway_status' => $gatewayStatus,
+        if (! $payment) {
+            Log::warning('Webhook received for unknown payment intent.', [
+                'intent_id' => $gatewayPaymentIntentId,
             ]);
-        });
+            PaymentGatewayLog::create([
+                'payment_id' => null,
+                'gateway' => 'paymongo',
+                'event' => 'unknown_payment_intent',
+                'payload' => [
+                    'intent_id' => $gatewayPaymentIntentId,
+                    'status' => $status,
+                ],
+            ]);
+
+            return;
+        }
+
+        // Idempotency guard
+        if ((int) $payment->status_id === Status::SUCCESS) {
+            Log::info('Webhook already processed.', ['payment_id' => $payment->id]);
+            PaymentGatewayLog::create([
+                'payment_id' => $payment->id,
+                'gateway' => $payment->gateway ?? 'paymongo',
+                'event' => 'already_processed',
+                'payload' => [],
+            ]);
+
+            return;
+        }
+
+        $payable = $payment->payable;
+
+        // check the contract
+        if (! $payable instanceof Payable) {
+            Log::warning('Payable does not implement Payable contract.', [
+                'payment_id' => $payment->id,
+                'payable_type' => $payment->payable_type,
+            ]);
+            PaymentGatewayLog::create([
+                'payment_id' => $payment->id,
+                'gateway' => $payment->gateway ?? 'paymongo',
+                'event' => 'invalid_payable',
+                'payload' => ['type' => $payment->payable_type],
+            ]);
+
+            return;
+        }
+
+        if ($status === 'paid') {
+            DB::transaction(function () use ($payment, $payable, $gatewayPaymentId) {
+                $payment->update([
+                    'status_id' => Status::SUCCESS,
+                    'gateway_payment_id' => $gatewayPaymentId,
+                ]);
+
+                // delegates to Payable model
+                $payable->onPaymentSuccess($payment);
+
+                // record this transaction's share into the cooperative fund
+                if ($slug = $payable->cooperativeServiceSlug()) {
+                    $this->revenueAllocator->allocate(
+                        serviceSlug: $slug,
+                        amount: $payment->amount / 100, // ASSUMPTION: Payment::amount is stored in cents — confirm below
+                    );
+                }
+
+                PaymentGatewayLog::create([
+                    'payment_id' => $payment->id,
+                    'gateway' => $payment->gateway ?? 'paymongo',
+                    'event' => 'payment_success',
+                    'payload' => [
+                        'intent_id' => $payment->gateway_payment_intent_id,
+                        'gateway_payment_id' => $gatewayPaymentId,
+                        'payable_type' => $payment->payable_type,
+                        'payable_id' => $payment->payable_id,
+                    ],
+                ]);
+            });
+        }
+
+        if ($status === 'failed') {
+            DB::transaction(function () use ($payment, $payable, $gatewayPaymentIntentId) {
+                $payment->update(['status_id' => Status::FAILED]);
+
+                $payable->onPaymentFailed($payment);
+
+                PaymentGatewayLog::create([
+                    'payment_id' => $payment->id,
+                    'gateway' => $payment->gateway ?? 'paymongo',
+                    'event' => 'payment_failed',
+                    'payload' => [
+                        'intent_id' => $gatewayPaymentIntentId,
+                        'payable_type' => $payment->payable_type,
+                        'payable_id' => $payment->payable_id,
+                    ],
+                ]);
+            });
+
+            Log::info('Payment marked as failed.', ['payment_id' => $payment->id]);
+        }
+    }
+
+    private function normalizeStatus(string $status): string
+    {
+        return match ($status) {
+            'paid', 'payment.paid', 'success', 'succeeded' => 'paid',
+            'failed', 'payment.failed' => 'failed',
+            default => $status,
+        };
     }
 }

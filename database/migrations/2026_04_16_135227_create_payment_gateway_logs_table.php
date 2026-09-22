@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,13 +12,17 @@ return new class extends Migration
     {
         Schema::create('payment_gateway_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('payment_id')->nullable()->constrained()->nullOnDelete();
+
+            $table->foreignId('payment_id')
+                ->nullable()
+                ->constrained()
+                ->nullOnDelete();
+
             $table->string('gateway');
-            $table->string('gateway_event_id')->nullable();
             $table->string('event');
             $table->json('payload')->nullable();
+
             $table->timestamps();
-            $table->unique(['gateway', 'gateway_event_id']);
         });
     }
 

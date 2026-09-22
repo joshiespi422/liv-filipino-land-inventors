@@ -5,7 +5,6 @@ namespace App\Http\Requests\Wallet;
 use App\Models\PaymentMethod;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class RechargeWalletRequest extends FormRequest
 {
@@ -25,17 +24,8 @@ class RechargeWalletRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'amount' => ['required', 'integer', 'min:10000', 'max:10000000'],
-
-            'payment_method_id' => [
-                'required',
-                Rule::exists('payment_methods', 'id')->where(
-                    fn ($query) => $query->whereIn('gateway_type', [
-                        'card', 'paymaya', 'qrph', 'billease', 'grab_pay',
-                    ])
-                ),
-            ],
-
+            'amount' => ['required', 'integer', 'min:10000'],
+            'payment_method_id' => ['required', 'exists:payment_methods,id'],
             'gateway_payment_method_id' => [
                 'required_if:payment_method_id,'.PaymentMethod::CARD,
                 'nullable',
