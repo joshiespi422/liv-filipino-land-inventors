@@ -79,16 +79,28 @@ class Wallet extends Model implements Payable
         return $this->morphMany(Payment::class, 'payable');
     }
 
-    public function deposit(float $amount, Model $reference, string $description): WalletTransaction
-    {
+    public function deposit(
+        float $amount,
+        Model $reference,
+        string $description,
+        float $fee = 0.00,
+        ?string $referenceNumber = null,
+        ?string $providerLabel = null
+    ): WalletTransaction {
         $this->balance = (float) $this->balance + $amount;
         $this->save(); // Save triggers static::saving to update signature automatically
 
         $transaction = $this->walletTransactions()->create([
             'reference_type' => $reference::class,
             'reference_id' => $reference->id,
+            'reference_number' => $referenceNumber,
             'type' => 'deposit',
             'amount' => $amount,
+            'transfer_fee' => $fee,
+            'from_name' => $providerLabel ?? $reference::class,
+            'to_account_name' => $this->user?->name,
+            'to_account_number' => (string) $this->id,
+            'to_provider' => $providerLabel,
             'description' => $description,
         ]);
 
@@ -97,16 +109,27 @@ class Wallet extends Model implements Payable
         return $transaction;
     }
 
-    public function withdraw(float $amount, Model $reference, string $description): WalletTransaction
-    {
+    public function withdraw(
+        float $amount,
+        Model $reference,
+        string $description,
+        float $fee = 0.00,
+        ?string $referenceNumber = null,
+        ?string $providerLabel = null
+    ): WalletTransaction {
         $this->balance = (float) $this->balance - $amount;
         $this->save(); // Save triggers static::saving to update signature automatically
 
         $transaction = $this->walletTransactions()->create([
             'reference_type' => $reference::class,
             'reference_id' => $reference->id,
+            'reference_number' => $referenceNumber,
             'type' => 'withdrawal',
             'amount' => $amount,
+            'transfer_fee' => $fee,
+            'from_name' => $this->user?->name,
+            'to_account_name' => $providerLabel,
+            'to_provider' => $providerLabel,
             'description' => $description,
         ]);
 
@@ -118,8 +141,16 @@ class Wallet extends Model implements Payable
     public function onPaymentSuccess(Payment $payment): void
     {
         $amountDecimal = $payment->amount / 100;
+        $feeDecimal = ($payment->fee ?? 0) / 100;
 
-        $this->deposit($amountDecimal, $payment, 'Wallet recharge via '.$payment->gateway);
+        $this->deposit(
+            $amountDecimal,
+            $payment,
+            'Wallet recharge via '.$payment->gateway,
+            $feeDecimal,
+            $payment->gateway_payment_intent_id,
+            'Load Wallet ('.$payment->gateway.')'
+        );
     }
 
     public function onPaymentFailed(Payment $payment): void
