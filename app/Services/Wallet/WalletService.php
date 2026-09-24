@@ -91,7 +91,7 @@ class WalletService
         $feeCents = (int) round($fee * 100);
         $totalChargeCents = (int) round($amount + $feeCents);
 
-        return DB::transaction(function () use ($wallet, $data, $amount, $feeCents, $totalChargeCents) {
+        return DB::transaction(function () use ($wallet, $user, $data, $amount, $feeCents, $totalChargeCents) {
             // Clean old failed/cancelled attempts
             $wallet->payments()
                 ->whereIn('status_id', [Status::FAILED, Status::CANCELLED])
@@ -119,8 +119,14 @@ class WalletService
                 $data
             );
 
+            // Set description for PayMongo dashboard record
+            $description = $data['description'] ?? "Wallet recharge for {$user->name}";
+
             // Charge amount + fee via the gateway; only $amount ends up credited to the wallet
-            $intentResponse = $service->createPaymentIntent($totalChargeCents / 100);
+            $intentResponse = $service->createPaymentIntent(
+                $totalChargeCents / 100,
+                ['description' => $description]
+            );
 
             $intentId = data_get($intentResponse, 'data.id')
                 ?? throw new DomainException('Failed to create payment intent.');

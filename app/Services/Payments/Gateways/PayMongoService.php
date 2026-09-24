@@ -40,20 +40,26 @@ class PayMongoService implements PaymentGatewayInterface
             $headers['Idempotency-Key'] = $options['idempotency_key'];
         }
 
+        $attributes = [
+            'amount' => (int) round($amount * 100),
+            'currency' => 'PHP',
+            'payment_method_allowed' => $allowedMethods,
+            'payment_method_options' => [
+                'card' => [
+                    'request_three_d_secure' => $threeDS,
+                ],
+            ],
+            'capture_type' => 'automatic',
+        ];
+
+        if (! empty($options['description'])) {
+            $attributes['description'] = $options['description'];
+        }
+
         return Http::withHeaders($headers)
             ->post("{$this->baseUrl}/payment_intents", [
                 'data' => [
-                    'attributes' => [
-                        'amount' => (int) round($amount * 100),
-                        'currency' => 'PHP',
-                        'payment_method_allowed' => $allowedMethods,
-                        'payment_method_options' => [
-                            'card' => [
-                                'request_three_d_secure' => $threeDS,
-                            ],
-                        ],
-                        'capture_type' => 'automatic',
-                    ],
+                    'attributes' => $attributes,
                 ],
             ])
             ->json();

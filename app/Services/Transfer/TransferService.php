@@ -141,13 +141,15 @@ class TransferService
             return $transfer;
         });
 
-        // 2. Dispatch PayMongo API (only the amount is sent; the fee stays with you)
+        $senderName = $user->name;
+        $description = $data['remarks'] ?? "FISMPC Transfer from {$senderName} via {$channel->name}";
+
         $payload = [
             'provider' => $provider,
             'amount' => (int) round($amount * 100),
             'currency' => 'PHP',
             'purpose' => $data['purpose'] ?? 'Disbursement',
-            'description' => $data['remarks'] ?? "Wallet withdrawal to {$channel->name}",
+            'description' => Str::limit($description, 255),
             'reference_number' => $referenceNumber,
             'source_account' => [
                 'number' => $sourceAccount['number'] ?? '',
@@ -221,8 +223,6 @@ class TransferService
 
             if ($wallet) {
                 if ($wallet->isTampered()) {
-                    // Don't auto-credit a wallet that's already inconsistent —
-                    // flag for manual review instead of silently re-signing it.
                     Log::warning('Refund blocked: wallet failed integrity check.', [
                         'wallet_id' => $wallet->id,
                         'transfer_reference' => $transfer->reference_number,
