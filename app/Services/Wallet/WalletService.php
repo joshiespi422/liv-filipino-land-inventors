@@ -11,6 +11,7 @@ use App\Services\Payments\PaymentGatewayFactory;
 use DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class WalletService
 {
@@ -119,13 +120,21 @@ class WalletService
                 $data
             );
 
-            // Set description for PayMongo dashboard record
-            $description = $data['description'] ?? "Wallet recharge for {$user->name}";
+            // Fetch full sender name cleanly across name / first_name + last_name
+            $senderName = trim(($user->first_name ?? '').' '.($user->last_name ?? ''))
+                ?: ($user->name ?? 'User');
 
-            // Charge amount + fee via the gateway; only $amount ends up credited to the wallet
+            // Force full description with sender name
+            $description = Str::limit("FISMPC Load Wallet - {$senderName}", 255);
+
+            // Charge amount + fee via gateway
             $intentResponse = $service->createPaymentIntent(
                 $totalChargeCents / 100,
-                ['description' => $description]
+                [
+                    'description' => $description,
+                    'statement_descriptor' => 'FISMPC',
+                    'statement_descriptor_suffix' => 'LOAD',
+                ]
             );
 
             $intentId = data_get($intentResponse, 'data.id')
