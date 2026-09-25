@@ -15,6 +15,7 @@ class ApiWalletTransactionResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'wallet_id' => $this->wallet_id,
             'amount' => number_format($this->amount, 2, '.', ''),
             'transfer_fee' => number_format($this->transfer_fee ?? 0, 2, '.', ''),
             'type' => $this->type,

@@ -52,11 +52,9 @@ class WalletController extends Controller
     public function transaction(Request $request): JsonResponse
     {
         $wallet = $this->walletService->getUserWallet($request->user());
-
         $transactions = $this->walletService->getWalletTransactions($wallet);
 
-        return ApiWalletTransactionResource::collection($transactions)
-            ->response();
+        return ApiWalletTransactionResource::collection($transactions)->response();
     }
 
     public function presets(): JsonResponse
