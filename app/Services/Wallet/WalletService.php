@@ -117,7 +117,8 @@ class WalletService
             $gatewayMethodId = $this->resolveGatewayMethodId(
                 $service,
                 $method,
-                $data
+                $data,
+                $user,
             );
 
             // Fetch full sender name cleanly across name / first_name + last_name
@@ -145,6 +146,8 @@ class WalletService
                 $gatewayMethodId
             );
 
+            [$senderName, $senderAccountNumber] = $this->resolveSenderDetails($attached, $user, $method, $data);
+
             $payment = $wallet->payments()->create([
                 'payment_method_id' => $data['payment_method_id'],
                 'status_id' => Status::PENDING,
@@ -154,6 +157,8 @@ class WalletService
                 'gateway' => $gateway,
                 'gateway_payment_intent_id' => $intentId,
                 'gateway_response' => $attached,
+                'sender_name' => $senderName,
+                'sender_account_number' => $senderAccountNumber,
             ]);
 
             return [
@@ -163,14 +168,47 @@ class WalletService
         });
     }
 
-    private function resolveGatewayMethodId($service, PaymentMethod $method, array $data): string
+    private function resolveSenderDetails(array $attached, User $user, PaymentMethod $method, array $data = []): array
+    {
+        $billingName = data_get($attached, 'data.attributes.billing.name');
+        $billingPhone = data_get($attached, 'data.attributes.billing.phone');
+        $last4 = data_get($attached, 'data.attributes.payment_method.details.last4');
+
+        $fallbackName = trim(($user->first_name ?? '').' '.($user->last_name ?? ''))
+            ?: ($user->name ?? 'User');
+
+        // User-declared "paid from" bank/e-wallet name takes priority over
+        // both the gateway echo and the FISMPC account name, since PayMongo
+        // never returns the payer's actual bank/e-wallet identity for QR Ph
+        // or other bank-rail methods.
+        $declaredName = trim((string) ($data['sender_account_name'] ?? ''));
+
+        $resolvedName = $declaredName !== ''
+            ? $declaredName
+            : ($billingName ?: $fallbackName);
+
+        $senderName = $resolvedName.' ('.$method->name.')';
+        $senderAccountNumber = $last4 ? "**** {$last4}" : $billingPhone;
+
+        return [$senderName, $senderAccountNumber];
+    }
+
+    private function resolveGatewayMethodId($service, PaymentMethod $method, array $data, User $user): string
     {
         if ($method->isClientSide()) {
             return $data['gateway_payment_method_id']
                 ?? throw new DomainException('Missing gateway_payment_method_id for client-side method.');
         }
 
-        $response = $service->createPaymentMethod($method->gateway_type);
+        $senderName = trim(($user->first_name ?? '').' '.($user->last_name ?? '')) ?: $user->name;
+
+        $response = $service->createPaymentMethod($method->gateway_type, [
+            'billing' => [
+                'name' => $senderName,
+                'email' => $user->email,
+                'phone' => $user->phone,
+            ],
+        ]);
 
         return data_get($response, 'data.id')
             ?? throw new DomainException('Failed to create payment method.');

@@ -32,6 +32,7 @@ class RechargeWalletRequest extends FormRequest
                 'nullable',
                 'string',
             ],
+            'sender_account_name' => ['nullable', 'string', 'max:255'],
         ];
     }
 }
