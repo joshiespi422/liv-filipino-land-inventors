@@ -14,8 +14,8 @@ class TransactionFeeSeeder extends Seeder
             ['module' => 'Transfer'],
             [
                 'type' => TransactionFee::TYPE_PHP,
-                'transfer_fee' => 10,
-                'minimum_fee' => 50,
+                'transfer_fee' => 0,
+                'minimum_fee' => 1,
             ],
         );
 
@@ -25,7 +25,7 @@ class TransactionFeeSeeder extends Seeder
             [
                 'type' => TransactionFee::TYPE_PERCENTAGE,
                 'transfer_fee' => 2,
-                'minimum_fee' => 0,
+                'minimum_fee' => 1,
             ],
         );
     }
