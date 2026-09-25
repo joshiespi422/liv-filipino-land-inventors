@@ -28,5 +28,15 @@ class TransactionFeeSeeder extends Seeder
                 'minimum_fee' => 1,
             ],
         );
+
+        // Membership transaction fee - 2%
+        TransactionFee::updateOrCreate(
+            ['module' => 'Membership'],
+            [
+                'type' => TransactionFee::TYPE_PERCENTAGE,
+                'transfer_fee' => 2,
+                'minimum_fee' => 0,
+            ],
+        );
     }
 }

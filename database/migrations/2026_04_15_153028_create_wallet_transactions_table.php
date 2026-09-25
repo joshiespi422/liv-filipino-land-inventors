@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('wallet_transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('wallet_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('wallet_id')->nullable()->constrained()->cascadeOnDelete();
+
             $table->nullableMorphs('reference');
             $table->string('reference_number')->nullable()->unique();
-            $table->enum('type', ['deposit', 'withdrawal', 'credit', 'debit']);
+            $table->enum('type', ['deposit', 'withdrawal', 'credit', 'debit', 'membership_payment']);
 
             // Transfer amount and fee (total deducted = amount + transfer_fee)
             $table->decimal('amount', 15, 2);
