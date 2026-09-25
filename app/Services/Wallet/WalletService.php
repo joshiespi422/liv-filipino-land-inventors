@@ -70,7 +70,7 @@ class WalletService
     public function getWalletTransactions(Wallet $wallet): LengthAwarePaginator
     {
         return $wallet->walletTransactions()
-            ->with('reference')
+            // ->with('reference')
             ->latest()
             ->paginate(15);
     }
