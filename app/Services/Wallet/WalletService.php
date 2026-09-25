@@ -146,7 +146,7 @@ class WalletService
                 $gatewayMethodId
             );
 
-            [$senderName, $senderAccountNumber] = $this->resolveSenderDetails($attached, $user, $method);
+            [$senderName, $senderAccountNumber] = $this->resolveSenderDetails($attached, $user, $method, $data);
 
             $payment = $wallet->payments()->create([
                 'payment_method_id' => $data['payment_method_id'],
@@ -168,7 +168,7 @@ class WalletService
         });
     }
 
-    private function resolveSenderDetails(array $attached, User $user, PaymentMethod $method): array
+    private function resolveSenderDetails(array $attached, User $user, PaymentMethod $method, array $data = []): array
     {
         $billingName = data_get($attached, 'data.attributes.billing.name');
         $billingPhone = data_get($attached, 'data.attributes.billing.phone');
@@ -177,7 +177,17 @@ class WalletService
         $fallbackName = trim(($user->first_name ?? '').' '.($user->last_name ?? ''))
             ?: ($user->name ?? 'User');
 
-        $senderName = ($billingName ?: $fallbackName).' ('.$method->name.')';
+        // User-declared "paid from" bank/e-wallet name takes priority over
+        // both the gateway echo and the FISMPC account name, since PayMongo
+        // never returns the payer's actual bank/e-wallet identity for QR Ph
+        // or other bank-rail methods.
+        $declaredName = trim((string) ($data['sender_account_name'] ?? ''));
+
+        $resolvedName = $declaredName !== ''
+            ? $declaredName
+            : ($billingName ?: $fallbackName);
+
+        $senderName = $resolvedName.' ('.$method->name.')';
         $senderAccountNumber = $last4 ? "**** {$last4}" : $billingPhone;
 
         return [$senderName, $senderAccountNumber];
