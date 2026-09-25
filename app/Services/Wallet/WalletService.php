@@ -117,7 +117,8 @@ class WalletService
             $gatewayMethodId = $this->resolveGatewayMethodId(
                 $service,
                 $method,
-                $data
+                $data,
+                $user,
             );
 
             // Fetch full sender name cleanly across name / first_name + last_name
@@ -182,14 +183,22 @@ class WalletService
         return [$senderName, $senderAccountNumber];
     }
 
-    private function resolveGatewayMethodId($service, PaymentMethod $method, array $data): string
+    private function resolveGatewayMethodId($service, PaymentMethod $method, array $data, User $user): string
     {
         if ($method->isClientSide()) {
             return $data['gateway_payment_method_id']
                 ?? throw new DomainException('Missing gateway_payment_method_id for client-side method.');
         }
 
-        $response = $service->createPaymentMethod($method->gateway_type);
+        $senderName = trim(($user->first_name ?? '').' '.($user->last_name ?? '')) ?: $user->name;
+
+        $response = $service->createPaymentMethod($method->gateway_type, [
+            'billing' => [
+                'name' => $senderName,
+                'email' => $user->email,
+                'phone' => $user->phone,
+            ],
+        ]);
 
         return data_get($response, 'data.id')
             ?? throw new DomainException('Failed to create payment method.');
