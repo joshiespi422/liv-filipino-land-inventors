@@ -145,6 +145,8 @@ class WalletService
                 $gatewayMethodId
             );
 
+            [$senderName, $senderAccountNumber] = $this->resolveSenderDetails($attached, $user, $method);
+
             $payment = $wallet->payments()->create([
                 'payment_method_id' => $data['payment_method_id'],
                 'status_id' => Status::PENDING,
@@ -154,6 +156,8 @@ class WalletService
                 'gateway' => $gateway,
                 'gateway_payment_intent_id' => $intentId,
                 'gateway_response' => $attached,
+                'sender_name' => $senderName,
+                'sender_account_number' => $senderAccountNumber,
             ]);
 
             return [
@@ -161,6 +165,21 @@ class WalletService
                 'next_action' => $service->getNextAction($attached),
             ];
         });
+    }
+
+    private function resolveSenderDetails(array $attached, User $user, PaymentMethod $method): array
+    {
+        $billingName = data_get($attached, 'data.attributes.billing.name');
+        $billingPhone = data_get($attached, 'data.attributes.billing.phone');
+        $last4 = data_get($attached, 'data.attributes.payment_method.details.last4');
+
+        $fallbackName = trim(($user->first_name ?? '').' '.($user->last_name ?? ''))
+            ?: ($user->name ?? 'User');
+
+        $senderName = ($billingName ?: $fallbackName).' ('.$method->name.')';
+        $senderAccountNumber = $last4 ? "**** {$last4}" : $billingPhone;
+
+        return [$senderName, $senderAccountNumber];
     }
 
     private function resolveGatewayMethodId($service, PaymentMethod $method, array $data): string

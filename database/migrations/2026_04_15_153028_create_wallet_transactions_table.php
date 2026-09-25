@@ -24,6 +24,7 @@ return new class extends Migration
 
             // From / To details (used by transfers)
             $table->string('from_name')->nullable();
+            $table->string('from_account_number')->nullable()->after('from_name');
             $table->string('to_account_name')->nullable();
             $table->string('to_account_number', 50)->nullable();
             $table->string('to_provider')->nullable();

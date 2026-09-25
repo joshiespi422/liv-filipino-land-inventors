@@ -23,6 +23,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
     'gateway_payment_intent_id',
     'gateway_payment_id',
     'gateway_response',
+    'sender_name',
+    'sender_account_number',
 ])]
 class Payment extends Model
 {
