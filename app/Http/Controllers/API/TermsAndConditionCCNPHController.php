@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\TermsAndConditionCCNPH;
 use Illuminate\Http\JsonResponse;
 
-class TermsAndConditionController extends Controller
+class TermsAndConditionCCNPHController extends Controller
 {
     /**
      * Get the Terms and Conditions.
