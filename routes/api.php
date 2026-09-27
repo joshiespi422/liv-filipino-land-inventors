@@ -32,6 +32,7 @@ use App\Http\Controllers\API\Store\ShopHomeController;
 use App\Http\Controllers\API\Store\ShopProductController;
 use App\Http\Controllers\API\Store\ShopStoreController;
 use App\Http\Controllers\API\SupportChat\SupportChatController;
+use App\Http\Controllers\API\TermsAndConditionCCNPHController;
 use App\Http\Controllers\API\TermsAndConditionController;
 use App\Http\Controllers\API\Transfer\PaymongoTransferWebhookController;
 use App\Http\Controllers\API\Transfer\TransferController;
@@ -51,7 +52,9 @@ Route::middleware('guest')->group(function () {
     Route::post('/verify-phone/acknowledge', [PhoneVerificationController::class, 'verify'])->middleware('throttle:5,1');
     Route::post('/verify-phone/resend', [PhoneVerificationController::class, 'resend'])->middleware('throttle:3,1');
     Route::post('/register/set-password', [RegisteredUserController::class, 'setPassword'])->middleware('throttle:5,1');
+
     Route::get('/terms-and-conditions', [TermsAndConditionController::class, 'show']);
+    Route::get('/terms-and-conditions-ccnph', [TermsAndConditionCCNPHController::class, 'show']);
 
     Route::post('/account/reactivate/send', [ReactivationController::class, 'send'])->middleware('throttle:5,1');
     Route::post('/account/reactivate/verify', [ReactivationController::class, 'verify'])->middleware('throttle:5,1');
