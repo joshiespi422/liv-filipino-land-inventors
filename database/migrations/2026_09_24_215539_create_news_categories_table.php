@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('news_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->boolean('is_active')->default(true);
             $table->string('slug')->unique();
+            $table->boolean('is_active')->default(true);
             $table->text('description')->nullable();
             $table->timestamps();
         });
