@@ -485,7 +485,7 @@ onUnmounted(() => {
                 <div
                   class="flex flex-col items-center justify-center gap-4 sm:flex-row"
                 >
-                  <!-- <button
+                  <button
                     class="flex w-full items-center justify-center gap-3 rounded-xl bg-gray-900 px-6 py-3.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 sm:w-auto dark:bg-white dark:text-gray-900"
                   >
                     <svg
@@ -508,7 +508,10 @@ onUnmounted(() => {
                     </div>
                   </button>
 
-                  <button
+                  <a
+                    href="https://play.google.com/store/apps/details?id=com.BB88ADVERTISINGANDDIGITALSOLUTIONS.fismpc"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     class="flex w-full items-center justify-center gap-3 rounded-xl bg-[#033e94] px-6 py-3.5 text-sm font-semibold text-white shadow-md transition-opacity hover:opacity-90 sm:w-auto"
                   >
                     <svg
@@ -529,7 +532,7 @@ onUnmounted(() => {
                       >
                       <span class="text-base font-bold">Google Play</span>
                     </div>
-                  </button> -->
+                  </a>
 
                   <!-- Download APK Button -->
                 <a
