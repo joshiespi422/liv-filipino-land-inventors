@@ -4,10 +4,6 @@ interface Props {
     navLogo?: { icon_path: string };
 }
 const props = defineProps<Props>();
-
-// URLs commented out during maintenance
-// const playStoreUrl = "https://play.google.com/store/apps";
-// const appStoreUrl = "https://www.apple.com/app-store/";
 </script>
 
 <template>
@@ -28,34 +24,35 @@ const props = defineProps<Props>();
                         Download the official FISMPC app to join a dynamic community of visionary inventors and entrepreneurs. Get exclusive access to cooperative benefits, member updates, and a platform to commercialize your creative ideas right from your phone.
                     </p>
 
-                    <!-- <div class="mb-4">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 text-sm font-medium border border-yellow-200 dark:border-yellow-800">
-                            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            App Stores Currently Under Maintenance
-                        </span>
-                    </div>
-
                     <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                        <div class="relative opacity-50 grayscale cursor-not-allowed rounded-xl" title="Currently unavailable">
+                        <!-- Active Google Play Button -->
+                        <a 
+                            href="https://play.google.com/store/apps/details?id=com.BB88ADVERTISINGANDDIGITALSOLUTIONS.fismpc" 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="transition-transform hover:scale-105 active:scale-95"
+                            title="Get it on Google Play"
+                        >
                             <img 
                                 src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" 
-                                alt="Google Play - Under Maintenance" 
-                                class="h-14 w-auto pointer-events-none"
+                                alt="Google Play Store" 
+                                class="h-14 w-auto"
                             />
-                        </div>
+                        </a>
 
-                        <div class="relative opacity-50 grayscale cursor-not-allowed rounded-xl" title="Currently unavailable">
+                        <!-- Coming Soon App Store Button -->
+                        <div class="relative opacity-60 grayscale cursor-not-allowed rounded-xl transition-all" title="App Store - Coming soon">
                             <img 
                                 src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" 
-                                alt="App Store - Under Maintenance" 
+                                alt="App Store - Coming Soon" 
                                 class="h-14 w-auto pointer-events-none"
                             />
+                            <!-- Coming Soon Badge -->
+                            <div class="absolute -top-2 -right-2 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm border border-yellow-200">
+                                Coming soon
+                            </div>
                         </div>
-                    </div> -->
-
-                    
+                    </div>
                 </div>
 
                 <div class="lg:w-1/2 relative flex justify-center w-full">
