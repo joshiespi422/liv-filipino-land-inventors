@@ -24,4 +24,9 @@ class NewsCategory extends Model
             'is_active' => 'boolean',
         ];
     }
+
+    public function articles(): HasMany
+    {
+        return $this->hasMany(NewsArticle::class);
+    }
 }
