@@ -36,6 +36,7 @@ class DatabaseSeeder extends Seeder
             TransactionChannelSeeder::class,
             TransactionFeeSeeder::class,
             AttributeSeeder::class,
+            NewsCategorySeeder::class,
         ]);
 
         User::factory()->create([
