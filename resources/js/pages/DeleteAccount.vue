@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useForm, usePage } from '@inertiajs/vue3';
+import { AlertTriangle, Loader2, Trash2 } from 'lucide-vue-next';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import AccountDeletionController from '@/actions/App/Http/Controllers/AccountDeletionController';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -12,9 +15,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useForm, usePage } from '@inertiajs/vue3';
-import { AlertTriangle, Loader2, Trash2 } from 'lucide-vue-next';
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 interface Props {
   identified: boolean;
@@ -45,6 +45,7 @@ watch(
 const cancelForm = useForm({});
 function handleDialogChange(open: boolean) {
   dialogOpen.value = open;
+
   if (!open) {
     cancelForm.post(AccountDeletionController.cancel().url);
   }
@@ -63,7 +64,10 @@ const secondsLeft = ref(0);
 let timer: ReturnType<typeof setInterval> | undefined;
 
 const tick = () => {
-  if (!props.otpSentAt) return;
+  if (!props.otpSentAt) {
+return;
+}
+
   const elapsed = Math.floor(
     (Date.now() - new Date(props.otpSentAt).getTime()) / 1000,
   );
