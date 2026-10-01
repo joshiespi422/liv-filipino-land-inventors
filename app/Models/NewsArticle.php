@@ -35,7 +35,7 @@ class NewsArticle extends Model
         ];
     }
 
-    public function category(): BelongsTo
+    public function newsCategory(): BelongsTo
     {
         return $this->belongsTo(NewsCategory::class);
     }
