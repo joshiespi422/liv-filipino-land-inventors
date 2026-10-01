@@ -8,6 +8,7 @@ export * from './intellectual-property';
 export * from './admin-management';
 export * from './auth';
 export * from './navigation';
+export * from './news-events';
 export * from './seller/product';
 export * from './seller/shop';
 export * from './seller/order';
