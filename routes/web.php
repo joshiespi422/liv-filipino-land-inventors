@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\IntellectualPropertyController;
 use App\Http\Controllers\Web\LoanAssistanceController;
 use App\Http\Controllers\Web\LoanScheduleController;
+use App\Http\Controllers\Web\NewsArticleController;
 use App\Http\Controllers\Web\Seller\DashboardController as SellerDashboardController;
 use App\Http\Controllers\Web\Seller\ShopController as SellerShopController;
 use App\Http\Controllers\Web\Seller\ProductController as SellerProductController;
@@ -221,6 +222,12 @@ Route::middleware([
 
         Route::patch('/intellectual-property-assistance/{property}/status', [IntellectualPropertyController::class, 'updateStatus'])
             ->name('intellectual-property-assistance.update-status');
+    });
+
+    // News & Events Domain
+    Route::middleware(['service_access:news-events'])->group(function () {
+        Route::get('/news-events', [NewsArticleController::class, 'index'])
+            ->name('news-events.index');
     });
 
     // Conversation routes
