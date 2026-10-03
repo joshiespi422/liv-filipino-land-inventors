@@ -30,6 +30,7 @@ export interface NewsStatusOption {
 export interface NewsFilters {
   status: NewsArticleStatus | null;
   category: string | null;
+  search: string | null;
 }
 
 export interface PaginatedNewsArticles {
@@ -52,4 +53,12 @@ export interface PaginatedNewsArticles {
     to: number;
     total: number;
   };
+}
+
+export interface NewsArticleDetail extends NewsArticleIndex {
+  user: string | null;
+  content: string;
+  views_count: number;
+  source_name: string | null;
+  source_url: string | null;
 }
