@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import {
   CalendarDaysIcon,
   ImageOffIcon,
   NewspaperIcon,
   XIcon,
+  SearchIcon,
 } from 'lucide-vue-next';
 import {
   Select,
@@ -16,15 +17,11 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Pagination from '@/components/Pagination.vue';
 import newsEvents from '@/routes/news-events';
+import { formatDate, statusClasses } from '@/lib/news-events';
 import type {
   NewsArticleStatus,
   NewsCategoryOption,
@@ -52,17 +49,34 @@ const ALL = 'all';
 const status = computed(() => props.filters.status ?? ALL);
 const category = computed(() => props.filters.category ?? ALL);
 const hasFilters = computed(
-  () => !!props.filters.status || !!props.filters.category,
+  () =>
+    !!props.filters.status ||
+    !!props.filters.category ||
+    !!props.filters.search,
 );
 
-function applyFilters(next: Partial<NewsFilters>) {
-  const merged = { ...props.filters, ...next };
-  const query: Record<string, string> = {};
+// Search keeps local state (so typing is instant) and is debounced to the server
+const search = ref(props.filters.search ?? '');
+let lastSent = props.filters.search ?? '';
+let timer: ReturnType<typeof setTimeout> | undefined;
 
+function applyFilters(next: Partial<NewsFilters> = {}) {
+  clearTimeout(timer);
+
+  const merged: NewsFilters = {
+    status: props.filters.status,
+    category: props.filters.category,
+    search: search.value.trim() || null,
+    ...next,
+  };
+
+  const query: Record<string, string> = {};
   if (merged.status) query.status = merged.status;
   if (merged.category) query.category = merged.category;
+  if (merged.search) query.search = merged.search;
+  lastSent = merged.search ?? '';
 
-  // page is omitted on purpose, so changing a filter goes back to page 1
+  // page is omitted on purpose: any filter change goes back to page 1
   router.get(
     newsEvents.index({ query }),
     {},
@@ -75,6 +89,27 @@ function applyFilters(next: Partial<NewsFilters>) {
   );
 }
 
+watch(search, (value) => {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    if (value.trim() !== (props.filters.search ?? '')) applyFilters();
+  }, 350);
+});
+
+// Sync the input when the URL changes from outside (back/forward navigation),
+// but ignore the echo of what we just sent so typing is never overwritten.
+watch(
+  () => props.filters.search,
+  (value) => {
+    if ((value ?? '') !== lastSent) {
+      lastSent = value ?? '';
+      search.value = value ?? '';
+    }
+  },
+);
+
+onBeforeUnmount(() => clearTimeout(timer));
+
 const onStatusChange = (value: unknown) =>
   applyFilters({
     status: value === ALL ? null : (value as NewsArticleStatus),
@@ -83,37 +118,35 @@ const onStatusChange = (value: unknown) =>
 const onCategoryChange = (value: unknown) =>
   applyFilters({ category: value === ALL ? null : (value as string) });
 
-const resetFilters = () => applyFilters({ status: null, category: null });
-
-const statusClasses: Record<NewsArticleStatus, string> = {
-  draft:
-    'border-transparent bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300',
-  scheduled:
-    'border-transparent bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
-  published:
-    'border-transparent bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
-  archived:
-    'border-transparent bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300',
-};
-
-const formatDate = (iso: string) =>
-  new Date(iso).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+function resetFilters() {
+  search.value = '';
+  applyFilters({ status: null, category: null, search: null });
+}
 </script>
 
 <template>
   <Head title="News & Events" />
   <div class="flex h-full flex-1 flex-col gap-6 p-6">
-    <!-- Header + filters -->
+    <!-- Header -->
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight">News & Events</h1>
+      <p class="text-muted-foreground">View and manage news and events.</p>
+    </div>
+
+    <!-- Toolbar -->
     <div
-      class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+      class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"
     >
-      <div>
-        <h1 class="text-2xl font-bold tracking-tight">News & Events</h1>
-        <p class="text-muted-foreground">View and manage news and events.</p>
+      <div class="relative w-full lg:max-w-sm">
+        <SearchIcon
+          class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+        />
+        <Input
+          v-model="search"
+          type="search"
+          placeholder="Search by title..."
+          class="pl-9"
+        />
       </div>
 
       <div
@@ -164,64 +197,71 @@ const formatDate = (iso: string) =>
       v-if="news_articles.data.length"
       class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
     >
-      <Card
+      <Link
         v-for="article in news_articles.data"
         :key="article.id"
-        class="gap-0 overflow-hidden pt-0 transition-shadow hover:shadow-md"
+        :href="newsEvents.show(article.slug)"
+        class="group block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <div class="relative aspect-video w-full overflow-hidden bg-muted">
-          <img
-            v-if="article.image"
-            :src="article.image"
-            :alt="article.title"
-            loading="lazy"
-            class="size-full object-cover"
-          />
-          <div
-            v-else
-            class="flex size-full items-center justify-center text-muted-foreground"
-          >
-            <ImageOffIcon class="size-8" />
-          </div>
+        <Card
+          class="h-full gap-0 overflow-hidden pt-0 transition-shadow group-hover:shadow-md"
+        >
+          <div class="relative aspect-video w-full overflow-hidden bg-muted">
+            <img
+              v-if="article.image"
+              :src="article.image"
+              :alt="article.title"
+              loading="lazy"
+              class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            <div
+              v-else
+              class="flex size-full items-center justify-center text-muted-foreground"
+            >
+              <ImageOffIcon class="size-8" />
+            </div>
 
-          <Badge
-            :class="statusClasses[article.status]"
-            class="absolute top-3 left-3 shadow-sm"
-          >
-            {{ article.status_label }}
-          </Badge>
-        </div>
-
-        <CardHeader class="gap-2 pt-4">
-          <div class="flex">
-            <Badge v-if="article.category" variant="outline" class="gap-1">
-              <NewspaperIcon class="size-3" />
-              {{ article.category }}
+            <Badge
+              :class="statusClasses[article.status]"
+              class="absolute top-3 left-3 shadow-sm"
+            >
+              {{ article.status_label }}
             </Badge>
           </div>
-          <CardTitle class="line-clamp-2 text-base leading-snug">
-            {{ article.title }}
-          </CardTitle>
-        </CardHeader>
 
-        <CardContent class="flex-1" />
+          <CardHeader class="flex-1 gap-2 pt-4">
+            <div class="flex">
+              <Badge v-if="article.category" variant="outline" class="gap-1">
+                <Newspaper class="size-3" />
+                {{ article.category }}
+              </Badge>
+            </div>
+            <CardTitle
+              class="line-clamp-2 text-base leading-snug group-hover:text-primary"
+            >
+              {{ article.title }}
+            </CardTitle>
+          </CardHeader>
 
-        <CardFooter
-          class="flex-col items-start gap-1 pt-4 text-xs text-muted-foreground"
-        >
-          <span class="flex items-center gap-1.5">
-            <CalendarDaysIcon class="size-3.5" />
-            <template v-if="article.published_at">
-              {{
-                article.status === 'scheduled' ? 'Scheduled for' : 'Published'
-              }}
-              {{ formatDate(article.published_at) }}
-            </template>
-            <template v-else>Not published</template>
-          </span>
-          <span class="pl-5">Created {{ formatDate(article.created_at) }}</span>
-        </CardFooter>
-      </Card>
+          <CardFooter
+            class="flex-col items-start gap-1 pt-4 text-xs text-muted-foreground"
+          >
+            <span class="flex items-center gap-1.5">
+              <CalendarDaysIcon class="size-3.5" />
+              <template v-if="article.published_at">
+                {{
+                  article.status === 'scheduled' ? 'Scheduled for' : 'Published'
+                }}
+                {{ formatDate(article.published_at) }}
+              </template>
+              <template v-else>Not published</template>
+            </span>
+            <span class="pl-5"
+              >Created {{ formatDate(article.created_at) }}</span
+            >
+          </CardFooter>
+        </Card>
+      </Link>
     </div>
 
     <!-- Empty state -->
