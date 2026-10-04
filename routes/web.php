@@ -228,6 +228,8 @@ Route::middleware([
     Route::middleware(['service_access:news-events'])->group(function () {
         Route::get('/news-events', [NewsArticleController::class, 'index'])
             ->name('news-events.index');
+        Route::get('/news-events/{article:slug}', [NewsArticleController::class, 'show'])
+            ->name('news-events.show');
     });
 
     // Conversation routes
