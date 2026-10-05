@@ -18,4 +18,10 @@ enum NewsArticleStatus: string
             self::ARCHIVED => 'Archived',
         };
     }
+
+    /** @return array<self> */
+    public static function creatable(): array
+    {
+        return [self::DRAFT, self::SCHEDULED, self::PUBLISHED];
+    }
 }
