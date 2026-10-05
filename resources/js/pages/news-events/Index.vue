@@ -7,6 +7,7 @@ import {
   NewspaperIcon,
   XIcon,
   SearchIcon,
+  PlusIcon,
 } from 'lucide-vue-next';
 import {
   Select,
@@ -128,9 +129,19 @@ function resetFilters() {
   <Head title="News & Events" />
   <div class="flex h-full flex-1 flex-col gap-6 p-6">
     <!-- Header -->
-    <div>
-      <h1 class="text-2xl font-bold tracking-tight">News & Events</h1>
-      <p class="text-muted-foreground">View and manage news and events.</p>
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight">News & Events</h1>
+        <p class="text-muted-foreground">View and manage news and events.</p>
+      </div>
+
+      <div>
+        <Button v-if="can_mutate" variant="default" as-child class="-ml-2">
+          <Link :href="newsEvents.create()">
+            <PlusIcon class="size-4" /> Create Article
+          </Link>
+        </Button>
+      </div>
     </div>
 
     <!-- Toolbar -->
