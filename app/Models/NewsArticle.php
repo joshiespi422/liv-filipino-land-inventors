@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Enums\NewsArticleStatus;
+use Illuminate\Support\Str;
 
 #[Fillable([
     'news_category_id',
@@ -43,5 +44,18 @@ class NewsArticle extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public static function generateUniqueSlug(string $title): string
+    {
+        $base = Str::limit(Str::slug($title) ?: 'article', 240, '');
+        $slug = $base;
+
+        // "create" is reserved, article with that slug could never be opened
+        while ($slug === 'create' || static::where('slug', $slug)->exists()) {
+            $slug = $base.'-'.Str::lower(Str::random(5));
+        }
+
+        return $slug;
     }
 }

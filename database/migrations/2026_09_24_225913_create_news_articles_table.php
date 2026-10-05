@@ -26,6 +26,8 @@ return new class extends Migration
             $table->string('source_url')->nullable();
             $table->timestamp('published_at')->nullable();
             $table->timestamps();
+
+            $table->index(['status', 'published_at']);
         });
     }
 
