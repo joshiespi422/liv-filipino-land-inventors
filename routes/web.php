@@ -234,6 +234,12 @@ Route::middleware([
             ->name('news-events.store');
         Route::get('/news-events/{article:slug}', [NewsArticleController::class, 'show'])
             ->name('news-events.show');
+        Route::get('/news-events/{article:slug}/edit', [NewsArticleController::class, 'edit'])
+            ->name('news-events.edit');
+        Route::put('/news-events/{article:slug}', [NewsArticleController::class, 'update'])
+            ->name('news-events.update');
+        Route::delete('/news-events/{article:slug}', [NewsArticleController::class, 'destroy'])
+            ->name('news-events.destroy');
     });
 
     // Conversation routes
