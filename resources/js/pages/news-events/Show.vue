@@ -8,17 +8,18 @@ import {
   ImageOffIcon,
   NewspaperIcon,
   PencilIcon,
-  Trash2Icon,
 } from 'lucide-vue-next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/AppLayout.vue';
+import ChangeStatusDialog from '@/components/news-events/ChangeStatusDialog.vue';
+import DeleteArticleDialog from '@/components/news-events/DeleteArticleDialog.vue';
 import newsEvents from '@/routes/news-events';
 import { formatDate, statusClasses } from '@/lib/news-events';
 import { getNewsArticleDetails } from '@/features/news-events/details';
-import type { NewsArticleDetail } from '@/types';
+import type { NewsArticleDetail, NewsArticleAbilities } from '@/types';
 
 defineOptions({
   layout: [],
@@ -27,6 +28,7 @@ defineOptions({
 const props = defineProps<{
   article: NewsArticleDetail;
   can_mutate: boolean;
+  abilities: NewsArticleAbilities;
 }>();
 
 const truncateTitle = (text: string, max = 30) =>
@@ -72,13 +74,24 @@ const details = computed(() => getNewsArticleDetails(props.article));
           </Link>
         </Button>
 
-        <div v-if="can_mutate" class="flex items-center gap-2">
-          <Button variant="outline" size="sm" class="cursor-pointer">
-            <PencilIcon class="size-4" /> Edit
+        <div
+          v-if="can_mutate"
+          class="flex flex-wrap items-center justify-end gap-2"
+        >
+          <ChangeStatusDialog
+            v-if="abilities.transitions.length"
+            :article="article"
+            :transitions="abilities.transitions"
+          />
+          <Button v-if="abilities.edit" variant="outline" size="sm" as-child>
+            <Link :href="newsEvents.edit(article.slug)">
+              <PencilIcon class="size-4" /> Edit
+            </Link>
           </Button>
-          <Button variant="destructive" size="sm" class="cursor-pointer">
-            <Trash2Icon class="size-4" /> Delete
-          </Button>
+          <DeleteArticleDialog
+            :article="article"
+            :can-delete="abilities.delete"
+          />
         </div>
       </div>
 
