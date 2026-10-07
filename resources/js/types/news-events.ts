@@ -56,9 +56,16 @@ export interface PaginatedNewsArticles {
 }
 
 export interface NewsArticleDetail extends NewsArticleIndex {
+  news_category_id: number;
   user: string | null;
   content: string;
   views_count: number;
   source_name: string | null;
   source_url: string | null;
+}
+
+export interface NewsArticleAbilities {
+  edit: boolean;
+  delete: boolean;
+  transitions: NewsStatusOption[];
 }

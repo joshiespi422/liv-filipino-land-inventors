@@ -18,6 +18,7 @@ class NewsArticleDetailResource extends JsonResource
         return [
             'id' => $this->id,
             'slug' => $this->slug,
+            'news_category_id' => $this->news_category_id,
             'category' => $this->newsCategory?->name,
             'user' => $this->user?->name,
             'title' => $this->title,
