@@ -18,6 +18,6 @@ export interface MemberUserDetail extends MemberUser {
   created_at: string;
 }
 
-export type MemberStatus = 'active' | 'for_approval' | 'approved';
+export type MemberStatus = 'active' | 'for_approval' | 'approved' | 'rejected';
 
 export type MemberType = 'basic' | 'member';

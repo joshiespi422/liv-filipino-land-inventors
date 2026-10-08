@@ -17,6 +17,7 @@ const STATUS_STYLES: Record<string, string> = {
   for_approval: 'bg-amber-500 hover:bg-amber-600',
   approved: 'bg-green-500 hover:bg-green-600',
   active: 'bg-blue-500 hover:bg-blue-600',
+  rejected: 'bg-rose-500 hover:bg-rose-600',
 };
 
 export const getMemberUserColumns = ({
