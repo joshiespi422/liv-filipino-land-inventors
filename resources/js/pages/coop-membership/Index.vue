@@ -21,6 +21,7 @@ import type {
   MemberType,
   MemberStatus,
   MemberUserDetail,
+  MemberUserAction,
   ApiResponse,
 } from '@/types';
 
@@ -58,6 +59,7 @@ const statusOptions = computed(() => {
         { label: 'For approval', value: 'for_approval' },
         { label: 'Approved', value: 'approved' },
         { label: 'Active', value: 'active' },
+        { label: 'Rejected', value: 'rejected' },
       ]
     : [{ label: 'Active', value: 'active' }];
 });
@@ -82,7 +84,9 @@ const debouncedUpdate = useDebounceFn(updateFilters, 300);
 watch(selectedType, (type) => {
   if (type === 'basic') {
     if (
-      !['for_approval', 'approved', 'active'].includes(selectedStatus.value)
+      !['for_approval', 'approved', 'active', 'rejected'].includes(
+        selectedStatus.value,
+      )
     ) {
       selectedStatus.value = 'for_approval';
     }
@@ -115,45 +119,66 @@ const showUserDetails = async (id: number) => {
 };
 
 // state for manage
+const ACTION_CONFIG = {
+  approve: {
+    title: 'Approve User',
+    confirmText: 'Approve',
+    variant: 'default',
+    success: 'User has been approved successfully!',
+  },
+  decline: {
+    title: 'Decline User',
+    confirmText: 'Decline',
+    variant: 'destructive',
+    success: 'User has been declined successfully!',
+  },
+  reactivate: {
+    title: 'Reactivate User',
+    confirmText: 'Reactivate',
+    variant: 'default',
+    success: 'User has been reactivated successfully!',
+  },
+} as const;
+
 const isConfirmOpen = ref(false);
 const selectedUserId = ref<number | null>(null);
-const actionType = ref<'approve' | 'decline' | null>(null);
+const actionType = ref<MemberUserAction | null>(null);
 
-const form = useForm({
-  action: '' as 'approve' | 'decline',
+const currentAction = computed(() =>
+  actionType.value ? ACTION_CONFIG[actionType.value] : null,
+);
+
+const form = useForm<{ action: MemberUserAction | '' }>({
+  action: '',
 });
 
-const openConfirm = (id: number, action: 'approve' | 'decline') => {
+const manageUser = (id: number, action: MemberUserAction) => {
   selectedUserId.value = id;
   actionType.value = action;
   isConfirmOpen.value = true;
 };
-
-const approveUser = (id: number) => openConfirm(id, 'approve');
-const declineUser = (id: number) => openConfirm(id, 'decline');
 
 const handleUserAction = () => {
   if (!selectedUserId.value || !actionType.value) {
     return;
   }
 
+  const config = ACTION_CONFIG[actionType.value];
   form.action = actionType.value;
 
   form.patch(coopMembership.users.updateStatus.url(selectedUserId.value), {
     preserveScroll: true,
-
     onSuccess: () => {
       isConfirmOpen.value = false;
       form.reset();
-      toast.success(`User has been ${actionType.value}d successfully!`);
+      toast.success(config.success);
     },
   });
 };
 
 const columns = getMemberUserColumns({
   showUserDetails,
-  approveUser,
-  declineUser,
+  manageUser,
 });
 
 const userDetails = computed(() =>
@@ -232,10 +257,10 @@ const userDetails = computed(() =>
 
   <ConfirmDialog
     v-model:open="isConfirmOpen"
-    :title="actionType === 'approve' ? 'Approve User' : 'Decline User'"
+    :title="currentAction?.title"
     :description="`Are you sure you want to ${actionType} this user?`"
-    :confirmText="actionType === 'approve' ? 'Approve' : 'Decline'"
-    :variant="actionType === 'approve' ? 'default' : 'destructive'"
+    :confirm-text="currentAction?.confirmText ?? 'Confirm'"
+    :variant="currentAction?.variant ?? 'default'"
     :loading="form.processing"
     @confirm="handleUserAction"
   />
