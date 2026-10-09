@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { MemberUser } from '@/types';
+import type { MemberUser, MemberUserAction } from '@/types';
 
 const STATUS_STYLES: Record<string, string> = {
   for_approval: 'bg-amber-500 hover:bg-amber-600',
@@ -20,14 +20,38 @@ const STATUS_STYLES: Record<string, string> = {
   rejected: 'bg-rose-500 hover:bg-rose-600',
 };
 
+// Which actions are available per status
+const STATUS_ACTIONS: Record<
+  string,
+  { action: MemberUserAction; label: string; class: string }[]
+> = {
+  for_approval: [
+    {
+      action: 'approve',
+      label: 'Approve User',
+      class: 'text-blue-500 focus:text-blue-600',
+    },
+    {
+      action: 'decline',
+      label: 'Decline User',
+      class: 'text-rose-500 focus:text-rose-600',
+    },
+  ],
+  rejected: [
+    {
+      action: 'reactivate',
+      label: 'Reactivate User',
+      class: 'text-green-600 focus:text-green-700',
+    },
+  ],
+};
+
 export const getMemberUserColumns = ({
   showUserDetails,
-  approveUser,
-  declineUser,
+  manageUser,
 }: {
   showUserDetails: (userId: number) => void;
-  approveUser: (userId: number) => void;
-  declineUser: (userId: number) => void;
+  manageUser: (userId: number, action: MemberUserAction) => void;
 }): ColumnDef<MemberUser>[] => [
   {
     accessorKey: 'name',
@@ -88,6 +112,7 @@ export const getMemberUserColumns = ({
     header: () => h('div', { class: 'text-center' }, 'Actions'),
     cell: ({ row }) => {
       const user = row.original;
+      const actions = STATUS_ACTIONS[user.status_name] ?? [];
 
       return h('div', { class: 'relative text-center' }, [
         h(DropdownMenu, null, () => [
@@ -110,24 +135,19 @@ export const getMemberUserColumns = ({
               },
               () => 'View User Details',
             ),
-            user.status_name === 'for_approval'
+            actions.length
               ? [
                   h(DropdownMenuSeparator),
-                  h(
-                    DropdownMenuItem,
-                    {
-                      class: 'cursor-pointer text-blue-500 focus:text-blue-600',
-                      onClick: () => approveUser(user.id),
-                    },
-                    () => 'Approve User',
-                  ),
-                  h(
-                    DropdownMenuItem,
-                    {
-                      class: 'cursor-pointer text-rose-500 focus:text-rose-600',
-                      onClick: () => declineUser(user.id),
-                    },
-                    () => 'Decline User',
+                  ...actions.map((item) =>
+                    h(
+                      DropdownMenuItem,
+                      {
+                        key: item.action,
+                        class: ['cursor-pointer', item.class],
+                        onClick: () => manageUser(user.id, item.action),
+                      },
+                      () => item.label,
+                    ),
                   ),
                 ]
               : null,
