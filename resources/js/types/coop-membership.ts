@@ -21,3 +21,5 @@ export interface MemberUserDetail extends MemberUser {
 export type MemberStatus = 'active' | 'for_approval' | 'approved' | 'rejected';
 
 export type MemberType = 'basic' | 'member';
+
+export type MemberUserAction = 'approve' | 'decline' | 'reactivate';
