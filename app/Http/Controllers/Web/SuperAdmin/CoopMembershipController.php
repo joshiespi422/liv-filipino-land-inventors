@@ -20,14 +20,14 @@ class CoopMembershipController extends Controller
     {
         // Validate all filters
         $validated = $request->validate([
-            'status' => ['sometimes', 'string', Rule::in(['for_approval', 'approved', 'active'])],
+            'status' => ['sometimes', 'string', Rule::in(['for_approval', 'approved', 'active', 'rejected'])],
             'type' => ['sometimes', 'string', Rule::in(['basic', 'member'])],
         ]);
 
         // Determine type & enforce allowed statuses
         $type = $validated['type'] ?? 'basic';
         $allowedStatuses = $type === 'basic'
-            ? ['for_approval', 'approved', 'active']
+            ? ['for_approval', 'approved', 'active', 'rejected']
             : ['active'];
 
         // Resolve status safely
@@ -95,6 +95,10 @@ class CoopMembershipController extends Controller
 
     public function updateStatus(User $user, Request $request)
     {
+        $request->validate([
+            'action' => 'required|in:approve,decline,reactivate',
+        ]);
+
         $action = $request->input('action');
 
         if ($action === 'approve' && $user->status_id === Status::FOR_APPROVAL) {
@@ -102,7 +106,7 @@ class CoopMembershipController extends Controller
                 'status_id' => Status::APPROVED,
             ]);
 
-            // Notification 2: Membership prompt
+            // Notification: Membership prompt
             $user->notify(new GeneralNotification(
                 type: 'coop_membership_available',
                 title: 'You can now join the Cooperative!',
@@ -115,7 +119,7 @@ class CoopMembershipController extends Controller
                 ]
             ));
 
-            // Notification 1: Profile approved
+            // Notification: Profile approved
             $user->notify(new GeneralNotification(
                 type: 'profile_approved',
                 title: 'Profile Approved!',
@@ -127,9 +131,8 @@ class CoopMembershipController extends Controller
                     'status' => 'approved',
                 ]
             ));
-        }
 
-        if ($action === 'decline' && $user->status_id === Status::FOR_APPROVAL) {
+        } elseif ($action === 'decline' && $user->status_id === Status::FOR_APPROVAL) {
             $user->update([
                 'status_id' => Status::REJECTED,
             ]);
@@ -138,12 +141,30 @@ class CoopMembershipController extends Controller
             $user->notify(new GeneralNotification(
                 type: 'profile_declined',
                 title: 'Profile Update Declined',
-                body: 'Your profile update was not approved. Please chat with our support team for more details.    ',
+                body: 'Your profile update was not approved. Please chat with our support team for more details.',
                 actionType: 'VIEW_PROFILE',
                 route: '/profile',
                 extraData: [
                     'user_id' => $user->id,
                     'status' => 'declined',
+                ]
+            ));
+
+        } elseif ($action === 'reactivate' && $user->status_id === Status::REJECTED) {
+            $user->update([
+                'status_id' => Status::ACTIVE,
+            ]);
+
+            // Notification: Account reactivated
+            $user->notify(new GeneralNotification(
+                type: 'account_reactivated',
+                title: 'Account Reactivated!',
+                body: 'Your account has been reactivated. You can now update your profile.',
+                actionType: 'VIEW_PROFILE',
+                route: '/profile',
+                extraData: [
+                    'user_id' => $user->id,
+                    'status' => 'active',
                 ]
             ));
         }
