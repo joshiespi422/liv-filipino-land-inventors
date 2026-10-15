@@ -46,25 +46,6 @@ const homeHref = computed(() =>
 );
 
 // static items
-// const platformNavItems = computed<NavItem[]>(() => {
-//   const items: NavItem[] = [
-//     {
-//       title: 'Dashboard',
-//       href: dashboard.index(),
-//       icon: LayoutGrid,
-//     },
-//   ];
-
-//   if (isSuperAdmin.value) {
-//     items.push({
-//       title: 'Admin Management',
-//       href: adminManagement.index(),
-//       icon: FolderDot,
-//     });
-//   }
-
-//   return items;
-// });
 const platformNavItems = computed<NavItem[]>(() => {
   if (isSeller.value) {
     return [
@@ -101,27 +82,16 @@ const platformNavItems = computed<NavItem[]>(() => {
 });
 
 // dynamic items
-// const serviceNavItems = computed(() => {
-//   return page.props.auth.managed_services.map(
-//     (service: Service): NavItem => ({
-//       title: service.name,
-//       href: `/${service.slug}`,
-//       icon: Box,
-//     }),
-//   );
-// });
 const serviceNavItems = computed(() => {
   if (isSeller.value) {
     return [];
   }
 
-  return page.props.auth.managed_services.map(
-    (service: Service): NavItem => ({
-      title: service.name,
-      href: `/${service.slug}`,
-      icon: Box,
-    }),
-  );
+  return page.props.auth.managed_services.map((service: Service): NavItem => ({
+    title: service.name,
+    href: `/${service.slug}`,
+    icon: Box,
+  }));
 });
 
 const footerNavItems: NavItem[] = [
