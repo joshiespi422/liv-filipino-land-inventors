@@ -31,6 +31,7 @@ export type Auth = {
   is_seller: boolean;
   managed_services: Service[];
   unread_notifications_count: number;
+  open_support_tickets_count: number;
 };
 
 export type TwoFactorConfigContent = {

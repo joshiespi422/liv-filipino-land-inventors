@@ -6,6 +6,7 @@ import {
   Box,
   Bell,
   MessageCircle,
+  Headset,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
@@ -26,6 +27,7 @@ import {
 } from '@/components/ui/sidebar';
 import adminManagement from '@/routes/admin-management';
 import dashboard from '@/routes/dashboard';
+import supportChat from '@/routes/support-chat';
 import notifications from '@/routes/notifications';
 import sellerConversations from '@/routes/seller/conversations';
 import sellerDashboard from '@/routes/seller/dashboard';
@@ -39,6 +41,9 @@ const isSeller = computed(() => page.props.auth.is_seller);
 
 const unreadCount = computed(
   () => page.props.auth.unread_notifications_count ?? 0,
+);
+const openTickets = computed(
+  () => page.props.auth.open_support_tickets_count ?? 0,
 );
 
 const homeHref = computed(() =>
@@ -124,6 +129,29 @@ const footerNavItems: NavItem[] = [
         :items="serviceNavItems"
         label="Services"
       />
+      <SidebarGroup v-if="isSuperAdmin" class="px-2 py-0">
+        <SidebarGroupLabel>Support</SidebarGroupLabel>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              as-child
+              :is-active="page.url.startsWith(supportChat.index().url)"
+            >
+              <Link :href="supportChat.index()" class="flex items-center gap-2">
+                <Headset class="size-4" />
+                <span>Support Chat</span>
+                <Badge
+                  v-if="openTickets > 0"
+                  variant="destructive"
+                  class="ml-auto h-5 min-w-5 rounded-full px-1 text-xs"
+                >
+                  {{ openTickets > 99 ? '99+' : openTickets }}
+                </Badge>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroup>
 
       <SidebarGroup class="px-2 py-0">
         <SidebarGroupLabel>Notifications</SidebarGroupLabel>

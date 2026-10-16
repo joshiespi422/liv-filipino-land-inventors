@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use App\Models\Service;
+use App\Models\SupportConversation;
 use App\Models\User;
 use App\Models\UserType;
 
@@ -49,6 +50,9 @@ class HandleInertiaRequests extends Middleware
                 'is_seller' => (bool) ($user?->is_seller ?? false),
                 'managed_services' => $user ? $this->getManagedServices($user) : [],
                 'unread_notifications_count' => $user?->unreadNotifications()->count() ?? 0,
+                'open_support_tickets_count' => $user?->user_type_id === UserType::SUPER_ADMIN
+                    ? SupportConversation::where('status', 'open')->count()
+                    : 0,
             ],
             'sidebarOpen' => !$request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => [
