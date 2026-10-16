@@ -6,6 +6,7 @@ use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
 use App\Notifications\Web\SupportChatMessageNotification;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -13,19 +14,15 @@ class SupportChatNotifier
 {
     public function notifyStaff(User $recipient, Conversation $conversation, Message $message): void
     {
-        $message->loadMissing('sender');
+        $message->loadMissing('sender:id,name');
 
         [$id, $data] = DB::transaction(function () use ($recipient, $conversation, $message) {
-            $existing = $recipient->unreadNotifications()
-                ->where('type', SupportChatMessageNotification::class)
-                ->get()
-                ->first(fn ($n) => ($n->data['conversation_id'] ?? null) === $conversation->id);
+            $existing = $this->unreadFor($recipient, $conversation->id, lock: true)->first();
 
             $count = ($existing?->data['unread_count'] ?? 0) + 1;
             $senderName = $message->sender->name ?? 'a user';
 
             $data = [
-                'kind' => 'support_chat',
                 'conversation_id' => $conversation->id,
                 'conversation_type' => 'support',
                 'message_id' => $message->id,
@@ -54,10 +51,29 @@ class SupportChatNotifier
             return [$id, $data];
         });
 
-        // Reuse the DB row's id so the broadcast matches the stored notification.
         $notification = new SupportChatMessageNotification($data);
         $notification->id = $id;
 
-        $recipient->notify($notification);
+        $recipient->notify($notification); // broadcast only; DB row already written
+    }
+
+    /** Mark this conversation's unread support notification(s) as read. */
+    public function clearFor(User $user, int $conversationId): void
+    {
+        $this->unreadFor($user, $conversationId)->each->markAsRead();
+    }
+
+    private function unreadFor(User $user, int $conversationId, bool $lock = false): Collection
+    {
+        $query = $user->unreadNotifications()
+            ->where('type', SupportChatMessageNotification::class);
+
+        if ($lock) {
+            $query->lockForUpdate();
+        }
+
+        return $query->get()->filter(
+            fn ($n) => ($n->data['conversation_id'] ?? null) === $conversationId
+        );
     }
 }
