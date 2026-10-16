@@ -5,6 +5,8 @@ namespace App\Services\Conversation;
 use App\Events\MessageSent;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Models\Status;
+use App\Models\SupportConversation;
 use App\Models\User;
 use App\Models\UserType;
 use App\Notifications\NewMessageNotification;
@@ -16,6 +18,41 @@ class ConversationNotifier
 
     public function notifyOthers(Conversation $conversation, Message $message, int $senderId): void
     {
+        if ($conversation->conversable_type === SupportConversation::class) {
+            $this->notifySupport($conversation, $message, $senderId);
+        } else {
+            $this->notifyParticipants($conversation, $message, $senderId);
+        }
+
+        broadcast(new MessageSent($message))->toOthers();
+    }
+
+    private function notifySupport(Conversation $conversation, Message $message, int $senderId): void
+    {
+        $ticket = $conversation->conversable;
+
+        if (! $ticket) {
+            return;
+        }
+
+        // Ticket owner (mobile) wrote in -> one aggregated notification per super admin (website)
+        if ($senderId === $ticket->user_id) {
+            User::query()
+                ->where('user_type_id', UserType::SUPER_ADMIN)
+                ->where('status_id', Status::ACTIVE)
+                ->where('id', '!=', $senderId)
+                ->each(fn (User $admin) => $this->supportChatNotifier->notifyStaff($admin, $conversation, $message));
+
+            return;
+        }
+
+        // Staff replied -> ticket owner gets the same notification as before (mobile unchanged)
+        $ticket->user?->notify(new NewMessageNotification($message));
+    }
+
+    /** Original behavior, untouched. */
+    private function notifyParticipants(Conversation $conversation, Message $message, int $senderId): void
+    {
         $participants = $conversation->participants()
             ->where('user_id', '!=', $senderId)
             ->with('user')
@@ -25,28 +62,9 @@ class ConversationNotifier
         $service = $conversation->conversable->service ?? null;
         $admins = $service ? $service->admins()->get() : collect();
 
-        $isSupport = $conversation->conversation_type === 'support';
-
         $participants->merge($admins)
             ->unique('id')
             ->reject(fn ($user) => $user->id === $senderId)
-            ->each(function ($user) use ($conversation, $message, $isSupport) {
-                // Website staff on support chat: one aggregated notification per conversation
-                if ($isSupport && $this->isWebsiteStaff($user)) {
-                    $this->supportChatNotifier->notifyStaff($user, $conversation, $message);
-
-                    return;
-                }
-
-                // Everyone else (mobile members/basic, intellectual property chats): unchanged
-                $user->notify(new NewMessageNotification($message));
-            });
-
-        broadcast(new MessageSent($message))->toOthers();
-    }
-
-    private function isWebsiteStaff(User $user): bool
-    {
-        return in_array($user->user_type_id, [UserType::SUPER_ADMIN], true);
+            ->each(fn ($user) => $user->notify(new NewMessageNotification($message)));
     }
 }
