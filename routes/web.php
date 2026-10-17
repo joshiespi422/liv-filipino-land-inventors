@@ -2,8 +2,7 @@
 
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Web\BusinessTrainingController;
-use App\Http\Controllers\Web\Conversation\ConversationController;
-use App\Http\Controllers\Web\Conversation\MessageController;
+use App\Http\Controllers\Web\MessageController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\IntellectualPropertyController;
 use App\Http\Controllers\Web\LoanAssistanceController;
@@ -19,7 +18,7 @@ use App\Http\Controllers\Web\Seller\ReviewController as SellerReviewController;
 use App\Http\Controllers\Web\Seller\ShopConversationController as SellerShopConversationController;
 use App\Http\Controllers\Web\SuperAdmin\AdminManagementController;
 use App\Http\Controllers\Web\SuperAdmin\CoopMembershipController;
-use App\Http\Controllers\Web\SupportChat\SupportChatController;
+use App\Http\Controllers\Web\SupportChatController;
 use App\Http\Controllers\AccountDeletionController;
 use App\Models\UserType;
 use App\Models\TermsAndCondition;
@@ -156,6 +155,13 @@ Route::middleware([
 
     });
 
+    // Support Chat Domain
+    Route::prefix('support-chat')->name('support-chat.')->group(function () {
+        Route::get('/', [SupportChatController::class, 'index'])->name('index');
+        Route::post('{conversation}/read', [SupportChatController::class, 'markRead'])
+            ->whereNumber('conversation')->name('read');
+    });
+
 });
 
 Route::middleware([
@@ -242,15 +248,9 @@ Route::middleware([
             ->name('news-events.destroy');
     });
 
-    // Conversation routes
-    Route::prefix('admin/conversations')->name('conversations.')->group(function () {
-        Route::get('{conversation}', [ConversationController::class, 'show'])->name('show');
+    // Conversation (chat-support, intellectual-chat) -- message creation with existing conversation
+    Route::prefix('conversations')->name('conversations.')->group(function () {
         Route::post('{conversation}/messages', [MessageController::class, 'store'])->name('messages.store');
-        Route::post('{conversation}/read', [ConversationController::class, 'markRead'])->name('read');
-    });
-
-    Route::prefix('admin/support-chat')->name('support-chat.')->group(function () {
-        Route::get('/', [SupportChatController::class, 'index'])->name('index');
     });
 
 });
