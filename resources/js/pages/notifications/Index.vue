@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
-import conversationRoutes from '@/routes/conversations';
 import notificationRoutes from '@/routes/notifications';
 
 defineOptions({
@@ -32,22 +31,24 @@ interface PaginatedNotifications {
   links: { url: string | null; label: string; active: boolean }[];
 }
 
+interface NotificationItem {
+  id: string;
+  message: string;
+  preview: string | null;
+  read_at: string | null;
+  created_at: string;
+}
+
 const props = defineProps<{
   notifications: PaginatedNotifications;
 }>();
 
 function markRead(notification: NotificationItem) {
+  // The server marks it read and redirects to the right page
   router.post(
     notificationRoutes.read(notification.id).url,
     {},
-    {
-      preserveScroll: true,
-      onSuccess: () => {
-        router.visit(
-          conversationRoutes.show(notification.data.conversation_id).url,
-        );
-      },
-    },
+    { preserveScroll: true },
   );
 }
 
@@ -89,7 +90,13 @@ function markAllRead() {
         <span v-else class="mt-1.5 size-2 shrink-0" />
 
         <div class="flex flex-col gap-1">
-          <p class="text-sm">{{ notification.data.body }}</p>
+          <p class="text-sm">{{ notification.message }}</p>
+          <p
+            v-if="notification.preview"
+            class="line-clamp-1 text-xs text-muted-foreground"
+          >
+            {{ notification.preview }}
+          </p>
           <p class="text-xs text-muted-foreground">
             {{ new Date(notification.created_at).toLocaleString() }}
           </p>
