@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Head, router, usePage } from '@inertiajs/vue3';
-import { useEcho } from '@laravel/echo-vue';
+import { echo } from '@laravel/echo-vue';
 import { ref, computed, nextTick, onMounted, watch } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import conversations from '@/routes/conversations';
+import supportChat from '@/routes/support-chat';
 import type { Auth } from '@/types';
 
 interface TicketUser {
@@ -12,10 +13,9 @@ interface TicketUser {
   name: string;
   email: string;
 }
-
 interface Ticket {
   id: number;
-  conversation_id: number | null;
+  conversation_id: number;
   status: string;
   subject: string | null;
   user: TicketUser | null;
@@ -23,20 +23,17 @@ interface Ticket {
   last_message_at: string | null;
   unread_count: number;
 }
-
 interface Attachment {
   id: number;
   path: string;
   original_name: string;
-  mime_type: string;
+  mime_type: string | null;
   size: number;
 }
-
 interface Sender {
   id: number;
   name: string;
 }
-
 interface Message {
   id: number;
   body: string | null;
@@ -44,18 +41,10 @@ interface Message {
   sender: Sender;
   attachments: Attachment[];
 }
-
-interface Participant {
-  id: number;
-  user: Sender;
-  role: string;
-}
-
 interface ConversationData {
   id: number;
   status: string;
   messages: Message[];
-  participants: Participant[];
 }
 
 const props = defineProps<{
@@ -63,21 +52,23 @@ const props = defineProps<{
   selectedConversation: ConversationData | null;
 }>();
 
-defineOptions({
-  layout: {
-    breadcrumbs: [{ title: 'Support Chat' }],
-  },
-});
+defineOptions({ layout: { breadcrumbs: [{ title: 'Support Chat' }] } });
+
+// Props that change when a ticket is opened or read
+const PARTIAL = ['selectedConversation', 'tickets', 'auth'];
 
 const page = usePage<{ auth: Auth }>();
 const currentUserId = computed(() => page.props.auth.user?.id);
 
-const messages = ref<Message[]>(
-  props.selectedConversation ? [...props.selectedConversation.messages] : [],
-);
+const messages = ref<Message[]>([]);
 const body = ref('');
 const files = ref<File[]>([]);
 const scrollContainer = ref<HTMLElement | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null);
+
+const openCount = computed(
+  () => props.tickets.filter((t) => t.status === 'open').length,
+);
 
 function scrollToBottom() {
   nextTick(() => {
@@ -88,52 +79,65 @@ function scrollToBottom() {
 }
 
 function selectTicket(conversationId: number | null) {
-  if (!conversationId) {
-return;
+  if (!conversationId || conversationId === props.selectedConversation?.id) {
+    return;
+  }
+
+  router.visit(supportChat.index({ query: { c: conversationId } }), {
+    only: PARTIAL,
+    preserveState: true,
+    preserveScroll: true,
+  });
 }
 
-  router.get(
-    '/admin/support-chat',
-    { conversation_id: conversationId },
-    { preserveState: true, preserveScroll: true },
-  );
-}
-
-// Update local state when conversation updates
+// Server messages -> local list (the server already marked the chat as read)
 watch(
   () => props.selectedConversation,
-  (newVal) => {
-    messages.value = newVal ? [...newVal.messages] : [];
+  (conversation) => {
+    messages.value = conversation ? [...conversation.messages] : [];
     scrollToBottom();
-
-    if (newVal) {
-      markAsRead(newVal.id);
-    }
   },
   { immediate: true },
 );
 
 function markAsRead(conversationId: number) {
   router.post(
-    conversations.read(conversationId).url,
+    supportChat.read(conversationId).url,
     {},
-    { preserveScroll: true, preserveState: true },
+    {
+      only: ['tickets', 'auth'],
+      preserveScroll: true,
+      preserveState: true,
+    },
   );
 }
 
-onMounted(() => {
-  scrollToBottom();
-});
-
-// Real-time updates via Laravel Echo
+// Real-time: one channel per open conversation, cleaned up on switch/unmount
 watch(
   () => props.selectedConversation?.id,
-  (conversationId, oldId) => {
-    if (conversationId) {
-      useEcho(`conversation.${conversationId}`, '.message.sent', (e: any) => {
-        if (e.sender_id === currentUserId.value) {
-return;
-}
+  (id, _prev, onCleanup) => {
+    body.value = ''; // don't carry a draft into another ticket
+    files.value = [];
+
+    if (fileInput.value) {
+      fileInput.value.value = '';
+    }
+
+    if (!id) {
+      return;
+    }
+
+    const channelName = `conversation.${id}`;
+
+    echo()
+      .private(channelName)
+      .listen('.message.sent', (e: any) => {
+        if (
+          e.sender_id === currentUserId.value ||
+          messages.value.some((m) => m.id === e.id)
+        ) {
+          return;
+        }
 
         messages.value.push({
           id: e.id,
@@ -142,13 +146,16 @@ return;
           sender: e.sender,
           attachments: e.attachments || [],
         });
-
         scrollToBottom();
+        markAsRead(id); // viewing it live = read; also clears the notification
       });
-    }
+
+    onCleanup(() => echo().leave(channelName));
   },
   { immediate: true },
 );
+
+onMounted(scrollToBottom);
 
 function handleFileChange(event: Event) {
   const input = event.target as HTMLInputElement;
@@ -157,12 +164,12 @@ function handleFileChange(event: Event) {
 
 function sendMessage() {
   if (!props.selectedConversation) {
-return;
-}
+    return;
+  }
 
   if (!body.value.trim() && files.value.length === 0) {
-return;
-}
+    return;
+  }
 
   const formData = new FormData();
   formData.append('body', body.value);
@@ -172,11 +179,17 @@ return;
     conversations.messages.store(props.selectedConversation.id).url,
     formData,
     {
+      only: ['selectedConversation', 'tickets'],
       preserveScroll: true,
       forceFormData: true,
       onSuccess: () => {
         body.value = '';
         files.value = [];
+
+        if (fileInput.value) {
+          fileInput.value.value = '';
+        }
+
         scrollToBottom();
       },
     },
@@ -188,15 +201,19 @@ function isOwnMessage(message: Message): boolean {
 }
 
 function formatTime(isoString: string | null) {
-  if (!isoString) {
-return '';
+  return isoString
+    ? new Date(isoString).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : '';
 }
 
-  return new Date(isoString).toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
+// Attachments
+const attachmentUrl = (path: string) =>
+  /^(https?:)?\//.test(path) ? path : `/storage/${path}`;
+const isImage = (a: Attachment) => !!a.mime_type?.startsWith('image/');
+const isVideo = (a: Attachment) => !!a.mime_type?.startsWith('video/');
 </script>
 
 <template>
@@ -207,6 +224,9 @@ return '';
     <div class="flex w-1/3 flex-col overflow-hidden rounded-lg border bg-card">
       <div class="border-b p-3 font-semibold text-card-foreground">
         Support Tickets
+        <span class="text-xs font-normal text-muted-foreground"
+          >({{ openCount }} open)</span
+        >
       </div>
       <div class="flex-1 divide-y overflow-y-auto">
         <div
@@ -219,9 +239,13 @@ return '';
           @click="selectTicket(ticket.conversation_id)"
         >
           <div class="flex items-center justify-between">
-            <span class="text-sm font-medium">{{
-              ticket.user?.name ?? 'Unknown'
-            }}</span>
+            <span class="text-sm font-medium"
+              >{{ ticket.user?.name ?? 'Unknown'
+              }}<span class="ms-1 text-[10px] text-muted-foreground uppercase">
+                {{ ticket.status }}
+              </span></span
+            >
+
             <span
               v-if="ticket.unread_count > 0"
               class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground"
@@ -292,18 +316,44 @@ return '';
               </p>
 
               <div
-                v-if="message.attachments && message.attachments.length > 0"
-                class="mt-1 flex flex-col gap-1"
+                v-if="message.attachments?.length"
+                class="mt-1 flex flex-col gap-2"
               >
-                <a
+                <template
                   v-for="attachment in message.attachments"
                   :key="attachment.id"
-                  :href="`/storage/${attachment.path}`"
-                  target="_blank"
-                  class="text-xs underline"
                 >
-                  {{ attachment.original_name }}
-                </a>
+                  <a
+                    v-if="isImage(attachment)"
+                    :href="attachmentUrl(attachment.path)"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <img
+                      :src="attachmentUrl(attachment.path)"
+                      :alt="attachment.original_name"
+                      loading="lazy"
+                      class="max-h-64 max-w-full rounded-md object-cover"
+                      @load="scrollToBottom"
+                    />
+                  </a>
+                  <video
+                    v-else-if="isVideo(attachment)"
+                    :src="attachmentUrl(attachment.path)"
+                    controls
+                    preload="metadata"
+                    class="max-h-64 max-w-full rounded-md"
+                  />
+                  <a
+                    v-else
+                    :href="attachmentUrl(attachment.path)"
+                    target="_blank"
+                    rel="noopener"
+                    class="text-xs underline"
+                  >
+                    {{ attachment.original_name }}
+                  </a>
+                </template>
               </div>
             </div>
 
