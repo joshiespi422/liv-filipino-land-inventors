@@ -160,6 +160,8 @@ Route::middleware([
         Route::get('/', [SupportChatController::class, 'index'])->name('index');
         Route::post('{conversation}/read', [SupportChatController::class, 'markRead'])
             ->whereNumber('conversation')->name('read');
+        Route::patch('{conversation}/status', [SupportChatController::class, 'updateStatus'])
+            ->whereNumber('conversation')->name('status');
     });
 
 });
