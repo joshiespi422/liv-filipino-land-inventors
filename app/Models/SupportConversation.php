@@ -14,6 +14,9 @@ class SupportConversation extends Model
         'status',
     ];
 
+    public const OPEN = 'open';
+    public const CLOSED = 'closed';
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
