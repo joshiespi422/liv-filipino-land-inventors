@@ -157,7 +157,10 @@ const footerNavItems: NavItem[] = [
         <SidebarGroupLabel>Notifications</SidebarGroupLabel>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton as-child>
+            <SidebarMenuButton
+              as-child
+              :is-active="page.url.startsWith(notifications.index().url)"
+            >
               <Link
                 :href="notifications.index()"
                 class="relative flex items-center gap-2"
