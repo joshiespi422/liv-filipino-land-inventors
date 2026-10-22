@@ -11,6 +11,7 @@ use App\Models\UserType;
 use App\Services\SupportChat\Web\SupportChatInbox;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -41,7 +42,10 @@ class SupportChatController extends Controller
         }
 
         return Inertia::render('support-chat/Index', [
-            'tickets' => $this->inbox->tickets($user),
+            'tickets' => $this->inbox->tickets($user, SupportConversation::OPEN),
+            'closedTickets' => Inertia::optional(
+                fn () => $this->inbox->tickets($user, SupportConversation::CLOSED)
+            ),
             'selectedConversation' => $selected,
         ]);
     }
@@ -67,5 +71,20 @@ class SupportChatController extends Controller
         );
 
         return $user;
+    }
+
+    public function updateStatus(Request $request, Conversation $conversation): RedirectResponse
+    {
+        $this->staff($request);
+
+        abort_unless($conversation->conversable_type === SupportConversation::class, 404);
+
+        $validated = $request->validate([
+            'status' => ['required', Rule::in([SupportConversation::OPEN, SupportConversation::CLOSED])],
+        ]);
+
+        $this->inbox->setStatus($conversation, $validated['status']);
+
+        return redirect()->route('support-chat.index');
     }
 }
