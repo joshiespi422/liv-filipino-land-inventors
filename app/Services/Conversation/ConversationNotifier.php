@@ -37,6 +37,11 @@ class ConversationNotifier
 
         // Ticket owner (mobile) wrote in -> one aggregated notification per super admin (website)
         if ($senderId === $ticket->user_id) {
+            if ($ticket->status !== SupportConversation::OPEN) {
+                $ticket->update(['status' => SupportConversation::OPEN]);
+                $conversation->update(['status' => SupportConversation::OPEN]);
+            }
+
             User::query()
                 ->where('user_type_id', UserType::SUPER_ADMIN)
                 ->where('status_id', Status::ACTIVE)
