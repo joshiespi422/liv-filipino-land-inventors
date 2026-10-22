@@ -8,13 +8,14 @@ use App\Models\SupportConversation;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class SupportChatInbox
 {
     public function __construct(private readonly SupportChatNotifier $notifier) {}
 
     /** Open tickets first, then newest activity. */
-    public function tickets(User $user, int $limit = 100): Collection
+    public function tickets(User $user, string $status = SupportConversation::OPEN, int $limit = 100): Collection
     {
         $lastMessage = fn (string $column) => Message::query()
             ->select($column)
@@ -38,6 +39,7 @@ class SupportChatInbox
                 $join->on('conversations.conversable_id', '=', 'support_conversations.id')
                     ->where('conversations.conversable_type', '=', SupportConversation::class);
             })
+            ->where('support_conversations.status', $status)
             ->addSelect('conversations.id as conversation_id')
             ->addSelect([
                 'last_message_at' => $lastMessage('created_at'),
@@ -45,7 +47,6 @@ class SupportChatInbox
                 'unread_count' => $unread,
             ])
             ->with('user:id,name,email')
-            ->orderByRaw("CASE WHEN support_conversations.status = 'open' THEN 0 ELSE 1 END")
             ->orderByDesc('last_message_at')
             ->orderByDesc('support_conversations.id')
             ->limit($limit)
@@ -88,5 +89,13 @@ class SupportChatInbox
     {
         $conversation->ensureParticipant($user)->update(['last_read_at' => now()]);
         $this->notifier->clearFor($user, $conversation->id);
+    }
+
+    public function setStatus(Conversation $conversation, string $status): void
+    {
+        DB::transaction(function () use ($conversation, $status) {
+            $conversation->conversable->update(['status' => $status]);
+            $conversation->update(['status' => $status]);
+        });
     }
 }
