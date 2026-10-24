@@ -2,8 +2,17 @@
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { echo } from '@laravel/echo-vue';
 import { ref, computed, nextTick, onMounted, watch } from 'vue';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'vue-sonner';
 import conversations from '@/routes/conversations';
 import supportChat from '@/routes/support-chat';
 import type { Auth } from '@/types';
@@ -46,16 +55,31 @@ interface ConversationData {
   status: string;
   messages: Message[];
 }
+type StatusFilter = 'open' | 'closed';
 
 const props = defineProps<{
   tickets: Ticket[];
+  closedTickets?: Ticket[];
   selectedConversation: ConversationData | null;
 }>();
 
-defineOptions({ layout: { breadcrumbs: [{ title: 'Support Chat' }] } });
+// Open when the page loads; switches to Closed only if the linked ticket is closed
+const statusFilter = ref<StatusFilter>(
+  props.selectedConversation?.status === 'closed' ? 'closed' : 'open',
+);
 
-// Props that change when a ticket is opened or read
-const PARTIAL = ['selectedConversation', 'tickets', 'auth'];
+const partialProps = () => [
+  'selectedConversation',
+  'tickets',
+  'auth',
+  ...(statusFilter.value === 'closed' ? ['closedTickets'] : []),
+];
+
+const visibleTickets = computed(() =>
+  statusFilter.value === 'open' ? props.tickets : props.closedTickets,
+);
+
+defineOptions({ layout: { breadcrumbs: [{ title: 'Support Chat' }] } });
 
 const page = usePage<{ auth: Auth }>();
 const currentUserId = computed(() => page.props.auth.user?.id);
@@ -66,9 +90,63 @@ const files = ref<File[]>([]);
 const scrollContainer = ref<HTMLElement | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 
-const openCount = computed(
-  () => props.tickets.filter((t) => t.status === 'open').length,
-);
+// Fetch closed tickets every time the filter switches to Closed
+watch(statusFilter, (filter) => {
+  if (
+    filter === 'closed' &&
+    props.closedTickets === undefined &&
+    !props.selectedConversation
+  ) {
+    router.reload({ only: ['closedTickets'] });
+  }
+});
+onMounted(() => {
+  if (statusFilter.value === 'closed' && props.closedTickets === undefined) {
+    router.reload({ only: ['closedTickets'] });
+  }
+});
+
+function setStatus(status: StatusFilter) {
+  if (!props.selectedConversation) {
+    return;
+  }
+
+  router.patch(
+    supportChat.status(props.selectedConversation.id).url,
+    { status },
+    {
+      only: partialProps(),
+      preserveScroll: true,
+      preserveState: true,
+      onSuccess: () => {
+        toast.success('Conversation status successfully updated.');
+      },
+    },
+  );
+}
+function changeFilter(filter: StatusFilter) {
+  if (filter === statusFilter.value) {
+    return;
+  }
+
+  statusFilter.value = filter;
+
+  if (props.selectedConversation) {
+    router.visit(supportChat.index(), {
+      only: partialProps(),
+      preserveState: true,
+      preserveScroll: true,
+    });
+  }
+}
+
+// Status badge colors: add one entry per future status
+const STATUS_STYLES: Record<string, string> = {
+  open: 'border-transparent bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
+  closed: 'border-transparent bg-rose-500/15 text-rose-600 dark:text-rose-400',
+};
+const statusClass = (status: string) =>
+  STATUS_STYLES[status] ?? STATUS_STYLES.closed;
 
 function scrollToBottom() {
   nextTick(() => {
@@ -84,7 +162,7 @@ function selectTicket(conversationId: number | null) {
   }
 
   router.visit(supportChat.index({ query: { c: conversationId } }), {
-    only: PARTIAL,
+    only: partialProps(),
     preserveState: true,
     preserveScroll: true,
   });
@@ -171,6 +249,8 @@ function sendMessage() {
     return;
   }
 
+  if (props.selectedConversation.status !== 'open') return;
+
   const formData = new FormData();
   formData.append('body', body.value);
   files.value.forEach((file) => formData.append('attachments[]', file));
@@ -222,15 +302,25 @@ const isVideo = (a: Attachment) => !!a.mime_type?.startsWith('video/');
   <div class="flex h-[calc(100vh-8rem)] gap-4 p-4">
     <!-- Left Column: Tickets List -->
     <div class="flex w-1/3 flex-col overflow-hidden rounded-lg border bg-card">
-      <div class="border-b p-3 font-semibold text-card-foreground">
-        Support Tickets
-        <span class="text-xs font-normal text-muted-foreground"
-          >({{ openCount }} open)</span
+      <div class="flex items-center justify-between gap-2 border-b p-3">
+        <span class="font-semibold text-card-foreground">Support Tickets</span>
+
+        <Select
+          :model-value="statusFilter"
+          @update:model-value="changeFilter($event as StatusFilter)"
         >
+          <SelectTrigger class="h-8 w-28 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="open">Open</SelectItem>
+            <SelectItem value="closed">Closed</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div class="flex-1 divide-y overflow-y-auto">
         <div
-          v-for="ticket in tickets"
+          v-for="ticket in visibleTickets"
           :key="ticket.id"
           class="flex cursor-pointer flex-col gap-1 p-3 transition-colors hover:bg-muted/50"
           :class="{
@@ -238,17 +328,23 @@ const isVideo = (a: Attachment) => !!a.mime_type?.startsWith('video/');
           }"
           @click="selectTicket(ticket.conversation_id)"
         >
-          <div class="flex items-center justify-between">
-            <span class="text-sm font-medium"
-              >{{ ticket.user?.name ?? 'Unknown'
-              }}<span class="ms-1 text-[10px] text-muted-foreground uppercase">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex min-w-0 items-center gap-2">
+              <span class="truncate text-sm font-medium">{{
+                ticket.user?.name ?? 'Unknown'
+              }}</span>
+              <Badge
+                variant="outline"
+                class="px-1.5 py-0 text-[10px] uppercase"
+                :class="statusClass(ticket.status)"
+              >
                 {{ ticket.status }}
-              </span></span
-            >
+              </Badge>
+            </div>
 
             <span
               v-if="ticket.unread_count > 0"
-              class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground"
+              class="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground"
             >
               {{ ticket.unread_count > 9 ? '9+' : ticket.unread_count }}
             </span>
@@ -267,10 +363,16 @@ const isVideo = (a: Attachment) => !!a.mime_type?.startsWith('video/');
         </div>
 
         <div
-          v-if="tickets.length === 0"
+          v-if="visibleTickets === undefined"
           class="p-4 text-center text-sm text-muted-foreground"
         >
-          No support chat tickets yet.
+          Loading…
+        </div>
+        <div
+          v-else-if="visibleTickets.length === 0"
+          class="p-4 text-center text-sm text-muted-foreground"
+        >
+          No {{ statusFilter }} tickets.
         </div>
       </div>
     </div>
@@ -280,12 +382,30 @@ const isVideo = (a: Attachment) => !!a.mime_type?.startsWith('video/');
       <template v-if="selectedConversation">
         <!-- Chat Header -->
         <div
-          class="flex items-center justify-between border-b bg-muted/30 p-3 font-semibold"
+          class="flex items-center justify-between gap-3 border-b bg-muted/30 p-3"
         >
-          <span>Active Conversation (#{{ selectedConversation.id }})</span>
-          <span class="text-xs font-normal text-muted-foreground capitalize">
-            Status: {{ selectedConversation.status }}
-          </span>
+          <div class="flex items-center gap-2 font-semibold">
+            <span>Conversation #{{ selectedConversation.id }}</span>
+            <Badge
+              variant="outline"
+              class="px-1.5 py-0 text-[10px] uppercase"
+              :class="statusClass(selectedConversation.status)"
+            >
+              {{ selectedConversation.status }}
+            </Badge>
+          </div>
+
+          <Button
+            v-if="selectedConversation.status === 'open'"
+            variant="outline"
+            size="sm"
+            @click="setStatus('closed')"
+          >
+            Close ticket
+          </Button>
+          <Button v-else variant="outline" size="sm" @click="setStatus('open')">
+            Reopen
+          </Button>
         </div>
 
         <!-- Chat Messages Window -->
@@ -372,6 +492,7 @@ const isVideo = (a: Attachment) => !!a.mime_type?.startsWith('video/');
 
         <!-- Input Area -->
         <form
+          v-if="selectedConversation.status === 'open'"
           class="flex flex-col gap-2 border-t p-3"
           @submit.prevent="sendMessage"
         >
@@ -397,6 +518,12 @@ const isVideo = (a: Attachment) => !!a.mime_type?.startsWith('video/');
             {{ files.length }} file(s) selected
           </p>
         </form>
+        <div
+          v-else
+          class="border-t p-3 text-center text-xs text-muted-foreground"
+        >
+          This ticket is closed. Reopen it to reply.
+        </div>
       </template>
 
       <!-- Empty State -->
