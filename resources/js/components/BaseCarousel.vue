@@ -28,9 +28,13 @@ let autoplayTimer: ReturnType<typeof setInterval> | null = null;
 let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const isDragging = ref(false);
+const isPointerDown = ref(false);
+const didDrag = ref(false);
 const isJumping = ref(false); 
 const startX = ref(0);
+const startY = ref(0);
 const scrollLeft = ref(0);
+const dragThreshold = 8;
 
 const getSingleSetWidth = () => {
     if (!sliderRef.value || props.items.length === 0) {
@@ -144,31 +148,59 @@ const dragStart = (e: MouseEvent) => {
         return;
     }
 
-    isDragging.value = true;
+    isPointerDown.value = true;
+    didDrag.value = false;
     startX.value = e.pageX - sliderRef.value.offsetLeft;
+    startY.value = e.pageY;
     scrollLeft.value = sliderRef.value.scrollLeft;
     stopAutoplay(); 
 };
 
 const dragStop = () => {
-    if (!isDragging.value) {
+    if (!isPointerDown.value) {
         return;
     }
 
+    isPointerDown.value = false;
     isDragging.value = false;
     startAutoplay(); 
     setTimeout(checkInfiniteBounds, 150);
 };
 
 const dragMove = (e: MouseEvent) => {
-    if (!isDragging.value || !sliderRef.value) {
+    if (!isPointerDown.value || !sliderRef.value) {
         return;
     }
 
-    e.preventDefault();
     const x = e.pageX - sliderRef.value.offsetLeft;
+
+    if (!isDragging.value) {
+        const movedX = Math.abs(x - startX.value);
+        const movedY = Math.abs(e.pageY - startY.value);
+
+        // Only treat this as a drag once the pointer actually moves, otherwise
+        // a plain click would be swallowed by the slide's pointer-events-none state.
+        if (movedX < dragThreshold && movedY < dragThreshold) {
+            return;
+        }
+
+        isDragging.value = true;
+        didDrag.value = true;
+    }
+
+    e.preventDefault();
     const walk = (x - startX.value) * 1.5; 
     sliderRef.value.scrollLeft = scrollLeft.value - walk;
+};
+
+const handleClickCapture = (e: MouseEvent) => {
+    if (!didDrag.value) {
+        return;
+    }
+
+    // A drag just ended — suppress the click so cards don't open by accident.
+    e.preventDefault();
+    e.stopPropagation();
 };
 
 const initCarousel = async () => {
@@ -236,6 +268,7 @@ onUnmounted(() => {
                 (!isDragging && !isJumping) ? 'snap-x snap-mandatory scroll-smooth' : ''
             ]"
             @scroll="handleScroll"
+            @click.capture="handleClickCapture"
             @mousedown="dragStart"
             @mouseleave="dragStop"
             @mouseup="dragStop"
