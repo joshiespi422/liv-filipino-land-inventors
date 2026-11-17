@@ -20,7 +20,7 @@ const sampleItems: any[] = [
     subtitle: 'Step 1',
     description:
       'Learn where and how to securely download the official mobile app.',
-    media_path: '/assets/placeholder.jpg',
+    media_path: '/assets/Mobile-Tutorial/Thumbnail/Thumb 1.png',
     video_url: '/assets/Mobile-Tutorial/1 How to Download the App.mp4',
   },
   {
@@ -30,7 +30,7 @@ const sampleItems: any[] = [
     subtitle: 'Step 2',
     description:
       'A step-by-step guide to registering and setting up your new account.',
-    media_path: '/assets/placeholder.jpg',
+    media_path: '/assets/Mobile-Tutorial/Thumbnail/Thumb 2.png',
     video_url:
       '/assets/Mobile-Tutorial/2 How to create your fismpc account.mp4',
   },
@@ -40,7 +40,7 @@ const sampleItems: any[] = [
     title: 'How to Login your Account',
     subtitle: 'Step 3',
     description: 'Securely access your account using your credentials.',
-    media_path: '/assets/placeholder.jpg',
+    media_path: '/assets/Mobile-Tutorial/Thumbnail/Thumb 3.png',
     video_url: '/assets/Mobile-Tutorial/3 How to Log In to Your Account.mp4',
   },
   {
@@ -50,7 +50,7 @@ const sampleItems: any[] = [
     subtitle: 'Step 4',
     description:
       'Forgot your password? Learn how to safely recover your access.',
-    media_path: '/assets/placeholder.jpg',
+    media_path: '/assets/Mobile-Tutorial/Thumbnail/Thumb 4.png',
     video_url:
       '/assets/Mobile-Tutorial/4 How to Recover Your Account If You Forget Your Password.mp4',
   },
@@ -61,7 +61,7 @@ const sampleItems: any[] = [
     subtitle: 'Step 5',
     description:
       'Fill in your necessary details to complete your membership profile.',
-    media_path: '/assets/placeholder.jpg',
+    media_path: '/assets/Mobile-Tutorial/Thumbnail/Thumb 5.png',
     video_url: '/assets/Mobile-Tutorial/5 How to Complete Your Profile.mp4',
   },
   {
@@ -70,7 +70,7 @@ const sampleItems: any[] = [
     title: 'How to Change Your Profile Picture',
     subtitle: 'Step 6',
     description: 'Personalize your account by updating your profile picture.',
-    media_path: '/assets/placeholder.jpg',
+    media_path: '/assets/Mobile-Tutorial/Thumbnail/Thumb 6.png',
     video_url:
       '/assets/Mobile-Tutorial/6 How to Change Your Profile Picture.mp4',
   },
@@ -81,7 +81,7 @@ const sampleItems: any[] = [
     subtitle: 'Step 7',
     description:
       'Enable Face ID or Fingerprint login for faster, secure access.',
-    media_path: '/assets/placeholder.jpg',
+    media_path: '/assets/Mobile-Tutorial/Thumbnail/Thumb 7.png',
     video_url:
       '/assets/Mobile-Tutorial/7 How to Activate Biometric Authentication.mp4',
   },
@@ -92,7 +92,7 @@ const sampleItems: any[] = [
     subtitle: 'Step 8',
     description:
       'Follow the process to officially become a registered cooperative member.',
-    media_path: '/assets/placeholder.jpg',
+    media_path: '/assets/Mobile-Tutorial/Thumbnail/Thumb 8.png',
     video_url:
       '/assets/Mobile-Tutorial/8 How to Become a Cooperative Member.mp4',
   },
@@ -103,7 +103,7 @@ const sampleItems: any[] = [
     subtitle: 'Step 9',
     description:
       'Navigate the membership module to view your cooperative status.',
-    media_path: '/assets/placeholder.jpg',
+    media_path: '/assets/Mobile-Tutorial/Thumbnail/Thumb 9.png',
     video_url:
       '/assets/Mobile-Tutorial/9 How to access the Cooperative Membership Module.mp4',
   },
@@ -113,7 +113,7 @@ const sampleItems: any[] = [
     title: 'How to Access Business Training and What You Can Gain from It',
     subtitle: 'Step 10',
     description: 'Find and enroll in available business training courses.',
-    media_path: '/assets/placeholder.jpg',
+    media_path: '/assets/Mobile-Tutorial/Thumbnail/Thumb 10.png',
     video_url:
       '/assets/Mobile-Tutorial/10 How to access the Business training.mp4',
   },
@@ -124,8 +124,26 @@ const sampleItems: any[] = [
     subtitle: 'Step 11',
     description:
       'Stay updated with the latest cooperative news and upcoming events.',
-    media_path: '/assets/placeholder.jpg',
+    media_path: '/assets/Mobile-Tutorial/Thumbnail/Thumb 11.png',
     video_url: '/assets/Mobile-Tutorial/11 How to Access News and Events.mp4',
+  },
+  {
+    id: 'v12',
+    type: 'video',
+    title: 'How to Delete Your Account',
+    subtitle: 'Step 12',
+    description: 'Learn how to properly request the deletion of your account.',
+    media_path: '/assets/Mobile-Tutorial/Thumbnail/Thumb 12.png',
+    video_url: '/assets/Mobile-Tutorial/12 Account deletion vid.mp4',
+  },
+  {
+    id: 'v13',
+    type: 'video',
+    title: 'How to Reactivate Your Account',
+    subtitle: 'Step 13',
+    description: 'Learn how to reactivate your previously deactivated account.',
+    media_path: '/assets/Mobile-Tutorial/Thumbnail/Thumb 13.png',
+    video_url: '/assets/Mobile-Tutorial/13 Reactivated account vid.mp4',
   },
 ];
 
